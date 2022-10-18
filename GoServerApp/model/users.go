@@ -52,27 +52,27 @@ const (
 )
 
 // corresponds to users table in DB
-type user struct {
-	userID uint
-	teamID uint
+type User struct {
+	UserID uint
+	TeamID uint
 
-	username string `gorm:"unique;not null"`
+	Username string `gorm:"unique;not null"`
 	// not sure if this should be in separate table
-	password string `gorm:"not null"`
-	email    string
+	Password string `gorm:"not null"`
+	Email    string
 
-	firstname string
-	lastname  string
+	Firstname string
+	Lastname  string
 
-	role userRole `gorm:"not null"`
+	Role userRole `gorm:"not null"`
 
-	position playerPosition
+	Position playerPosition
 
 	// biographical info, could add more
-	height uint
-	weight uint
+	Height uint
+	Weight uint
 
-	profPic image.Image
+	ProfPic image.Image
 
 	// metadata
 	CreatedAt time.Time

@@ -17,28 +17,28 @@ const (
 	FINAL
 )
 
-type match struct {
-	matchID  uint
-	seasonID uint
+type Match struct {
+	MatchID  uint
+	SeasonID uint
 
-	matchType matchType `gorm:"not null"`
+	MatchType matchType `gorm:"not null"`
 
 	// probably should just be the name of the stadium or whatever,
 	// could add street num/name, state, zip, etc.
-	location string `gorm:"not null"`
+	Location string `gorm:"not null"`
 
 	// date AND time
-	startTime time.Time `gorm:"not null"`
-	endTime   time.Time
+	StartTime time.Time `gorm:"not null"`
+	EndTime   time.Time
 
-	homeTeamID uint `gorm:"not null"`
-	awayTeamID uint `gorm:"not null"`
+	HomeTeamID uint `gorm:"not null"`
+	AwayTeamID uint `gorm:"not null"`
 
-	homeTeamScore uint
-	awayTeamScore uint
+	HomeTeamScore uint
+	AwayTeamScore uint
 
-	likes    uint
-	dislikes uint
+	Likes    uint
+	Dislikes uint
 
 	// player likes and dislikes? Not sure if those
 	// are meant to be for a match only or just on the

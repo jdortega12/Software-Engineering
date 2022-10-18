@@ -8,10 +8,10 @@ import (
 
 // teams.go -> database CRUDing for teams
 
-type team struct {
-	teamID uint
+type Team struct {
+	TeamID uint
 
-	name string `gorm:"unique;not null"`
+	Name string `gorm:"unique;not null"`
 
 	// other data maybe
 
