@@ -6,6 +6,10 @@ const (
 	PORT = ":8080"
 )
 
+// Sets up the routers api endpoints.
+func setupEndpoints(*gin.Engine) {
+}
+
 func main() {
 	// initialize gin router
 	router := gin.Default()
