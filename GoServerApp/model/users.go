@@ -1,6 +1,11 @@
 package model
 
-import "image"
+import (
+	"image"
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // users.go -> database CRUDing for users
 
@@ -51,14 +56,15 @@ type user struct {
 	userID uint
 	teamID uint
 
-	username string `gorm:"unique"`
-	password string // not sure if this should be in separate table
+	username string `gorm:"unique;not null"`
+	// not sure if this should be in separate table
+	password string `gorm:"not null"`
 	email    string
 
 	firstname string
 	lastname  string
 
-	role userRole
+	role userRole `gorm:"not null"`
 
 	position playerPosition
 
@@ -67,4 +73,9 @@ type user struct {
 	weight uint
 
 	profPic image.Image
+
+	// metadata
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt
 }
