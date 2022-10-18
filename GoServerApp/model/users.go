@@ -1,7 +1,6 @@
 package model
 
 import (
-	"image"
 	"time"
 
 	"gorm.io/gorm"
@@ -72,7 +71,7 @@ type User struct {
 	Height uint
 	Weight uint
 
-	ProfPic image.Image
+	//ProfPic image.Image
 
 	// metadata
 	CreatedAt time.Time
