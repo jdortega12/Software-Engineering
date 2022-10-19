@@ -28,6 +28,7 @@ func main() {
 
 	// initialize gin router
 	router := gin.Default()
+	setupEndpoints(router)
 
 	// run router
 	router.Run(PORT)
