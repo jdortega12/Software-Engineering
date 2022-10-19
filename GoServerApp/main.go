@@ -12,7 +12,11 @@ const (
 )
 
 // Sets up the routers api endpoints.
-func setupEndpoints(*gin.Engine) {
+func setupEndpoints(router *gin.Engine) {
+	// 404 handler
+	router.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	})
 }
 
 func main() {
