@@ -31,6 +31,7 @@ func InitDB(path string) error {
 		&User{},
 		&Team{},
 		&Match{},
+		&TeamNotification{},
 	)
 	return err
 }
