@@ -4,6 +4,8 @@ import (
 	"jdortega12/Software-Engineering/GoServerApp/controller"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +22,9 @@ func main() {
 
 	router := gin.Default()
 	controller.SetupHandlers(router)
+
+	store := cookie.NewStore([]byte("placeholder"))
+	router.Use(sessions.Sessions("session", store))
 
 	router.Run(PORT)
 }
