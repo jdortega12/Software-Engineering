@@ -2,8 +2,9 @@ package controller
 
 import (
 	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"io"
+	"fmt"
 )
 
 // handlers.go -> funcs bound to the router's endpoints
@@ -32,4 +33,15 @@ func Logout(ctx *gin.Context) {
 	clearSession(ctx)
 
 	ctx.JSON(http.StatusResetContent, gin.H{})
+}
+
+// Takes a POST request with Team request information 
+// Adds the request the the database 
+func CreateTeamRequest(ctx *gin.Context) {
+	body := ctx.Request.Body 
+	value, err := io.ReadAll(body)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(string(value))
 }
