@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"fmt"
+	"encoding/json"
 )
 
 // handlers.go -> funcs bound to the router's endpoints
@@ -37,12 +38,18 @@ func Logout(ctx *gin.Context) {
 }
 
 // Takes a POST request with Team request information 
-// Adds the request the the database 
+// Adds the request to the database 
 func CreateTeamRequest(ctx *gin.Context) {
 	body := ctx.Request.Body 
 	value, err := io.ReadAll(body)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Println(string(value))
+	var dat map[string]string
+
+	if err := json.Unmarshal(value, &dat); err != nil {
+		panic(err)
+	}
+
+	fmt.Println(dat)
 }
