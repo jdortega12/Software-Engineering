@@ -1,10 +1,16 @@
 // Home page
 
 import React from "react"
-import {Text} from "react-native"
+import {Button, Text} from "react-native"
+import HandleLogout from "../../event-handler/HandleLogout"
+import TopBar from "../component/TopBar"
 
 export default function HomeScreen() {
     return (
-        <Text>Home</Text>
+        <>
+            <TopBar/>
+            <Text>Home</Text>
+            <Button title="Logout (temp)" onPress={HandleLogout}/>
+        </>
     )
 }

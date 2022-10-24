@@ -20,11 +20,12 @@ func main() {
 		panic(err)
 	}
 
+	// session store must be set up right after router is initialized
 	router := gin.Default()
-	controller.SetupHandlers(router)
-
 	store := cookie.NewStore([]byte("placeholder"))
 	router.Use(sessions.Sessions("session", store))
+
+	controller.SetupHandlers(router)
 
 	router.Run(PORT)
 }
