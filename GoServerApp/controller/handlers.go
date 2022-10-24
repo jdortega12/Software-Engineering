@@ -6,6 +6,7 @@ import (
 	"io"
 	"fmt"
 	"encoding/json"
+	"jdortega12/Software-Engineering/GoServerApp/model"
 )
 
 // handlers.go -> funcs bound to the router's endpoints
@@ -45,11 +46,16 @@ func CreateTeamRequest(ctx *gin.Context) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	var dat map[string]string
+	var data map[string]string
 
-	if err := json.Unmarshal(value, &dat); err != nil {
+	if err := json.Unmarshal(value, &data); err != nil {
 		panic(err)
 	}
 
-	fmt.Println(dat)
+	if model.InsertTeamNotification(data) == 0 {
+		ctx.JSON(201, gin.H{"Created-notification": "true"})
+	} else {
+		ctx.JSON(201, gin.H{"Created-notification": "false"})
+	}
+
 }
