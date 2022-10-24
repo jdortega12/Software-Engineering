@@ -33,5 +33,10 @@ func InitDB(path string) error {
 		&Match{},
 		&TeamNotification{},
 	)
+
 	return err
+}
+
+func InitDBTest(NewDB *gorm.DB) {
+	DBConn = NewDB
 }
