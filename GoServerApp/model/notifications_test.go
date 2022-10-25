@@ -2,20 +2,15 @@ package model
 
 import (
 	"testing"
-
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 // ensure InsertTeamNotification can insert a valid notification
 func TestInsertGood(t *testing.T) {
-	TDBConn, err := gorm.Open(sqlite.Open(TEST_DB_PATH))
-
+	var err error
+	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {
 		panic(err)
 	}
-
-	InitDBTest(TDBConn)
 
 	m := make(map[string]string)
 	m["Message"] = "Pls Work"
@@ -28,13 +23,11 @@ func TestInsertGood(t *testing.T) {
 
 // ensure InsertTeamNotification can insert an invalid notification
 func TestInsertBad(t *testing.T) {
-	TDBConn, err := gorm.Open(sqlite.Open(TEST_DB_PATH))
-
+	var err error
+	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {
 		panic(err)
 	}
-
-	InitDBTest(TDBConn)
 
 	m := make(map[string]string)
 	m["Message"] = "Pls Work"

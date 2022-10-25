@@ -1,19 +1,21 @@
 package controller
 
 import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"jdortega12/Software-Engineering/GoServerApp/model"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+)
+
+const (
+	TEST_DB_PATH = "../test.db"
 )
 
 // Tests that Logout() returns correct status code.
@@ -39,13 +41,11 @@ func TestLogout(t *testing.T) {
 // Tests that CreateTeamRequest is able to properly recieve a team request
 // Test if function can succesfully call model to insert and send JSON indicating success to frontend
 func TestGoodRequestInsert(t *testing.T) {
-	TDBConn, err := gorm.Open(sqlite.Open("../test.db"))
-
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
 		panic(err)
 	}
-	
-	model.InitDBTest(TDBConn)
 
 	if err != nil {
 		panic(err)
@@ -61,7 +61,7 @@ func TestGoodRequestInsert(t *testing.T) {
 	// mock request
 	var jsonStr = []byte(`{"Message": "Hello World", "SenderID" : "1", "ReceiverID": "2"}`)
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createTeamRequest", bytes.NewBuffer(jsonStr))
-	
+
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -72,22 +72,21 @@ func TestGoodRequestInsert(t *testing.T) {
 		t.FailNow()
 	}
 
-	fmt.Println(data)	
-	
+	fmt.Println(data)
+
 	if data["Created-notification"] != "true" {
 		t.FailNow()
 	}
 }
 
-
 // Tests that CreateTeamRequest is able to handle in incorrect request
 // Test if function can succesfully call model to insert and send JSON indicating failure to frontend
 func TestBadRequestInsert(t *testing.T) {
-	TDBConn, err := gorm.Open(sqlite.Open("../test.db"))
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
 		panic(err)
 	}
-	model.InitDBTest(TDBConn)
 
 	gin.SetMode(gin.TestMode)
 
@@ -97,7 +96,7 @@ func TestBadRequestInsert(t *testing.T) {
 	// mock request
 	var jsonStr = []byte(`{"hi": "hello"}`)
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createTeamRequest", bytes.NewBuffer(jsonStr))
-	
+
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
@@ -108,8 +107,8 @@ func TestBadRequestInsert(t *testing.T) {
 		t.FailNow()
 	}
 
-	fmt.Println(data)	
-	
+	fmt.Println(data)
+
 	if data["Created-notification"] != "false" {
 		t.FailNow()
 	}

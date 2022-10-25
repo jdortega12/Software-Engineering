@@ -17,11 +17,11 @@ var (
 // If successful, then automigrates all tables. Returns error
 // if either of these operations fail. Currently not set up to
 // work with anything other than local sqlite db.
-func InitDB(path string) error {
+func InitDB(path string) (*gorm.DB, error) {
 	// open db and panic if cannot
 	DBConn, err := gorm.Open(sqlite.Open(path))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// auto-migrate all tables. If DB already existed,
@@ -34,9 +34,5 @@ func InitDB(path string) error {
 		&TeamNotification{},
 	)
 
-	return err
-}
-
-func InitDBTest(NewDB *gorm.DB) {
-	DBConn = NewDB
+	return DBConn, err
 }
