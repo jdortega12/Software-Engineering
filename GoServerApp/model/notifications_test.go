@@ -9,7 +9,7 @@ import (
 
 // ensure InsertTeamNotification can insert a valid notification
 func TestInsertGood(t *testing.T) {
-	TDBConn, err := gorm.Open(sqlite.Open("../test.db"))
+	TDBConn, err := gorm.Open(sqlite.Open(TEST_DB_PATH))
 
 	if err != nil {
 		panic(err)
@@ -28,7 +28,7 @@ func TestInsertGood(t *testing.T) {
 
 // ensure InsertTeamNotification can insert an invalid notification
 func TestInsertBad(t *testing.T) {
-	TDBConn, err := gorm.Open(sqlite.Open("../test.db"))
+	TDBConn, err := gorm.Open(sqlite.Open(TEST_DB_PATH))
 
 	if err != nil {
 		panic(err)
