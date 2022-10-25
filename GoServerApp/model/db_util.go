@@ -29,6 +29,7 @@ func InitDB(path string) (*gorm.DB, error) {
 	// fields if the corresponding structs have changed.
 	err = DBConn.AutoMigrate(
 		&User{},
+		&UserPersonalInfo{},
 		&Team{},
 		&Match{},
 		&TeamNotification{},

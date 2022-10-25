@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"net/http"
-	"github.com/gin-gonic/gin"
-	"io"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"io"
 	"jdortega12/Software-Engineering/GoServerApp/model"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // handlers.go -> funcs bound to the router's endpoints
@@ -25,6 +26,7 @@ func SetupHandlers(router *gin.Engine) {
 		{
 			v1.POST("/logout", Logout)
 			v1.POST("/createTeamRequest", CreateTeamRequest)
+			v1.POST("/updatePersonalInfo", UpdateUserPersonalInfoHandler)
 		}
 	}
 }
@@ -38,10 +40,10 @@ func Logout(ctx *gin.Context) {
 	ctx.JSON(http.StatusResetContent, gin.H{})
 }
 
-// Takes a POST request with Team request information 
-// Adds the request to the database 
+// Takes a POST request with Team request information
+// Adds the request to the database
 func CreateTeamRequest(ctx *gin.Context) {
-	body := ctx.Request.Body 
+	body := ctx.Request.Body
 	value, err := io.ReadAll(body)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -58,4 +60,37 @@ func CreateTeamRequest(ctx *gin.Context) {
 		ctx.JSON(201, gin.H{"Created-notification": "false"})
 	}
 
+}
+
+// Receives UserPersonalInfo JSON from the client and updates
+// it in the DB through the model. Validates that a user is
+// logged in before doing anything.
+func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
+	// get user session and check not null
+	username, password, sessionExists := getSessionUser(ctx)
+	if !sessionExists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	// validate that user
+	userID, _, err := model.ValidateUser(username, password)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	var userPersInfo model.UserPersonalInfo
+
+	err = ctx.BindJSON(&userPersInfo)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	userPersInfo.UserPersonalInfoID = userID
+
+	err = model.UpdateUserPersonalInfo(&userPersInfo)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+	}
+
+	ctx.Status(http.StatusAccepted)
 }

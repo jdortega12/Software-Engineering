@@ -60,16 +60,9 @@ type User struct {
 	Password string `gorm:"not null"`
 	Email    string
 
-	Firstname string
-	Lastname  string
-
 	Role userRole `gorm:"not null"`
 
 	Position playerPosition
-
-	// biographical info, could add more
-	Height uint
-	Weight uint
 
 	//ProfPic image.Image
 
@@ -77,4 +70,30 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
+}
+
+// Personal info of a user that they can change at any time
+// without any permission or extra complication.
+type UserPersonalInfo struct {
+	// must be same ID as user whom it belongs to
+	UserPersonalInfoID uint
+
+	Firstname string
+	Lastname  string
+
+	Height uint
+	Weight uint
+
+	// metadata
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt
+}
+
+// Updates the personal info of a user in the DB.
+func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
+	err := DBConn.Where("user_personal_info_id = ?", userPersInfo.UserPersonalInfoID).
+		Updates(&userPersInfo).Error
+
+	return err
 }
