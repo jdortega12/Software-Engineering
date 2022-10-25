@@ -70,12 +70,16 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 	username, password, sessionExists := getSessionUser(ctx)
 	if !sessionExists {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
+
+	fmt.Println("---------------------------------------------------------")
 
 	// validate that user
 	userID, _, err := model.ValidateUser(username, password)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	var userPersInfo model.UserPersonalInfo
@@ -83,6 +87,7 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 	err = ctx.BindJSON(&userPersInfo)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
 	userPersInfo.UserPersonalInfoID = userID
@@ -90,6 +95,7 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 	err = model.UpdateUserPersonalInfo(&userPersInfo)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	ctx.Status(http.StatusAccepted)
