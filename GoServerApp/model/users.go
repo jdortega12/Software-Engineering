@@ -78,11 +78,11 @@ type UserPersonalInfo struct {
 	// must be same ID as user whom it belongs to
 	UserPersonalInfoID uint
 
-	Firstname string
-	Lastname  string
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
 
-	Height uint
-	Weight uint
+	Height uint `json"height"`  // inches
+	Weight uint `json:"weight"` // lbs
 
 	// metadata
 	CreatedAt time.Time
