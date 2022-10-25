@@ -32,7 +32,26 @@ func TestInsertGood(t *testing.T) {
 	m["Message"] = "Pls Work"
 	m["SenderID"] = "1"
 	m["ReceiverID"] = "2"
-	if InsertTeamNotification(m) == 1 {
+	if InsertTeamNotification(m) != 0 {
+		t.FailNow()
+	}
+}
+
+
+// ensure InsertTeamNotification can insert an invalid notification
+func TestInsertBad(t *testing.T) {
+	TDBConn, err := gorm.Open(sqlite.Open("../test.db"))
+
+	if err != nil {
+		panic(err)
+	}
+	
+	InitDBTest(TDBConn)
+	
+	m := make(map[string]string)
+	m["Message"] = "Pls Work"
+	m["SenderID"] = "1"
+	if InsertTeamNotification(m) != 1 {
 		t.FailNow()
 	}
 }
