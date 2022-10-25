@@ -29,10 +29,11 @@ func getSessionUser(ctx *gin.Context) (string, string, bool) {
 	username := session.Get("username")
 	password := session.Get("password")
 
-	if username != nil && password != nil {
-		sessionExists = true
+	if username == nil || password == nil {
+		return "", "", sessionExists
 	}
 
+	sessionExists = true
 	return username.(string), password.(string), sessionExists
 }
 
