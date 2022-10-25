@@ -39,3 +39,27 @@ func TestClearSession(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 }
+
+func TestSetSession(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+
+	router.GET("/test", func(ctx *gin.Context) {
+		setSession(ctx, "test_username", "test_password")
+
+		test_session := sessions.Default(ctx)
+
+		if test_session.Get("username") != "test_username" ||
+			test_session.Get("password") != "test_password" {
+			t.FailNow()
+		}
+	})
+
+	// mock request
+	req, _ := http.NewRequest(http.MethodGet, "/test", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+}
