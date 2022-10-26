@@ -194,3 +194,31 @@ func CreatePhoto(ctx *gin.Context) {
 
 	ctx.Status(http.StatusAccepted)
 }
+
+func CreateTeamHandler(ctx *gin.Context) {
+	username, password, sessExists := getSessionUser(ctx)
+	if !sessExists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	_, role, err := model.ValidateUser(username, password) // _ is userID (not needed)
+	if err != nil || role != model.MANAGER {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	team := &model.Team{}
+	err = ctx.BindJSON(team)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	err = model.CreateTeam(team)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
