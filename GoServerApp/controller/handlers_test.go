@@ -55,6 +55,15 @@ func TestLogin(t *testing.T) {
 
 	SetupHandlers(router)
 
+	//Add User to DB
+	user := &model.User{
+		Username: "jdo",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+	model.CreateUser(user)
+
+	//Login
 	reader := strings.NewReader("username=jdo&password=123")
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", reader)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -68,6 +77,7 @@ func TestLogin(t *testing.T) {
 
 }
 
+// Test Login with improper username and password
 func TestImproperLogin(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
@@ -83,12 +93,16 @@ func TestImproperLogin(t *testing.T) {
 
 	SetupHandlers(router)
 
-	reader := strings.NewReader("username=jdo&email=jdo@gmail.com&password=123")
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createAccount", reader)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	//Add User to DB
+	user := &model.User{
+		Username: "jdo",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+	model.CreateUser(user)
 
-	reader = strings.NewReader("username=Wrong&password=Wrong")
-	req, _ = http.NewRequest(http.MethodPost, "/api/v1/login", reader)
+	reader := strings.NewReader("username=Wrong&password=Wrong")
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", reader)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	w := httptest.NewRecorder()
