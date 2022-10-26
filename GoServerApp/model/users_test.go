@@ -35,6 +35,7 @@ func TestUpdatePersonalInfo(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer DBConn.Unscoped().Where("user_personal_info_id", testInfo.UserPersonalInfoID).Delete(testInfo)
 
 	// pull record from DB to ensure it was saved correctly
 	var testInfoCopy UserPersonalInfo

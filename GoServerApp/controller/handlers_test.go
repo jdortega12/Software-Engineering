@@ -197,10 +197,12 @@ func TestBadRequestInsert(t *testing.T) {
 func TestUpdatePersonalInfoHandler(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
-	model.DBConn.Create(&model.User{
+	user := &model.User{
 		Username: "jaluhrman",
 		Password: "ween",
-	})
+	}
+	model.DBConn.Create(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	gin.SetMode(gin.TestMode)
 
@@ -221,6 +223,7 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 		Height:    50,
 		Weight:    240,
 	}
+	defer model.DBConn.Unscoped().Where("user_personal_info_id = ?", user.UserID).Delete(info)
 
 	json_info, err := json.Marshal(info)
 	if err != nil {
@@ -240,10 +243,12 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 func TestUpdatePersonalInfoHandlerBadJSON(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
-	model.DBConn.Create(&model.User{
+	user := &model.User{
 		Username: "jaluhrman",
 		Password: "ween",
-	})
+	}
+	model.DBConn.Create(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	gin.SetMode(gin.TestMode)
 
