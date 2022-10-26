@@ -62,6 +62,7 @@ func TestLogin(t *testing.T) {
 		Password: "123",
 	}
 	model.CreateUser(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	//Login
 	reader := strings.NewReader("username=jdo&password=123")
@@ -100,6 +101,7 @@ func TestImproperLogin(t *testing.T) {
 		Password: "123",
 	}
 	model.CreateUser(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	reader := strings.NewReader("username=Wrong&password=Wrong")
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", reader)
@@ -194,10 +196,12 @@ func TestBadRequestInsert(t *testing.T) {
 func TestUpdatePersonalInfoHandler(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
-	model.DBConn.Create(&model.User{
+	user := &model.User{
 		Username: "jaluhrman",
 		Password: "ween",
-	})
+	}
+	model.DBConn.Create(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	gin.SetMode(gin.TestMode)
 
@@ -218,6 +222,7 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 		Height:    50,
 		Weight:    240,
 	}
+	defer model.DBConn.Unscoped().Where("user_personal_info_id = ?", user.UserID).Delete(info)
 
 	json_info, err := json.Marshal(info)
 	if err != nil {
@@ -237,10 +242,12 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 func TestUpdatePersonalInfoHandlerBadJSON(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
-	model.DBConn.Create(&model.User{
+	user := &model.User{
 		Username: "jaluhrman",
 		Password: "ween",
-	})
+	}
+	model.DBConn.Create(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	gin.SetMode(gin.TestMode)
 
@@ -283,6 +290,8 @@ func TestCreateAccount(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
+
+	model.DBConn.Unscoped().Where("username = ?", "jdo").Delete(&model.User{})
 
 	if w.Code != http.StatusAccepted {
 		t.FailNow()
