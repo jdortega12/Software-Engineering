@@ -96,3 +96,44 @@ func TestCreateUser(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// test if we can create a user, and then insert a picture without errors
+func TestInsertPhoto(t *testing.T) {
+	//Initialize Database
+	var err error
+	DBConn, err = InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+	
+	// Insert a user
+	user := &User{
+		Username: "do5",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+	
+	err = CreateUser(user)
+	
+	if err != nil {
+		panic(err)
+	}
+
+	// now, try to insert a photo 
+	err = UpdateUserPhoto("thisisntarealbase64", "do5", "123")
+	if err != nil {
+		panic(err)
+	}
+
+	// now, retrieve the user and check if it has the photo we inserted
+	found_user := User{}
+	err = DBConn.Where("photo = ?", "thisisntrealbase64", &found_user).Error
+	if err != nil {
+		panic(err)
+	}
+ 
+	if found_user.Photo == "thisisntrealbase64" {
+		t.FailNow()
+	}
+
+}
