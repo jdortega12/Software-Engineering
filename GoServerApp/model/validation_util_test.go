@@ -20,6 +20,7 @@ func TestValidateUser(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	_, _, err = ValidateUser(user.Username, user.Password)
 	if err != nil {
@@ -41,6 +42,7 @@ func TestValidateUserFail(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	_, _, err = ValidateUser("test_username", "test_password")
 	if err != nil {

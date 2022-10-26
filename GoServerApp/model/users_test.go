@@ -75,7 +75,7 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	err = CreateUser(user)
-	defer DBConn.Unscoped().Where("username = ?", user.Username).Delete(user)
+	defer DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	if err != nil {
 		panic(err)
