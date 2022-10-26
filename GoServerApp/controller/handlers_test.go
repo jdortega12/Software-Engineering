@@ -137,8 +137,23 @@ func TestGoodRequestInsert(t *testing.T) {
 	store := cookie.NewStore([]byte("placeholder"))
 	router.Use(sessions.Sessions("session", store))
 
+	user := &model.User{
+		Username: "timba7",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+
+	user2 := &model.User{
+		Username: "paulba7",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+
+	model.CreateUser(user)
+	model.CreateUser(user2)
+
 	// mock request
-	var jsonStr = []byte(`{"Message": "Hello World", "SenderID" : "1", "ReceiverID": "2"}`)
+	var jsonStr = []byte(`{"Message": "Hello World", "SenderID" : "timba7", "ReceiverID": "paulba7"}`)
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createTeamRequest", bytes.NewBuffer(jsonStr))
 
 	w := httptest.NewRecorder()
@@ -172,22 +187,28 @@ func TestBadRequestInsert(t *testing.T) {
 	router := gin.Default()
 	SetupHandlers(router)
 
-	var jsonStr = []byte(`{"hi": "hello"}`)
+	user := &model.User{
+		Username: "josh6",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+
+	user2 := &model.User{
+		Username: "joshie6",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+
+	model.CreateUser(user)
+	model.CreateUser(user2)
+
+	var jsonStr = []byte(`{"Message": "Hello World", "SenderID" : "t", "ReceiverID": "p"}`)
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createTeamRequest", bytes.NewBuffer(jsonStr))
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	var data map[string]string
-
-	if err := json.Unmarshal(w.Body.Bytes(), &data); err != nil {
-		fmt.Println("got here")
-		t.FailNow()
-	}
-
-	fmt.Println(data)
-
-	if data["Created-notification"] != "false" {
+	if w.Code != http.StatusUnauthorized {
 		t.FailNow()
 	}
 }

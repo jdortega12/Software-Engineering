@@ -6,6 +6,7 @@ import (
 	"io"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -75,6 +76,21 @@ func CreateTeamRequest(ctx *gin.Context) {
 	if err := json.Unmarshal(value, &data); err != nil {
 		panic(err)
 	}
+
+	sender, err2 := model.GetUserId(data["SenderID"])
+
+	if err2 != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	receiver, err3 := model.GetUserId(data["ReceiverID"])
+
+	if err3 != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	data["SenderID"] = strconv.Itoa(int(sender))
+	data["ReceiverID"] = strconv.Itoa(int(receiver))
 
 	if model.InsertTeamNotification(data) == 0 {
 		ctx.JSON(201, gin.H{"Created-notification": "true"})
