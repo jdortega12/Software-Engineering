@@ -229,7 +229,11 @@ func TestCreateAccount(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> 1fd46b381ffdb06c3f10ff6b9ddc6f1537b2c435
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
