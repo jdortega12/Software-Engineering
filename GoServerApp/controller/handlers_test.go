@@ -172,7 +172,6 @@ func TestBadRequestInsert(t *testing.T) {
 	router := gin.Default()
 	SetupHandlers(router)
 
-	// mock request
 	var jsonStr = []byte(`{"hi": "hello"}`)
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createTeamRequest", bytes.NewBuffer(jsonStr))
 
@@ -298,3 +297,82 @@ func TestCreateAccount(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+// Test whether a Photo can be inserted into the database
+func TestCreatePhoto(t *testing.T) {
+	// generic user for this test
+	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn.Create(&model.User{
+		Username: "jaluhrman",
+		Password: "ween",
+	})
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+
+	// test endpoint just to set session for this test
+	router.POST("/testWrapper", func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+		CreatePhoto(ctx)
+	})
+
+	info := gin.H{
+		"photo": "dfjekjfcks",
+	}
+
+	json_info, err := json.Marshal(info)
+	if err != nil {
+		panic(err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusAccepted {
+		t.FailNow()
+	}
+}
+
+// Test whether the correct response is given for an invalid call to CreatePhoto
+func TestCreatePhotoInvalid(t *testing.T) {
+	// generic user for this test
+	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn.Create(&model.User{
+		Username: "jaluhrman2",
+		Password: "ween",
+	})
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+
+	// test endpoint just to set session for this test
+	router.POST("/testWrapper", func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+		CreatePhoto(ctx)
+	})
+
+	info := gin.H{
+		"thisfieldisntrelevant": "dfjekjfcks",
+	}
+
+	json_info, err := json.Marshal(info)
+	if err != nil {
+		panic(err)
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.FailNow()
+	}
+}
+

@@ -29,6 +29,7 @@ func SetupHandlers(router *gin.Engine) {
 			v1.POST("/createTeamRequest", CreateTeamRequest)
 			v1.POST("/updatePersonalInfo", UpdateUserPersonalInfoHandler)
 			v1.POST("/createAccount", CreateAccountHandler)
+			v1.POST("/createPhoto", CreatePhoto)
 		}
 	}
 }
@@ -140,6 +141,39 @@ func CreateAccountHandler(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusConflict)
 		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+} 
+
+// Take JSON with base64 of image, image filetype, and user id as parameters, insert into DB
+func CreatePhoto(ctx *gin.Context) {
+	username, password, sessionExists := getSessionUser(ctx)
+	if !sessionExists {
+		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+	}
+	body := ctx.Request.Body 
+
+	value, err := io.ReadAll(body)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+	var data map[string]string
+
+	if err := json.Unmarshal(value, &data); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	photo, checkphoto := data["photo"]
+
+	if !checkphoto {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	err = model.UpdateUserPhoto(photo, username, password)
+
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 	}
 
 	ctx.Status(http.StatusAccepted)
