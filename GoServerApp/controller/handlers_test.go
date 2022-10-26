@@ -114,11 +114,11 @@ func TestBadRequestInsert(t *testing.T) {
 	}
 }
 
-/*
+// Make sure update info handler returns correct status code.
 func TestUpdatePersonalInfoHandler(t *testing.T) {
 	// generic user for this test
-	DBConn, _ := model.InitDB(TEST_DB_PATH)
-	DBConn.Create(&model.User{
+	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
 	})
@@ -129,33 +129,61 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 	test_store := cookie.NewStore([]byte("test"))
 	router.Use(sessions.Sessions("test_session", test_store))
 
-	SetupHandlers(router)
-
 	// test endpoint just to set session for this test
-	router.POST("/setTestSession", func(ctx *gin.Context) {
+	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
 
-		// mock request to actually test endpoint
-		var json = []byte(`{
-		"firstname": "Joe",
-		"lastname": "Luhrman",
-		"height": "50",
-		"weight": "240",
-		}`)
-		req, _ := http.NewRequest(http.MethodPost, "/api/v1/updatePersonalInfo", bytes.NewBuffer(json))
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
-
-		if w.Code != http.StatusOK {
-			t.FailNow()
-		}
+		UpdateUserPersonalInfoHandler(ctx)
 	})
 
-	// mock request to set session
-	req, _ := http.NewRequest(http.MethodPost, "/setTestSession", nil)
+	info := &model.UserPersonalInfo{
+		Firstname: "Joe",
+		Lastname:  "Luhrman",
+		Height:    50,
+		Weight:    240,
+	}
+
+	json_info, err := json.Marshal(info)
+	if err != nil {
+		panic(err)
+	}
+
 	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
 	router.ServeHTTP(w, req)
 
-	http.
+	if w.Code != http.StatusAccepted {
+		t.FailNow()
+	}
 }
-*/
+
+// Make sure update info handler returns correct status code for bad request.
+func TestUpdatePersonalInfoHandlerBadJSON(t *testing.T) {
+	// generic user for this test
+	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn.Create(&model.User{
+		Username: "jaluhrman",
+		Password: "ween",
+	})
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+
+	// test endpoint just to set session for this test
+	router.POST("/testWrapper", func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+
+		UpdateUserPersonalInfoHandler(ctx)
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/testWrapper", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.FailNow()
+	}
+}

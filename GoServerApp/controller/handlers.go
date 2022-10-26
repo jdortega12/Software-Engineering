@@ -73,8 +73,6 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("---------------------------------------------------------")
-
 	// validate that user
 	userID, _, err := model.ValidateUser(username, password)
 	if err != nil {

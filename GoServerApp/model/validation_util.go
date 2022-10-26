@@ -11,12 +11,12 @@ func ValidateUser(username string, password string) (uint, userRole, error) {
 		Find(user).Error
 
 	var userID uint = 0
-	userRole := PLAYER
+	role := PLAYER
 
 	if err == nil {
 		userID = user.UserID
-		userRole = user.Role
+		role = user.Role
 	}
 
-	return userID, userRole, err
+	return userID, role, err
 }

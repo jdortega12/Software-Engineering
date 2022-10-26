@@ -81,8 +81,8 @@ type UserPersonalInfo struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 
-	Height uint `json"height"`  // inches
-	Weight uint `json:"weight"` // lbs
+	Height uint `json"height,string"`  // inches
+	Weight uint `json:"weight,string"` // lbs
 
 	// metadata
 	CreatedAt time.Time
