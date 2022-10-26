@@ -31,7 +31,7 @@ export default class UploadImage extends React.Component {
             console.log(this.state.photo.assets[0].uri)
             ImgToBase64.getBase64String(this.state.photo.assets[0].uri).then( 
                 (base64String) => {
-                    fetch('http://localhost:8080/createPhoto', {
+                    fetch('http://localhost:8080/api/v1/createPhoto', {
                         method: "POST", 
                         headers: {
                             Accept: "application/json",
