@@ -1,10 +1,15 @@
-import React from 'react-native'
+import React from 'react'
 import { Button, Text, TextInput, TouchableOpacity, View } from "react-native";
 import TopBar from "../component/TopBar"
 import FormStyle from "../Form.style"
-
+import handleUpdateUserPersonalInfo from '../../event-handler/HandleUpdateUserPersonalInfo'
 
 export default function UpdateUserPersonalInfoScreen() {
+    const [firstname, setFirstname] = React.useState("");
+    const [lastname, setLastname] = React.useState("");
+    const [height, setHeight] = React.useState("");
+    const [weight, setWeight] = React.useState("");
+
     return (
         <>
             <TopBar/>
@@ -15,7 +20,7 @@ export default function UpdateUserPersonalInfoScreen() {
                 style={FormStyle.inputText}
                 placeholder="Firstname"
                 placeholderTextColor="white"
-                //onChangeText={setEmail}
+                onChangeText={setFirstname}
                 autoCapitalize={false}
                 />
             </View>
@@ -24,7 +29,7 @@ export default function UpdateUserPersonalInfoScreen() {
                 style={FormStyle.inputText}
                 placeholder="Lastname"
                 placeholderTextColor="white"
-                //onChangeText={setPassword}
+                onChangeText={setLastname}
                 autoCapitalize={false}
                 />
             </View>
@@ -33,8 +38,9 @@ export default function UpdateUserPersonalInfoScreen() {
                 style={FormStyle.inputText}
                 placeholder="Height (inches)"
                 placeholderTextColor="white"
-                //onChangeText={setPassword}
+                onChangeText={setHeight}
                 autoCapitalize={false}
+                keyboardType="numeric"
                 />
             </View>
             <View style={FormStyle.inputView} >
@@ -42,12 +48,13 @@ export default function UpdateUserPersonalInfoScreen() {
                 style={FormStyle.inputText}
                 placeholder="Weight (lbs)"
                 placeholderTextColor="white"
-                //onChangeText={setPassword}
+                onChangeText={setWeight}
                 autoCapitalize={false}
+                keyboardType="numeric"
                 />
             </View>
             <TouchableOpacity style={FormStyle.button}
-                             //</View>onPress={()=> handleSubmit(email,password)}
+                onPress={()=> handleUpdateUserPersonalInfo(firstname,lastname,height,weight)}
             >
               <Text style={FormStyle.loginText}> UPDATE </Text>
             </TouchableOpacity>
