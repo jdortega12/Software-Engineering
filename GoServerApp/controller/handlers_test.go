@@ -62,6 +62,7 @@ func TestLogin(t *testing.T) {
 		Password: "123",
 	}
 	model.CreateUser(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	//Login
 	reader := strings.NewReader("username=jdo&password=123")
@@ -100,6 +101,7 @@ func TestImproperLogin(t *testing.T) {
 		Password: "123",
 	}
 	model.CreateUser(user)
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
 	reader := strings.NewReader("username=Wrong&password=Wrong")
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", reader)
@@ -284,6 +286,8 @@ func TestCreateAccount(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
+
+	model.DBConn.Unscoped().Where("username = ?", "jdo").Delete(&model.User{})
 
 	if w.Code != http.StatusAccepted {
 		t.FailNow()
