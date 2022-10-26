@@ -250,9 +250,6 @@ func TestUpdatePersonalInfoHandlerBadJSON(t *testing.T) {
 		t.FailNow()
 	}
 }
-<<<<<<< HEAD
-=======
-*/
 
 func TestCreateAccount(t *testing.T) {
 	var err error
@@ -278,4 +275,3 @@ func TestCreateAccount(t *testing.T) {
 		t.FailNow()
 	}
 }
->>>>>>> cff04f1a4d8466147a1cad40328e3ce56dd87b48
