@@ -397,3 +397,47 @@ func TestCreatePhotoInvalid(t *testing.T) {
 	}
 }
 
+func TestGoodCreateTeam(t *testing.T) {
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+	user := &model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		Role:     model.MANAGER,
+	}
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	model.DBConn.Create(user)
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+	SetupHandlers(router)
+	router.POST("/testWrapper", func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+
+		CreateTeamHandler(ctx)
+	})
+
+	info := &model.Team{
+		Name:         "Greyhounds",
+		TeamLocation: "Baltimore",
+	}
+	json_info, err := json.Marshal(info)
+	if err != nil {
+		panic(err)
+	}
+	defer model.DBConn.Unscoped().Where("team_id = ?", info.TeamID).Delete(&model.Team{})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusAccepted {
+		fmt.Println("Http status failed")
+		t.FailNow()
+	}
+
+}
