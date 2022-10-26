@@ -64,7 +64,7 @@ type User struct {
 
 	Position playerPosition
 
-	//ProfPic image.Image
+	Photo string
 
 	// metadata
 	CreatedAt time.Time
@@ -116,5 +116,21 @@ func CreateUser(user *User) error {
 		DBConn.Delete(user)
 		return err
 	}
+	return err
+}
+
+
+// Takes photo as base64 String, username, password 
+// updates user photo to the new phot 
+func UpdateUserPhoto(photo string, username string, password string) error {
+	user := User{}
+	err := DBConn.Where("username = ?", username, &user).Error
+	
+	if err != nil || user.Password != password {
+		return err
+	}
+
+	user.Photo = photo
+	DBConn.Save(&user)
 	return err
 }
