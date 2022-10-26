@@ -81,7 +81,7 @@ type UserPersonalInfo struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 
-	Height uint `json"height"`  // inches
+	Height uint `json:"height"` // inches
 	Weight uint `json:"weight"` // lbs
 
 	// metadata
@@ -95,5 +95,26 @@ func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 	err := DBConn.Where("user_personal_info_id = ?", userPersInfo.UserPersonalInfoID).
 		Updates(&userPersInfo).Error
 
+	return err
+}
+
+// Takes a User struct
+// into the DB as a User
+// returns 0 on successful insertion, 1 otherwise
+func CreateUser(user *User) error {
+	err := DBConn.Create(user).Error
+	if err != nil {
+		return err
+	}
+
+	personalInfo := &UserPersonalInfo{
+		UserPersonalInfoID: user.UserID,
+	}
+
+	err = DBConn.Create(personalInfo).Error
+	if err != nil {
+		DBConn.Delete(user)
+		return err
+	}
 	return err
 }

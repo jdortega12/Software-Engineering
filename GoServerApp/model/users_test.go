@@ -58,3 +58,41 @@ func TestUpdatePersonalInfo(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+func TestCreateUser(t *testing.T) {
+	//Initialize Database
+	var err error
+	DBConn, err = InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	user := &User{
+		Username: "jdo",
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+
+	err = CreateUser(user)
+
+	if err != nil {
+		panic(err)
+	}
+
+	user2 := &User{}
+	err = DBConn.Where("user_id = ?", user.UserID).Find(user2).Error
+	if err != nil {
+		panic(err)
+	}
+
+	user.CreatedAt = time.Time{}
+	user.UpdatedAt = time.Time{}
+	user.DeletedAt = gorm.DeletedAt{}
+	user2.CreatedAt = time.Time{}
+	user2.UpdatedAt = time.Time{}
+	user2.DeletedAt = gorm.DeletedAt{}
+
+	if *user != *user2 {
+		t.FailNow()
+	}
+}
