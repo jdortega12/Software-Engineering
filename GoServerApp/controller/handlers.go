@@ -25,8 +25,10 @@ func SetupHandlers(router *gin.Engine) {
 		v1 := api.Group("/v1")
 		{
 			v1.POST("/logout", Logout)
+			v1.POST("/login", Login)
 			v1.POST("/createTeamRequest", CreateTeamRequest)
 			v1.POST("/updatePersonalInfo", UpdateUserPersonalInfoHandler)
+			v1.POST("/createAccount", CreateAccountHandler)
 		}
 	}
 }
@@ -38,6 +40,25 @@ func Logout(ctx *gin.Context) {
 	clearSession(ctx)
 
 	ctx.JSON(http.StatusResetContent, gin.H{})
+}
+
+// Logins in a user
+func Login(ctx *gin.Context) {
+	username := ctx.PostForm("username")
+	password := ctx.PostForm("password")
+
+	//validate current user
+	_, _, err := model.ValidateUser(username, password)
+
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+		return
+	}
+
+	//set session user
+	setSessionUser(ctx, username, password)
+	ctx.Status(http.StatusAccepted)
+
 }
 
 // Takes a POST request with Team request information
@@ -93,6 +114,31 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 	err = model.UpdateUserPersonalInfo(&userPersInfo)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func CreateAccountHandler(ctx *gin.Context) {
+	username := ctx.PostForm("username")
+	email := ctx.PostForm("email")
+	password := ctx.PostForm("password")
+
+	if username == "" || email == "" || password == "" {
+		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+		return
+	}
+
+	user := &model.User{
+		Username: username,
+		Email:    email,
+		Password: password,
+	}
+
+	err := model.CreateUser(user)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusConflict)
 		return
 	}
 

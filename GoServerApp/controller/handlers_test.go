@@ -7,6 +7,7 @@ import (
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-contrib/sessions"
@@ -34,6 +35,68 @@ func TestLogout(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	if w.Code != http.StatusResetContent {
+		t.FailNow()
+	}
+}
+
+// Test login for existing user with correct credentials
+func TestLogin(t *testing.T) {
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+
+	SetupHandlers(router)
+
+	reader := strings.NewReader("username=jdo&password=123")
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", reader)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusAccepted {
+		t.FailNow()
+	}
+
+}
+
+func TestImproperLogin(t *testing.T) {
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+
+	SetupHandlers(router)
+
+	reader := strings.NewReader("username=jdo&email=jdo@gmail.com&password=123")
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createAccount", reader)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	reader = strings.NewReader("username=Wrong&password=Wrong")
+	req, _ = http.NewRequest(http.MethodPost, "/api/v1/login", reader)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	fmt.Println(w.Code)
+
+	if w.Code != http.StatusAccepted {
 		t.FailNow()
 	}
 }
@@ -187,3 +250,32 @@ func TestUpdatePersonalInfoHandlerBadJSON(t *testing.T) {
 		t.FailNow()
 	}
 }
+<<<<<<< HEAD
+=======
+*/
+
+func TestCreateAccount(t *testing.T) {
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	SetupHandlers(router)
+
+	//create data
+	reader := strings.NewReader("username=jdo&email=jdo@gmail.com&password=123")
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createAccount", reader)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusAccepted {
+		t.FailNow()
+	}
+}
+>>>>>>> cff04f1a4d8466147a1cad40328e3ce56dd87b48
