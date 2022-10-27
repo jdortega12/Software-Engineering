@@ -472,13 +472,15 @@ func TestGoodCreateTeam(t *testing.T) {
 		Password: "wasspord",
 		Role:     model.MANAGER,
 	}
-	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 	model.DBConn.Create(user)
+	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
+
 	test_store := cookie.NewStore([]byte("test"))
 	router.Use(sessions.Sessions("test_session", test_store))
+
 	SetupHandlers(router)
 
 	router.POST("/testWrapper", func(ctx *gin.Context) {
@@ -491,11 +493,12 @@ func TestGoodCreateTeam(t *testing.T) {
 		Name:         "Greyhounds",
 		TeamLocation: "Baltimore",
 	}
+	defer model.DBConn.Unscoped().Where("name = ?", "Greyhounds").Delete(info)
+
 	json_info, err := json.Marshal(info)
 	if err != nil {
 		panic(err)
 	}
-	defer model.DBConn.Unscoped().Where("id = ?", info.ID).Delete(info)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
