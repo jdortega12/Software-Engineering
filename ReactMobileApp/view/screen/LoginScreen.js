@@ -2,20 +2,23 @@
 import React from "react";
 import { Button, Text, TextInput, TouchableOpacity, View } from "react-native";
 import FormStyle from "../Form.style";
+import TopBar from "../component/TopBar"
+import handleLogin from "../../event-handler/HandleLogin"
 
 export default function LoginScreen(){
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
+    /*
     function handleSubmit(pEmail, pPwd){
-        const user = {login: pEmail, password: pPwd};
-        // I would call a method from a different Layer
-
-        console.log(JSON.stringify(user));
-        alert( JSON.stringify(user) );
+        const userInfo = {login: pEmail, password: pPwd};
+        handleLogin(userInfo)
+        //console.log(JSON.stringify(user));
+        //alert( JSON.stringify(user) );
     }
-
+    */
     return (<>
+    <TopBar/>
         <View style={FormStyle.container}>
             <Text style={FormStyle.fllText}> FLL </Text>
             <Text style={FormStyle.logo}> Login </Text>
@@ -36,7 +39,7 @@ export default function LoginScreen(){
                 onChangeText={setPassword}/>
             </View>
             <TouchableOpacity style={FormStyle.button}
-                             onPress={()=> handleSubmit(email,password)}>
+                             onPress={()=> handleLogin(email,password)}>
               <Text style={FormStyle.loginText}>LOGIN</Text>
             </TouchableOpacity>
         </View>
