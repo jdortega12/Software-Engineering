@@ -46,11 +46,17 @@ func Logout(ctx *gin.Context) {
 
 // Logins in a user
 func Login(ctx *gin.Context) {
-	username := ctx.PostForm("username")
-	password := ctx.PostForm("password")
+
+	user := &model.User{}
+
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 
 	//validate current user
-	_, _, err := model.ValidateUser(username, password)
+	_, _, err = model.ValidateUser(user.Username, user.Password)
 
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
@@ -58,7 +64,7 @@ func Login(ctx *gin.Context) {
 	}
 
 	//set session user
-	setSessionUser(ctx, username, password)
+	setSessionUser(ctx, user.Username, user.Password)
 	ctx.Status(http.StatusAccepted)
 
 }
@@ -145,30 +151,26 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+// Take JSON of user info, transfers to user struct
+// Creates user
 func CreateAccountHandler(ctx *gin.Context) {
-	username := ctx.PostForm("username")
-	email := ctx.PostForm("email")
-	password := ctx.PostForm("password")
 
-	if username == "" || email == "" || password == "" {
-		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+	user := &model.User{}
+	//bind JSON with User struct
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	user := &model.User{
-		Username: username,
-		Email:    email,
-		Password: password,
-	}
-
-	err := model.CreateUser(user)
+	//Create user with struct
+	err = model.CreateUser(user)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusConflict)
 		return
 	}
-
 	ctx.Status(http.StatusAccepted)
-} 
+}
 
 // Take JSON with base64 of image, image filetype, and user id as parameters, insert into DB
 func CreatePhoto(ctx *gin.Context) {
@@ -176,7 +178,7 @@ func CreatePhoto(ctx *gin.Context) {
 	if !sessionExists {
 		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
 	}
-	body := ctx.Request.Body 
+	body := ctx.Request.Body
 
 	value, err := io.ReadAll(body)
 	if err != nil {
@@ -198,6 +200,33 @@ func CreatePhoto(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func CreateTeamHandler(ctx *gin.Context) {
+	username, password, sessExists := getSessionUser(ctx)
+	if !sessExists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	_, role, err := model.ValidateUser(username, password) // _ is userID (not needed)
+	if err != nil || role != model.MANAGER {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	team := &model.Team{}
+	err = ctx.BindJSON(team)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	err = model.CreateTeam(team)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	ctx.Status(http.StatusAccepted)

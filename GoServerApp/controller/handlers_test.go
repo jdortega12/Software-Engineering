@@ -7,7 +7,6 @@ import (
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/gin-contrib/sessions"
@@ -49,6 +48,7 @@ func TestLogin(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 
+	//set test session
 	router := gin.Default()
 	test_store := cookie.NewStore([]byte("test"))
 	router.Use(sessions.Sessions("test_session", test_store))
@@ -64,9 +64,21 @@ func TestLogin(t *testing.T) {
 	model.CreateUser(user)
 	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
+	//create data
+	data := map[string]interface{}{
+		"email":    "jdo@gmail.com",
+		"password": "123",
+	}
+
+	//format as JSON
+	reader, err := json.Marshal(data)
+	if err != nil {
+		fmt.Printf("could not marshal json: %s\n", err)
+		return
+	}
+
 	//Login
-	reader := strings.NewReader("username=jdo&password=123")
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", reader)
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	w := httptest.NewRecorder()
@@ -103,8 +115,20 @@ func TestImproperLogin(t *testing.T) {
 	model.CreateUser(user)
 	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
 
-	reader := strings.NewReader("username=Wrong&password=Wrong")
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", reader)
+	//create data
+	data := map[string]interface{}{
+		"email":    "WRONG",
+		"password": "WRONG",
+	}
+
+	//format as JSON
+	reader, err := json.Marshal(data)
+	if err != nil {
+		fmt.Printf("could not marshal json: %s\n", err)
+		return
+	}
+
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	w := httptest.NewRecorder()
@@ -331,13 +355,27 @@ func TestCreateAccount(t *testing.T) {
 	SetupHandlers(router)
 
 	//create data
-	reader := strings.NewReader("username=jdo&email=jdo@gmail.com&password=123")
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/createAccount", reader)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	data := map[string]interface{}{
+		"username": "jdo",
+		"email":    "jdo@gmail.com",
+		"password": "123",
+	}
+
+	//format as JSON
+	reader, err := json.Marshal(data)
+	if err != nil {
+		fmt.Printf("could not marshal json: %s\n", err)
+		return
+	}
+
+	//Mock request
+	req, _ := http.NewRequest("POST", "/api/v1/createAccount", bytes.NewBuffer(reader))
+	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
+	//Clean up
 	model.DBConn.Unscoped().Where("username = ?", "jdo").Delete(&model.User{})
 
 	if w.Code != http.StatusAccepted {
@@ -423,3 +461,47 @@ func TestCreatePhotoInvalid(t *testing.T) {
 	}
 }
 
+func TestGoodCreateTeam(t *testing.T) {
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+	user := &model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		Role:     model.MANAGER,
+	}
+	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	model.DBConn.Create(user)
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+	SetupHandlers(router)
+	router.POST("/testWrapper", func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+
+		CreateTeamHandler(ctx)
+	})
+
+	info := &model.Team{
+		Name:         "Greyhounds",
+		TeamLocation: "Baltimore",
+	}
+	json_info, err := json.Marshal(info)
+	if err != nil {
+		panic(err)
+	}
+	defer model.DBConn.Unscoped().Where("team_id = ?", info.TeamID).Delete(&model.Team{})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusAccepted {
+		fmt.Println("Http status failed")
+		t.FailNow()
+	}
+
+}

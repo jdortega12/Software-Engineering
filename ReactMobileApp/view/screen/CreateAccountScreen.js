@@ -2,23 +2,25 @@
 import React from "react";
 import { Button, Text, TextInput, TouchableOpacity, View } from "react-native";
 import FormStyle from "../Form.style";
+import TopBar from "../component/TopBar"
+import handleCreateAccount from "../../event-handler/HandleCreateAccount"
 
 export default function CreateAccount(){
     const [username, setUsername] = React.useState("")
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-
+    /*
     function handleSubmit(pUsername, pEmail, pPwd){
-        const user = {username:pUsername, login: pEmail, password: pPwd};
-        event-handler.handleCreateAccount(user)
-
-        console.log(JSON.stringify(user));
-        alert( JSON.stringify(user) );
+        const userInfo = {username:pUsername, login: pEmail, password: pPwd};
+        handleCreateAccount(userInfo)
+        //console.log(JSON.stringify(user));
+        //alert( JSON.stringify(user) );
     }
-
+    */
 
     return (<>
+    <TopBar/>
         <View style={FormStyle.container}>
             <Text style={FormStyle.fllText}> FLL </Text>
             <Text style={FormStyle.logo}> Create Account </Text>
@@ -48,7 +50,7 @@ export default function CreateAccount(){
             </View>
             {/*change handleSubmit to handleChangeAccount */}
             <TouchableOpacity style={FormStyle.button}
-                             onPress={()=> handleSubmit(username,email,password)}>
+                             onPress={()=> handleCreateAccount(username, email, password)}>
               <Text style={FormStyle.loginText}>REGISTER</Text>
             </TouchableOpacity>
         </View>

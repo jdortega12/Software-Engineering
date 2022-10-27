@@ -1,8 +1,9 @@
 package model
 
 import (
-	"time"
 	"fmt"
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -55,10 +56,13 @@ type User struct {
 	UserID uint
 	TeamID uint
 
-	Username string `gorm:"unique;not null"`
-	// not sure if this should be in separate table
-	Password string `gorm:"not null"`
-	Email    string
+	//Username string `gorm:"unique;not null"`
+	//Password string `gorm:"not null"`
+	//Email    string
+
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 
 	Role userRole `gorm:"not null"`
 
@@ -81,7 +85,7 @@ type UserPersonalInfo struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 
-	Height uint `json"height,string"`  // inches
+	Height uint `json:"height,string"` // inches
 	Weight uint `json:"weight,string"` // lbs
 
 	// metadata
@@ -119,13 +123,12 @@ func CreateUser(user *User) error {
 	return err
 }
 
-
-// Takes photo as base64 String, username, password 
-// updates user photo to the new phot 
+// Takes photo as base64 String, username, password
+// updates user photo to the new phot
 func UpdateUserPhoto(photo string, username string, password string) error {
 	user := User{}
 	err := DBConn.Where("username = ?", username, &user).Error
-	
+
 	if err != nil || user.Password != password {
 		return err
 	}
@@ -135,11 +138,10 @@ func UpdateUserPhoto(photo string, username string, password string) error {
 	return err
 }
 
-
 func GetUserId(username string) (uint, error) {
-	user := User{} 
+	user := User{}
 	result := DBConn.Where("username = ?", username).First(&user)
-	fmt.Println(user) 
+	fmt.Println(user)
 
 	if result.Error != nil {
 		return 5, result.Error
