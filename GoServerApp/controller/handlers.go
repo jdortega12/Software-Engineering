@@ -77,6 +77,14 @@ func CreateTeamRequest(ctx *gin.Context) {
 		panic(err)
 	}
 
+	username, _, sessionExists := getSessionUser(ctx)
+
+	if !sessionExists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	data["SenderID"] = username
+
 	sender, err2 := model.GetUserId(data["SenderID"])
 
 	if err2 != nil {
