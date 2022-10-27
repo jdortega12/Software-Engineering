@@ -44,9 +44,13 @@ func Logout(ctx *gin.Context) {
 	ctx.JSON(http.StatusResetContent, gin.H{})
 }
 
-// Logins in a user
+// Logins in a user using username and password sent
+// by client as JSON. Validates the credentials, sets
+// current session with them, and responds with HTTP
+// Status Accepted. If JSON cannot be bound, aborts
+// with HTTP Status Bad Request. If user cannot be
+// validated, aborts with HTTP Status Unauthorized.
 func Login(ctx *gin.Context) {
-
 	user := &model.User{}
 
 	err := ctx.BindJSON(&user)
@@ -55,18 +59,14 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	//validate current user
 	_, _, err = model.ValidateUser(user.Username, user.Password)
-
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	//set session user
 	setSessionUser(ctx, user.Username, user.Password)
 	ctx.Status(http.StatusAccepted)
-
 }
 
 // Takes a POST request with Team request information

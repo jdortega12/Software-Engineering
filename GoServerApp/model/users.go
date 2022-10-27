@@ -56,13 +56,9 @@ type User struct {
 	ID     uint
 	TeamID uint
 
-	//Username string `gorm:"unique;not null"`
-	//Password string `gorm:"not null"`
-	//Email    string
-
-	Username string `json:"username"`
+	Username string `gorm:"unique;not null" json:"username"`
 	Email    string `json:"email"`
-	Password string `json:"password"`
+	Password string `gorm:"not null" json:"password"`
 
 	Role userRole `gorm:"not null"`
 

@@ -38,8 +38,8 @@ func TestLogout(t *testing.T) {
 	}
 }
 
-// Test login for existing user with correct credentials
-func TestLogin(t *testing.T) {
+// Test login for user that actually exists.
+func TestLoginGoodCredentials(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -48,38 +48,36 @@ func TestLogin(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 
-	//set test session
 	router := gin.Default()
 	test_store := cookie.NewStore([]byte("test"))
 	router.Use(sessions.Sessions("test_session", test_store))
 
 	SetupHandlers(router)
 
-	//Add User to DB
+	// Add user to DB
 	user := &model.User{
 		Username: "jdo",
 		Email:    "jdo@gmail.com",
 		Password: "123",
 	}
-	model.CreateUser(user)
+	model.DBConn.Create(user)
 	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
-	//create data
-	data := map[string]interface{}{
-		"email":    "jdo@gmail.com",
-		"password": "123",
+	// create mock login credentials
+	userCpy := &model.User{
+		Username: "jdo",
+		Password: "123",
 	}
 
-	//format as JSON
-	reader, err := json.Marshal(data)
+	// format as JSON
+	reader, err := json.Marshal(userCpy)
 	if err != nil {
-		fmt.Printf("could not marshal json: %s\n", err)
+		t.Errorf("Error: %s\n", err)
 		return
 	}
 
-	//Login
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -90,8 +88,8 @@ func TestLogin(t *testing.T) {
 
 }
 
-// Test Login with improper username and password
-func TestImproperLogin(t *testing.T) {
+// Test Login for user that doesn't exist.
+func TestLoginBadCredentials(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -106,37 +104,27 @@ func TestImproperLogin(t *testing.T) {
 
 	SetupHandlers(router)
 
-	//Add User to DB
-	user := &model.User{
-		Username: "jdo",
-		Email:    "jdo@gmail.com",
-		Password: "123",
-	}
-	model.CreateUser(user)
-	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
-
-	//create data
-	data := map[string]interface{}{
-		"email":    "WRONG",
-		"password": "WRONG",
+	fakeUser := &model.User{
+		Username: "doesnt_matter",
+		Password: "yup",
 	}
 
 	//format as JSON
-	reader, err := json.Marshal(data)
+	reader, err := json.Marshal(fakeUser)
 	if err != nil {
-		fmt.Printf("could not marshal json: %s\n", err)
+		t.Errorf("Error: %s\n", err)
 		return
 	}
 
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	fmt.Println(w.Code)
 
-	if w.Code != http.StatusAccepted {
+	if w.Code != http.StatusUnauthorized {
 		t.FailNow()
 	}
 }

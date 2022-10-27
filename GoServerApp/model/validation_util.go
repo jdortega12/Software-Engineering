@@ -8,7 +8,7 @@ func ValidateUser(username string, password string) (uint, userRole, error) {
 	user := &User{}
 
 	err := DBConn.Where("username = ? AND password = ?", username, password).
-		Find(user).Error
+		First(user).Error
 
 	return user.ID, user.Role, err
 }
