@@ -62,7 +62,7 @@ func TestLogin(t *testing.T) {
 		Password: "123",
 	}
 	model.CreateUser(user)
-	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	//create data
 	data := map[string]interface{}{
@@ -113,7 +113,7 @@ func TestImproperLogin(t *testing.T) {
 		Password: "123",
 	}
 	model.CreateUser(user)
-	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	//create data
 	data := map[string]interface{}{
@@ -272,7 +272,7 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 		Password: "ween",
 	}
 	model.DBConn.Create(user)
-	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	gin.SetMode(gin.TestMode)
 
@@ -293,7 +293,7 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 		Height:    50,
 		Weight:    240,
 	}
-	defer model.DBConn.Unscoped().Where("user_personal_info_id = ?", user.UserID).Delete(info)
+	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(info)
 
 	json_info, err := json.Marshal(info)
 	if err != nil {
@@ -318,7 +318,7 @@ func TestUpdatePersonalInfoHandlerBadJSON(t *testing.T) {
 		Password: "ween",
 	}
 	model.DBConn.Create(user)
-	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	gin.SetMode(gin.TestMode)
 
@@ -472,13 +472,15 @@ func TestGoodCreateTeam(t *testing.T) {
 		Password: "wasspord",
 		Role:     model.MANAGER,
 	}
-	defer model.DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 	model.DBConn.Create(user)
+
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 	test_store := cookie.NewStore([]byte("test"))
 	router.Use(sessions.Sessions("test_session", test_store))
 	SetupHandlers(router)
+
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "kevin", "wasspord")
 
@@ -493,7 +495,7 @@ func TestGoodCreateTeam(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	defer model.DBConn.Unscoped().Where("team_id = ?", info.TeamID).Delete(&model.Team{})
+	defer model.DBConn.Unscoped().Where("id = ?", info.ID).Delete(info)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))

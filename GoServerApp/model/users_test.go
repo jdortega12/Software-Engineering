@@ -22,24 +22,21 @@ func TestUpdatePersonalInfo(t *testing.T) {
 		panic(err)
 	}
 
-	testInfo = UserPersonalInfo{
-		Firstname: "test_firstname",
-		Lastname:  "test_lastname",
-
-		Height: 50,
-		Weight: 225,
-	}
+	testInfo.Firstname = "test_firstname"
+	testInfo.Lastname = "test_lastname"
+	testInfo.Height = 50
+	testInfo.Weight = 225
 
 	// test the upate itself produces no error
 	err = UpdateUserPersonalInfo(&testInfo)
 	if err != nil {
 		panic(err)
 	}
-	defer DBConn.Unscoped().Where("user_personal_info_id", testInfo.UserPersonalInfoID).Delete(testInfo)
+	defer DBConn.Unscoped().Where("id", testInfo.ID).Delete(testInfo)
 
 	// pull record from DB to ensure it was saved correctly
 	var testInfoCopy UserPersonalInfo
-	err = DBConn.Where("user_personal_info_id = ?", testInfo.UserPersonalInfoID).
+	err = DBConn.Where("id = ?", testInfo.ID).
 		Find(&testInfoCopy).Error
 
 	if err != nil {
@@ -75,14 +72,14 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	err = CreateUser(user)
-	defer DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
+	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	if err != nil {
 		panic(err)
 	}
 
 	user2 := &User{}
-	err = DBConn.Where("user_id = ?", user.UserID).Find(user2).Error
+	err = DBConn.Where("id = ?", user.ID).Find(user2).Error
 	if err != nil {
 		panic(err)
 	}
@@ -107,21 +104,23 @@ func TestInsertPhoto(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	// Insert a user
 	user := &User{
 		Username: "do5",
 		Email:    "jdo@gmail.com",
 		Password: "123",
 	}
-	
-	err = CreateUser(user)
-	
+
+	DBConn.Create(user)
+	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
+	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(&UserPersonalInfo{})
+
 	if err != nil {
 		panic(err)
 	}
 
-	// now, try to insert a photo 
+	// now, try to insert a photo
 	err = UpdateUserPhoto("thisisntarealbase64", "do5", "123")
 	if err != nil {
 		panic(err)
@@ -133,7 +132,7 @@ func TestInsertPhoto(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
- 
+
 	if found_user.Photo == "thisisntrealbase64" {
 		t.FailNow()
 	}

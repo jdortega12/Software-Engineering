@@ -53,7 +53,7 @@ const (
 
 // corresponds to users table in DB
 type User struct {
-	UserID uint
+	ID     uint
 	TeamID uint
 
 	//Username string `gorm:"unique;not null"`
@@ -80,7 +80,7 @@ type User struct {
 // without any permission or extra complication.
 type UserPersonalInfo struct {
 	// must be same ID as user whom it belongs to
-	UserPersonalInfoID uint
+	ID uint
 
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
@@ -96,7 +96,7 @@ type UserPersonalInfo struct {
 
 // Updates the personal info of a user in the DB.
 func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
-	err := DBConn.Where("user_personal_info_id = ?", userPersInfo.UserPersonalInfoID).
+	err := DBConn.Where("id = ?", userPersInfo.ID).
 		Updates(&userPersInfo).Error
 
 	return err
@@ -112,7 +112,7 @@ func CreateUser(user *User) error {
 	}
 
 	personalInfo := &UserPersonalInfo{
-		UserPersonalInfoID: user.UserID,
+		ID: user.ID,
 	}
 
 	err = DBConn.Create(personalInfo).Error
@@ -147,5 +147,5 @@ func GetUserId(username string) (uint, error) {
 		return 5, result.Error
 	}
 
-	return user.UserID, result.Error
+	return user.ID, result.Error
 }

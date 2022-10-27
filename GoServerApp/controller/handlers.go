@@ -140,7 +140,7 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 		return
 	}
 
-	userPersInfo.UserPersonalInfoID = userID
+	userPersInfo.ID = userID
 
 	err = model.UpdateUserPersonalInfo(&userPersInfo)
 	if err != nil {

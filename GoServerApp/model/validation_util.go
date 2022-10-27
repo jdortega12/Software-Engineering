@@ -14,7 +14,7 @@ func ValidateUser(username string, password string) (uint, userRole, error) {
 	role := PLAYER
 
 	if err == nil {
-		userID = user.UserID
+		userID = user.ID
 		role = user.Role
 	}
 
