@@ -71,7 +71,7 @@ func TestCreateUser(t *testing.T) {
 		Password: "123",
 	}
 
-	err = CreateUser(user)
+	DBConn.Create(user)
 	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	if err != nil {
