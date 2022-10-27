@@ -22,8 +22,11 @@ const (
 type playerPosition uint
 
 const (
+	// NULL for non-players
+	NULL playerPosition = iota
+
 	// offense
-	QUARTERBACK playerPosition = iota
+	QUARTERBACK
 	RUNNING_BACK
 	FULLBACK
 	WIDE_REC
