@@ -10,13 +10,5 @@ func ValidateUser(username string, password string) (uint, userRole, error) {
 	err := DBConn.Where("username = ? AND password = ?", username, password).
 		Find(user).Error
 
-	var userID uint = 0
-	role := PLAYER
-
-	if err == nil {
-		userID = user.ID
-		role = user.Role
-	}
-
-	return userID, role, err
+	return user.ID, user.Role, err
 }
