@@ -12,7 +12,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 const (
@@ -22,14 +21,11 @@ const (
 // Initializes a DB for testing purposes. Just a wrapper
 // for InitDB() and error handling to save space in tests.
 // Also declared in model because golang.
-func initTestDB() *gorm.DB {
-	var err error
-	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+func initTestDB() {
+	err := model.InitDB(TEST_DB_PATH)
 	if err != nil {
 		panic(err)
 	}
-
-	return model.DBConn
 }
 
 // Sets up a router for testing purposes.
@@ -62,7 +58,7 @@ func Test_handleLogout(t *testing.T) {
 
 // Test login for user that actually exists.
 func Test_handleLogin_GoodCredentials(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	// Add user to DB
@@ -101,7 +97,7 @@ func Test_handleLogin_GoodCredentials(t *testing.T) {
 
 // Test Login for user that doesn't exist.
 func Test_handleLogin_BadCredentials(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	fakeUser := &model.User{
@@ -132,7 +128,7 @@ func Test_handleLogin_BadCredentials(t *testing.T) {
 // Tests that login returns HTTP Status Bad Request
 // when JSON is not correct.
 func Test_handleLogin_BadJSON(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer([]byte("bad data")))
@@ -151,7 +147,7 @@ func Test_handleLogin_BadJSON(t *testing.T) {
 // Tests handleCreateTeamNotification() when a valid teamNotification
 // JSON is sent over and all success conditions are met.
 func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
@@ -207,7 +203,7 @@ func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
 // Tests case that handleCreateTeamNotification is called when there
 // is not a valid user logged in.
 func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	router.POST("/test", func(ctx *gin.Context) {
@@ -228,7 +224,7 @@ func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
 // Tests case that handleCreateTeamNotification is called without a valid
 // JSON request body in context.
 func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
@@ -257,7 +253,7 @@ func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
 // SenderUsername of the TeamNotification is not the same as the logged
 // in user.
 func Test_handleCreateTeamNotification_BadSender(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
@@ -291,7 +287,7 @@ func Test_handleCreateTeamNotification_BadSender(t *testing.T) {
 
 // Make sure update info handler returns correct status code.
 func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	user := &model.User{
@@ -346,7 +342,7 @@ func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
 
 // Make sure update info handler returns correct status code for bad request.
 func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	user := &model.User{
@@ -373,7 +369,7 @@ func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
 }
 
 func Test_handleCreateAccount_Valid(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	defer model.DBConn.Exec("DELETE FROM users")
@@ -406,7 +402,7 @@ func Test_handleCreateAccount_Valid(t *testing.T) {
 
 // Test whether a Photo can be inserted into the database
 func Test_handleCreatePhoto_Valid(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
@@ -440,7 +436,7 @@ func Test_handleCreatePhoto_Valid(t *testing.T) {
 
 // Test whether the correct response is given for an invalid call to CreatePhoto
 func Test_handleCreatePhoto_Invalid(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
@@ -473,7 +469,7 @@ func Test_handleCreatePhoto_Invalid(t *testing.T) {
 }
 
 func Test_handleCreateTeam_Valid(t *testing.T) {
-	model.DBConn = initTestDB()
+	initTestDB()
 	router := setupTestRouter()
 
 	user := &model.User{

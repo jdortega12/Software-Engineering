@@ -14,12 +14,12 @@ var (
 )
 
 // Creates/opens the database specified by the path parameter. If successful,
-// then automigrates all tables. Returns pointer to db connection and error
-// if any operations fail.
-func InitDB(path string) (*gorm.DB, error) {
-	DBConn, err := gorm.Open(sqlite.Open(path))
+// then automigrates all tables. Returns error if any operations fail.
+func InitDB(path string) error {
+	var err error
+	DBConn, err = gorm.Open(sqlite.Open(path))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = DBConn.AutoMigrate(
@@ -30,5 +30,5 @@ func InitDB(path string) (*gorm.DB, error) {
 		&TeamNotification{},
 	)
 
-	return DBConn, err
+	return err
 }
