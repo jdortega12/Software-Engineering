@@ -30,7 +30,6 @@ export default function CreateTeam(){
                     onChangeText={setTeamLocation}
                     autoCapitalize={false}/>
                 </View>
-                { /* change handleSubmit to handleChangeTeam */}
                 <TouchableOpacity style={FormStyle.button}
                                  onPress={()=> handleCreateTeam(Name, TeamLocation)}>
                   <Text style={FormStyle.loginText}>REGISTER TEAM</Text>

@@ -10,15 +10,6 @@ export default function CreateAccount(){
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    /*
-    function handleSubmit(pUsername, pEmail, pPwd){
-        const userInfo = {username:pUsername, login: pEmail, password: pPwd};
-        handleCreateAccount(userInfo)
-        //console.log(JSON.stringify(user));
-        //alert( JSON.stringify(user) );
-    }
-    */
-
     return (<>
     <TopBar/>
         <View style={FormStyle.container}>
@@ -48,7 +39,6 @@ export default function CreateAccount(){
                 placeholderTextColor="white"
                 onChangeText={setPassword}/>
             </View>
-            {/*change handleSubmit to handleChangeAccount */}
             <TouchableOpacity style={FormStyle.button}
                              onPress={()=> handleCreateAccount(username, email, password)}>
               <Text style={FormStyle.loginText}>REGISTER</Text>

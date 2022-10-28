@@ -69,8 +69,9 @@ func handleLogin(ctx *gin.Context) {
 // Receives TeamNotification as JSON from client and passes it to
 // model to be created in the DB. Returns HTTP Status Accepted on success.
 // Returns HTTP Status Unauthorized if session not set or user credentials
-// invalid. Returns HTTP Status Bad Request if JSON cannot be bound, SenderUsername
-// is not the same as the logged in user, or notification cannot be created in DB.
+// invalid. Returns HTTP Status Bad Request if JSON cannot be bound or notification
+// cannot be created in DB. SenderUsername is set as the username of the current
+// session user.
 func handleCreateTeamNotification(ctx *gin.Context) {
 	username, password, sessionExists := getSessionUser(ctx)
 	if !sessionExists {
@@ -92,10 +93,7 @@ func handleCreateTeamNotification(ctx *gin.Context) {
 		return
 	}
 
-	if username != teamNotification.SenderUsername {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+	teamNotification.SenderUsername = username
 
 	err = model.CreateTeamNotification(teamNotification)
 	if err != nil {
