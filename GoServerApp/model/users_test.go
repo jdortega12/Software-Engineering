@@ -7,7 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// Tests updating a user's personal info.
+// Tests updating a user's personal info when all conditions
+// are correct.
 func TestUpdatePersonalInfo(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
@@ -43,8 +44,7 @@ func TestUpdatePersonalInfo(t *testing.T) {
 		t.Errorf("Error: %s", err)
 	}
 
-	// remove metadata before comparison because its supposed
-	// to be different
+	// remove metadata before comparison
 	testInfo.CreatedAt = time.Time{}
 	testInfo.UpdatedAt = time.Time{}
 	testInfo.DeletedAt = gorm.DeletedAt{}
@@ -53,12 +53,13 @@ func TestUpdatePersonalInfo(t *testing.T) {
 	testInfoCopy.DeletedAt = gorm.DeletedAt{}
 
 	if testInfo != testInfoCopy {
+		t.Error("The updated info was not saved correctly in the DB")
 		t.FailNow()
 	}
 }
 
+// Tests creating a user when all conditions are correct.
 func TestCreateUser(t *testing.T) {
-	//Initialize Database
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -96,25 +97,23 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-// test if we can create a user, and then insert a picture without errors
-func TestInsertPhoto(t *testing.T) {
-	//Initialize Database
+// Tests updating a user's profile photo when
+// all conditions are correct.
+func TestUpdateUserPhoto(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {
 		panic(err)
 	}
 
-	// Insert a user
+	//  create a user
 	user := &User{
 		Username: "do5",
 		Email:    "jdo@gmail.com",
 		Password: "123",
 	}
-
 	DBConn.Create(user)
 	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
-	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(&UserPersonalInfo{})
 
 	if err != nil {
 		panic(err)

@@ -9,7 +9,8 @@ import (
 
 // users.go -> database CRUDing for users
 
-// Enum definition for user roles
+// Enum definition for user roles. Defaults
+// in DB to PLAYER.
 type userRole uint
 
 const (
@@ -18,7 +19,8 @@ const (
 	ADMIN
 )
 
-// enum definition for player positions
+// Enum definition for player positions. Defaults
+// in DB to NULL.
 type playerPosition uint
 
 const (
@@ -54,7 +56,7 @@ const (
 	PUNT_RETURN
 )
 
-// corresponds to users table in DB
+// Corresponds to users table in DB.
 type User struct {
 	ID     uint
 	TeamID uint
@@ -101,9 +103,9 @@ func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 	return err
 }
 
-// Takes a User struct
-// into the DB as a User
-// returns 0 on successful insertion, 1 otherwise
+// Creates a User in the DB. ALso creates
+// a corresponding UserPersonalInfo with
+// the same ID as the User.
 func CreateUser(user *User) error {
 	err := DBConn.Create(user).Error
 	if err != nil {
@@ -116,9 +118,9 @@ func CreateUser(user *User) error {
 
 	err = DBConn.Create(personalInfo).Error
 	if err != nil {
-		DBConn.Delete(user)
-		return err
+		DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 	}
+
 	return err
 }
 

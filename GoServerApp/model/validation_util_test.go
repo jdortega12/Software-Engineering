@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// Test validate user success case.
+// Tests validate user success case.
 func TestGoodValidateUser(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
@@ -31,7 +31,7 @@ func TestGoodValidateUser(t *testing.T) {
 	}
 }
 
-// Test that error returned is
+// Tests that error is returned when credentials are bad.
 func TestBadValidateUser(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)

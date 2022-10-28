@@ -11,11 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// handlers.go -> funcs bound to the router's endpoints
+// handlers.go -> endpoint setup and funcs bound to them
 
 // Sets up the routers api endpoints.
 func SetupHandlers(router *gin.Engine) {
-	// 404 handler
 	router.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
