@@ -2,8 +2,8 @@ package model
 
 // validation_util.go -> utilities for validating user permissions
 
-// Validates a user based on username and password. Returns role and ID
-// of user if validation succeeded and error if it did not succeed.
+// Validates a user based on username and password. Returns pointer
+// to User if succeeded and error if could not find user.
 func ValidateUser(username string, password string) (*User, error) {
 	user := &User{}
 
