@@ -17,7 +17,8 @@ var (
 // then automigrates all tables. Returns pointer to db connection and error
 // if any operations fail.
 func InitDB(path string) (*gorm.DB, error) {
-	DBConn, err := gorm.Open(sqlite.Open(path))
+	var err error
+	DBConn, err = gorm.Open(sqlite.Open(path))
 	if err != nil {
 		return nil, err
 	}
