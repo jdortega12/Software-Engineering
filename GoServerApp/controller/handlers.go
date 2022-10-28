@@ -13,7 +13,7 @@ import (
 
 // handlers.go -> endpoint setup and funcs bound to them
 
-// Sets up the routers api endpoints.
+// Sets up the handling functions bound to the Engine's api endpoints.
 func SetupHandlers(router *gin.Engine) {
 	router.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})

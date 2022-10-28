@@ -5,9 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// session_util.go -> functionality for setting/getting/modifying session,
-// also interactions with model to validate user permissions. Funcs should
-// not be publicly visible to other packages (lowercase).
+// session_util.go -> functionality for setting/getting/modifying session.
 
 // Sets the current session with given username and password for
 // validation of user for the rest of their session.
@@ -19,8 +17,8 @@ func setSessionUser(ctx *gin.Context, username string, password string) {
 	session.Save()
 }
 
-// Gets the username and password from the current session and
-// additionally returns false if either key does not exist.
+// Returns username and password of current session user as well
+// as a bool for whether the session has been correctly set or not.
 func getSessionUser(ctx *gin.Context) (string, string, bool) {
 	sessionExists := false
 
