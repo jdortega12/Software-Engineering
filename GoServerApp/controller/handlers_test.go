@@ -19,7 +19,7 @@ const (
 )
 
 // Tests that Logout() returns correct status code.
-func TestLogout(t *testing.T) {
+func TestHandleLogout(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
@@ -39,7 +39,7 @@ func TestLogout(t *testing.T) {
 }
 
 // Test login for user that actually exists.
-func TestLoginGoodCredentials(t *testing.T) {
+func TestHandleLoginGoodCredentials(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -89,7 +89,7 @@ func TestLoginGoodCredentials(t *testing.T) {
 }
 
 // Test Login for user that doesn't exist.
-func TestLoginBadCredentials(t *testing.T) {
+func TestHandleLoginBadCredentials(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -131,7 +131,7 @@ func TestLoginBadCredentials(t *testing.T) {
 
 // Tests that login returns HTTP Status Bad Request
 // when JSON is not correct.
-func TestLoginBadJSON(t *testing.T) {
+func TestHandleLoginBadJSON(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -161,7 +161,7 @@ func TestLoginBadJSON(t *testing.T) {
 
 // Tests that CreateTeamRequest is able to properly recieve a team request
 // Test if function can succesfully call model to insert and send JSON indicating success to frontend
-func TestGoodRequestInsert(t *testing.T) {
+func TestHandleCreateTeamRequest(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -196,7 +196,7 @@ func TestGoodRequestInsert(t *testing.T) {
 
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "timba11", "123")
-		CreateTeamRequest(ctx)
+		handleCreateTeamRequest(ctx)
 	})
 
 	// mock request
@@ -222,7 +222,7 @@ func TestGoodRequestInsert(t *testing.T) {
 
 // Tests that CreateTeamRequest is able to handle in incorrect request
 // Test if function can succesfully call model to insert and send JSON indicating failure to frontend
-func TestBadRequestInsert(t *testing.T) {
+func TestHandleCreateTeamRequestBad(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -257,7 +257,7 @@ func TestBadRequestInsert(t *testing.T) {
 
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "tom", "123")
-		CreateTeamRequest(ctx)
+		handleCreateTeamRequest(ctx)
 	})
 
 	// mock request
@@ -282,7 +282,7 @@ func TestBadRequestInsert(t *testing.T) {
 }
 
 // Make sure update info handler returns correct status code.
-func TestUpdateUserPersonalInfoHandler(t *testing.T) {
+func TestHandleUpdateUserPersonalInfo(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
 	user := &model.User{
@@ -302,7 +302,7 @@ func TestUpdateUserPersonalInfoHandler(t *testing.T) {
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
 
-		UpdateUserPersonalInfoHandler(ctx)
+		handleUpdateUserPersonalInfo(ctx)
 	})
 
 	info := &model.UserPersonalInfo{
@@ -329,7 +329,7 @@ func TestUpdateUserPersonalInfoHandler(t *testing.T) {
 
 // Tests that update info handler returns HTTP Status Unauthorized
 // when session doesn't exist.
-func TestUpdateUserPersonalInfoHandlerNilSession(t *testing.T) {
+func TestHandleUpdateUserPersonalInfoNilSession(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
@@ -348,7 +348,7 @@ func TestUpdateUserPersonalInfoHandlerNilSession(t *testing.T) {
 }
 
 // Make sure update info handler returns correct status code for bad request.
-func TestUpdateUserPersonalInfoHandlerBadJSON(t *testing.T) {
+func TestHandleUpdateUserPersonalInfoBadJSON(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
 	user := &model.User{
@@ -368,7 +368,7 @@ func TestUpdateUserPersonalInfoHandlerBadJSON(t *testing.T) {
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
 
-		UpdateUserPersonalInfoHandler(ctx)
+		handleUpdateUserPersonalInfo(ctx)
 	})
 
 	w := httptest.NewRecorder()
@@ -380,7 +380,7 @@ func TestUpdateUserPersonalInfoHandlerBadJSON(t *testing.T) {
 	}
 }
 
-func TestCreateAccount(t *testing.T) {
+func TestHandleCreateAccount(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -420,7 +420,7 @@ func TestCreateAccount(t *testing.T) {
 }
 
 // Test whether a Photo can be inserted into the database
-func TestCreatePhoto(t *testing.T) {
+func TestHandleCreatePhoto(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
 	model.DBConn.Create(&model.User{
@@ -437,7 +437,7 @@ func TestCreatePhoto(t *testing.T) {
 	// test endpoint just to set session for this test
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
-		CreatePhoto(ctx)
+		handleCreatePhoto(ctx)
 	})
 
 	info := gin.H{
@@ -459,7 +459,7 @@ func TestCreatePhoto(t *testing.T) {
 }
 
 // Test whether the correct response is given for an invalid call to CreatePhoto
-func TestCreatePhotoInvalid(t *testing.T) {
+func TestHandleCreatePhotoInvalid(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
 	model.DBConn.Create(&model.User{
@@ -476,7 +476,7 @@ func TestCreatePhotoInvalid(t *testing.T) {
 	// test endpoint just to set session for this test
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
-		CreatePhoto(ctx)
+		handleCreatePhoto(ctx)
 	})
 
 	info := gin.H{
@@ -497,7 +497,7 @@ func TestCreatePhotoInvalid(t *testing.T) {
 	}
 }
 
-func TestGoodCreateTeam(t *testing.T) {
+func TestHandleCreateTeam(t *testing.T) {
 	var err error
 	model.DBConn, err = model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -522,7 +522,7 @@ func TestGoodCreateTeam(t *testing.T) {
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "kevin", "wasspord")
 
-		CreateTeamHandler(ctx)
+		handleCreateTeam(ctx)
 	})
 
 	info := &model.Team{

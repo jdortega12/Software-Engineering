@@ -24,12 +24,12 @@ func SetupHandlers(router *gin.Engine) {
 	{
 		v1 := api.Group("/v1")
 		{
-			v1.POST("/logout", Logout)
-			v1.POST("/login", Login)
-			v1.POST("/createTeamRequest", CreateTeamRequest)
-			v1.POST("/updatePersonalInfo", UpdateUserPersonalInfoHandler)
-			v1.POST("/createAccount", CreateAccountHandler)
-			v1.POST("/createPhoto", CreatePhoto)
+			v1.POST("/logout", handleLogout)
+			v1.POST("/login", handleLogin)
+			v1.POST("/createTeamRequest", handleCreateTeamRequest)
+			v1.POST("/updatePersonalInfo", handleUpdateUserPersonalInfo)
+			v1.POST("/createAccount", handleCreateAccount)
+			v1.POST("/createPhoto", handleCreatePhoto)
 		}
 	}
 }
@@ -37,7 +37,7 @@ func SetupHandlers(router *gin.Engine) {
 // Logs out current user by clearing the current session.
 // Do not need to validate user or any permissions. Responds
 // with HTTP reset content status code.
-func Logout(ctx *gin.Context) {
+func handleLogout(ctx *gin.Context) {
 	clearSession(ctx)
 
 	ctx.JSON(http.StatusResetContent, gin.H{})
@@ -49,7 +49,7 @@ func Logout(ctx *gin.Context) {
 // Status Accepted. If JSON cannot be bound, aborts
 // with HTTP Status Bad Request. If user cannot be
 // validated, aborts with HTTP Status Unauthorized.
-func Login(ctx *gin.Context) {
+func handleLogin(ctx *gin.Context) {
 	user := &model.User{}
 
 	err := ctx.BindJSON(&user)
@@ -70,7 +70,7 @@ func Login(ctx *gin.Context) {
 
 // Takes a POST request with Team request information
 // Adds the request to the database
-func CreateTeamRequest(ctx *gin.Context) {
+func handleCreateTeamRequest(ctx *gin.Context) {
 	body := ctx.Request.Body
 	value, err := io.ReadAll(body)
 	if err != nil {
@@ -116,7 +116,7 @@ func CreateTeamRequest(ctx *gin.Context) {
 // Receives UserPersonalInfo JSON from the client and updates
 // it in the DB through the model. Validates that a user is
 // logged in before doing anything.
-func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
+func handleUpdateUserPersonalInfo(ctx *gin.Context) {
 	// get user session and check not null
 	username, password, sessionExists := getSessionUser(ctx)
 	if !sessionExists {
@@ -152,7 +152,7 @@ func UpdateUserPersonalInfoHandler(ctx *gin.Context) {
 
 // Take JSON of user info, transfers to user struct
 // Creates user
-func CreateAccountHandler(ctx *gin.Context) {
+func handleCreateAccount(ctx *gin.Context) {
 
 	user := &model.User{}
 	//bind JSON with User struct
@@ -172,7 +172,7 @@ func CreateAccountHandler(ctx *gin.Context) {
 }
 
 // Take JSON with base64 of image, image filetype, and user id as parameters, insert into DB
-func CreatePhoto(ctx *gin.Context) {
+func handleCreatePhoto(ctx *gin.Context) {
 	username, password, sessionExists := getSessionUser(ctx)
 	if !sessionExists {
 		ctx.AbortWithStatus(http.StatusUnprocessableEntity)
@@ -204,7 +204,7 @@ func CreatePhoto(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-func CreateTeamHandler(ctx *gin.Context) {
+func handleCreateTeam(ctx *gin.Context) {
 	username, password, sessExists := getSessionUser(ctx)
 	if !sessExists {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
