@@ -6,7 +6,7 @@ import TopBar from "../component/TopBar"
 import handleLogin from "../../event-handler/HandleLogin"
 
 export default function LoginScreen(){
-    const [email, setEmail] = React.useState("");
+    const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
 
     /*
@@ -27,7 +27,7 @@ export default function LoginScreen(){
                 style={FormStyle.inputText}
                 placeholder="Email..."
                 placeholderTextColor="white"
-                onChangeText={setEmail}
+                onChangeText={setUsername}
                 autoCapitalize={false}/>
             </View>
             <View style={FormStyle.inputView} >
@@ -39,7 +39,7 @@ export default function LoginScreen(){
                 onChangeText={setPassword}/>
             </View>
             <TouchableOpacity style={FormStyle.button}
-                             onPress={()=> handleLogin(email,password)}>
+                             onPress={()=> handleLogin(username,password)}>
               <Text style={FormStyle.loginText}>LOGIN</Text>
             </TouchableOpacity>
         </View>

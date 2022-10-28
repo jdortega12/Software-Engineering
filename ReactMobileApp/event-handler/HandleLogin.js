@@ -1,8 +1,8 @@
 import React from 'react'
 
 // Sends HTTP request to server to create account
-export default function handleLogin(email, password) {
-    accountInfo = {email: email, password: password}
+export default function handleLogin(username, password) {
+    accountInfo = {username: username, password: password}
     try {
         fetch("http://10.0.2.2:8080/api/v1/login", {
             method: "POST",
