@@ -129,6 +129,36 @@ func TestLoginBadCredentials(t *testing.T) {
 	}
 }
 
+// Tests that login returns HTTP Status Bad Request
+// when JSON is not correct.
+func TestLoginBadJSON(t *testing.T) {
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	test_store := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", test_store))
+
+	SetupHandlers(router)
+
+	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer([]byte("bad data")))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	fmt.Println(w.Code)
+
+	if w.Code != http.StatusBadRequest {
+		t.FailNow()
+	}
+}
+
 // Tests that CreateTeamRequest is able to properly recieve a team request
 // Test if function can succesfully call model to insert and send JSON indicating success to frontend
 func TestGoodRequestInsert(t *testing.T) {
@@ -252,7 +282,7 @@ func TestBadRequestInsert(t *testing.T) {
 }
 
 // Make sure update info handler returns correct status code.
-func TestUpdatePersonalInfoHandler(t *testing.T) {
+func TestUpdateUserPersonalInfoHandler(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
 	user := &model.User{
@@ -297,8 +327,28 @@ func TestUpdatePersonalInfoHandler(t *testing.T) {
 	}
 }
 
+// Tests that update info handler returns HTTP Status Unauthorized
+// when session doesn't exist.
+func TestUpdateUserPersonalInfoHandlerNilSession(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	router := gin.Default()
+	testStore := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", testStore))
+
+	SetupHandlers(router)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/updatePersonalInfo", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.FailNow()
+	}
+}
+
 // Make sure update info handler returns correct status code for bad request.
-func TestUpdatePersonalInfoHandlerBadJSON(t *testing.T) {
+func TestUpdateUserPersonalInfoHandlerBadJSON(t *testing.T) {
 	// generic user for this test
 	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
 	user := &model.User{
@@ -336,21 +386,22 @@ func TestCreateAccount(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	defer model.DBConn.Exec("DELETE FROM users")
+	defer model.DBConn.Exec("DELETE FROM user_personal_infos")
 
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
 	SetupHandlers(router)
 
-	//create data
-	data := map[string]interface{}{
-		"username": "jdo",
-		"email":    "jdo@gmail.com",
-		"password": "123",
+	testUser := &model.User{
+		Username: "jdo",
+		Email:    "jdo@gmail.com",
+		Password: "123",
 	}
 
-	//format as JSON
-	reader, err := json.Marshal(data)
+	// format as JSON
+	reader, err := json.Marshal(testUser)
 	if err != nil {
 		fmt.Printf("could not marshal json: %s\n", err)
 		return
@@ -362,9 +413,6 @@ func TestCreateAccount(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
-
-	//Clean up
-	model.DBConn.Unscoped().Where("username = ?", "jdo").Delete(&model.User{})
 
 	if w.Code != http.StatusAccepted {
 		t.FailNow()
