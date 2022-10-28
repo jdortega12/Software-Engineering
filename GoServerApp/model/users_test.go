@@ -10,7 +10,7 @@ import (
 // Tests updating a user's personal info when all conditions
 // are correct.
 func Test_UpdatePersonalInfo(t *testing.T) {
-	DBConn = initTestDB()
+	initTestDB()
 
 	var testInfo UserPersonalInfo
 
@@ -56,7 +56,7 @@ func Test_UpdatePersonalInfo(t *testing.T) {
 
 // Tests creating a user when all conditions are correct.
 func Test_CreateUser(t *testing.T) {
-	DBConn = initTestDB()
+	initTestDB()
 
 	user := &User{
 		Username: "jdo",
@@ -91,7 +91,7 @@ func Test_CreateUser(t *testing.T) {
 }
 
 func Test_CreateUser_NilUsername(t *testing.T) {
-	DBConn = initTestDB()
+	initTestDB()
 
 	user := &User{
 		Email:    "jdo@gmail.com",
@@ -110,7 +110,7 @@ func Test_CreateUser_NilUsername(t *testing.T) {
 // Tests updating a user's profile photo when
 // all conditions are correct.
 func Test_UpdateUserPhoto(t *testing.T) {
-	DBConn = initTestDB()
+	initTestDB()
 
 	//  create a user
 	user := &User{
@@ -141,7 +141,7 @@ func Test_UpdateUserPhoto(t *testing.T) {
 
 // Tests getUserByUsername when user exists.
 func Test_GetUserByUsername_UserExists(t *testing.T) {
-	DBConn = initTestDB()
+	initTestDB()
 
 	user := &User{
 		Username: "weenjeen",
@@ -159,7 +159,7 @@ func Test_GetUserByUsername_UserExists(t *testing.T) {
 }
 
 func Test_GetUserByUsername_NoUser(t *testing.T) {
-	DBConn = initTestDB()
+	initTestDB()
 
 	_, err := getUserByUsername("weenjeen")
 	if err == nil {

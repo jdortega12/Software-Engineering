@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	_, err := model.InitDB(DB_PATH)
+	err := model.InitDB(DB_PATH)
 	if err != nil {
 		panic(err)
 	}

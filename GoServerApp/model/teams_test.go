@@ -6,7 +6,7 @@ import (
 
 // Tests creating team info
 func Test_CreateTeam_Valid(t *testing.T) {
-	DBConn = initTestDB()
+	initTestDB()
 
 	testInfo := &Team{
 		Name:         "test_teamname",
