@@ -38,8 +38,8 @@ func setupTestRouter() *gin.Engine {
 
 	router := gin.Default()
 
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
+	testStore := cookie.NewStore([]byte("test"))
+	router.Use(sessions.Sessions("test_session", testStore))
 
 	SetupHandlers(router)
 
