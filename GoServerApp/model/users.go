@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -106,6 +107,10 @@ func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 // Creates a User in the DB. ALso creates a corresponding UserPersonalInfo
 // with the same ID as the User. Returns error if one ocurred.
 func CreateUser(user *User) error {
+	if user.Username == "" || user.Password == "" {
+		return errors.New("users: username and password cannot be empty")
+	}
+
 	err := DBConn.Create(user).Error
 	if err != nil {
 		return err

@@ -112,6 +112,32 @@ func Test_CreateTeamNotification_BothManagers(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
+func Test_CreateTeamNotification_BothAdmins(t *testing.T) {
+	DBConn, _ = InitDB(TEST_DB_PATH)
+
+	DBConn.Create(&User{
+		Username: "jaluhrman",
+		Role:     ADMIN,
+	})
+	DBConn.Create(&User{
+		Username: "colbert",
+		Role:     ADMIN,
+	})
+
+	notification := &TeamNotification{
+		SenderUsername:   "jaluhrman",
+		ReceiverUsername: "colbert",
+	}
+
+	err := CreateTeamNotification(notification)
+	if err == nil {
+		t.Error("Error should have been produced when both users are admins")
+	}
+
+	DBConn.Exec("DELETE FROM users")
+	DBConn.Exec("DELETE FROM team_notifications")
+}
+
 func Test_CreateTeamNotification_InvalidSender(t *testing.T) {
 	DBConn, _ = InitDB(TEST_DB_PATH)
 

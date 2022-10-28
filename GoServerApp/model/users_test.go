@@ -72,12 +72,13 @@ func Test_CreateUser(t *testing.T) {
 		Password: "123",
 	}
 
-	DBConn.Create(user)
-	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
-
+	err = CreateUser(user)
 	if err != nil {
 		panic(err)
 	}
+
+	defer DBConn.Exec("DELETE FROM users")
+	defer DBConn.Exec("DELETE FROM team_notifications")
 
 	user2 := &User{}
 	err = DBConn.Where("id = ?", user.ID).Find(user2).Error
@@ -95,6 +96,27 @@ func Test_CreateUser(t *testing.T) {
 	if *user != *user2 {
 		t.FailNow()
 	}
+}
+
+func Test_CreateUser_NilUsername(t *testing.T) {
+	var err error
+	DBConn, err = InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	user := &User{
+		Email:    "jdo@gmail.com",
+		Password: "123",
+	}
+
+	err = CreateUser(user)
+	if err == nil {
+		t.Error("Error should have been returned when username nil")
+	}
+
+	DBConn.Exec("DELETE FROM users")
+	DBConn.Exec("DELETE FROM team_notifications")
 }
 
 // Tests updating a user's profile photo when
