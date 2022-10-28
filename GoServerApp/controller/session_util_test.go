@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,11 +14,7 @@ import (
 // func endpoint and a mock GET request which is necessary to
 // set and clear a session.
 func Test_clearSession(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
@@ -42,11 +37,7 @@ func Test_clearSession(t *testing.T) {
 
 // Test that setSession sets the session correctly.
 func Test_setSession(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		setSessionUser(ctx, "test_username", "test_password")
@@ -68,11 +59,7 @@ func Test_setSession(t *testing.T) {
 // Check that getSessionUser works when session has been
 // set correctly.
 func Test_getSessionUser_Valid(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		testSession := sessions.Default(ctx)
@@ -99,24 +86,18 @@ func Test_getSessionUser_Valid(t *testing.T) {
 // Test that getSessionUser works in the case that
 // the session has not been set/doesn't exist.
 func Test_getSessionUser_NilSession(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		username, password, exists := getSessionUser(ctx)
 
 		if exists == true {
 			t.Error("getSessionUser should return false when session doesn't exist")
-			t.FailNow()
 		}
 
 		if username != "" || password != "" {
 			t.Error("getSessionUser should retun username and password as empty" +
 				"strings when session doesn't exist")
-			t.FailNow()
 		}
 	})
 

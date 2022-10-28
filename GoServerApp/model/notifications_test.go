@@ -5,7 +5,7 @@ import "testing"
 // Tests that CreateTeamNotification returns no errors
 // in the case of a valid invite from a manager to a player.
 func Test_CreateTeamNotification_ValidInvite(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	DBConn.Create(&User{
 		Username: "jaluhrman",
@@ -33,7 +33,7 @@ func Test_CreateTeamNotification_ValidInvite(t *testing.T) {
 // Tests that CreateTeamNotification produces no error in the case
 // of a valid request from a player to a manager.
 func Test_CreateTeamNotification_ValidRequest(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	DBConn.Create(&User{
 		Username: "jaluhrman",
@@ -61,7 +61,7 @@ func Test_CreateTeamNotification_ValidRequest(t *testing.T) {
 // Tests that CreateTeamNotification produces an error when
 // the sender and receiver are both players.
 func Test_CreateTeamNotification_BothPlayers(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	DBConn.Create(&User{
 		Username: "jaluhrman",
@@ -87,7 +87,7 @@ func Test_CreateTeamNotification_BothPlayers(t *testing.T) {
 }
 
 func Test_CreateTeamNotification_BothManagers(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	DBConn.Create(&User{
 		Username: "jaluhrman",
@@ -113,7 +113,7 @@ func Test_CreateTeamNotification_BothManagers(t *testing.T) {
 }
 
 func Test_CreateTeamNotification_BothAdmins(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	DBConn.Create(&User{
 		Username: "jaluhrman",
@@ -139,7 +139,7 @@ func Test_CreateTeamNotification_BothAdmins(t *testing.T) {
 }
 
 func Test_CreateTeamNotification_InvalidSender(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	DBConn.Create(&User{
 		Username: "colbert",
@@ -161,7 +161,7 @@ func Test_CreateTeamNotification_InvalidSender(t *testing.T) {
 }
 
 func Test_CreateTeamNotification_InvalidReceiver(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	DBConn.Create(&User{
 		Username: "colbert",

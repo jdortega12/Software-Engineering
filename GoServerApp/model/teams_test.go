@@ -1,17 +1,12 @@
 package model
 
 import (
-	"fmt"
 	"testing"
 )
 
 // Tests creating team info
 func Test_CreateTeam_Valid(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	testInfo := &Team{
 		Name:         "test_teamname",
@@ -19,9 +14,9 @@ func Test_CreateTeam_Valid(t *testing.T) {
 		// Height and weight not included (unlike in users.go)
 	}
 
-	err = CreateTeam(testInfo)
+	err := CreateTeam(testInfo)
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
 	}
 	defer DBConn.Unscoped().Where("id = ?", testInfo.ID).Delete(testInfo)
 
@@ -38,7 +33,6 @@ func Test_CreateTeam_Valid(t *testing.T) {
 	testInfo.DeletedAt = testInfoCopy.DeletedAt
 
 	if *testInfo != testInfoCopy {
-		fmt.Println("hello")
-		t.FailNow()
+		t.Error("Structs should be equal")
 	}
 }

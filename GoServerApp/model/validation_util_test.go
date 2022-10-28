@@ -7,11 +7,7 @@ import (
 
 // Tests validate user success case.
 func Test_ValidateUser_Exists(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	user := &User{
 		Username: "test_username",
@@ -19,7 +15,7 @@ func Test_ValidateUser_Exists(t *testing.T) {
 		Role:     PLAYER,
 	}
 
-	err = DBConn.Create(user).Error
+	err := DBConn.Create(user).Error
 	if err != nil {
 		panic(err)
 	}
@@ -33,15 +29,11 @@ func Test_ValidateUser_Exists(t *testing.T) {
 
 // Tests that error is returned when credentials are bad.
 func Test_ValidateUser_BadCredentials(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	user := &User{}
 
-	err = DBConn.Create(user).Error
+	err := DBConn.Create(user).Error
 	if err != nil {
 		panic(err)
 	}
@@ -57,11 +49,7 @@ func Test_ValidateUser_BadCredentials(t *testing.T) {
 // Tests that err is returned if provided username
 // is an empty string.
 func Test_ValidateUser_NilUsername(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	user := &User{
 		Username: "test_username",
@@ -69,7 +57,7 @@ func Test_ValidateUser_NilUsername(t *testing.T) {
 		Role:     PLAYER,
 	}
 
-	err = DBConn.Create(user).Error
+	err := DBConn.Create(user).Error
 	if err != nil {
 		panic(err)
 	}
@@ -85,11 +73,7 @@ func Test_ValidateUser_NilUsername(t *testing.T) {
 // Tests that err is returned if provided password
 // is an empty string.
 func Test_ValidateUser_NilPassword(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	user := &User{
 		Username: "test_username",
@@ -97,7 +81,7 @@ func Test_ValidateUser_NilPassword(t *testing.T) {
 		Role:     PLAYER,
 	}
 
-	err = DBConn.Create(user).Error
+	err := DBConn.Create(user).Error
 	if err != nil {
 		panic(err)
 	}

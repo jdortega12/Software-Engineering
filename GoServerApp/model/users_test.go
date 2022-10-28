@@ -10,15 +10,11 @@ import (
 // Tests updating a user's personal info when all conditions
 // are correct.
 func Test_UpdatePersonalInfo(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	var testInfo UserPersonalInfo
 
-	err = DBConn.Create(&testInfo).Error
+	err := DBConn.Create(&testInfo).Error
 	if err != nil {
 		panic(err)
 	}
@@ -60,11 +56,7 @@ func Test_UpdatePersonalInfo(t *testing.T) {
 
 // Tests creating a user when all conditions are correct.
 func Test_CreateUser(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	user := &User{
 		Username: "jdo",
@@ -72,7 +64,7 @@ func Test_CreateUser(t *testing.T) {
 		Password: "123",
 	}
 
-	err = CreateUser(user)
+	err := CreateUser(user)
 	if err != nil {
 		panic(err)
 	}
@@ -99,18 +91,14 @@ func Test_CreateUser(t *testing.T) {
 }
 
 func Test_CreateUser_NilUsername(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	user := &User{
 		Email:    "jdo@gmail.com",
 		Password: "123",
 	}
 
-	err = CreateUser(user)
+	err := CreateUser(user)
 	if err == nil {
 		t.Error("Error should have been returned when username nil")
 	}
@@ -122,11 +110,7 @@ func Test_CreateUser_NilUsername(t *testing.T) {
 // Tests updating a user's profile photo when
 // all conditions are correct.
 func Test_UpdateUserPhoto(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	DBConn = initTestDB()
 
 	//  create a user
 	user := &User{
@@ -137,12 +121,8 @@ func Test_UpdateUserPhoto(t *testing.T) {
 	DBConn.Create(user)
 	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
-	if err != nil {
-		panic(err)
-	}
-
 	// now, try to insert a photo
-	err = UpdateUserPhoto("thisisntarealbase64", "do5", "123")
+	err := UpdateUserPhoto("thisisntarealbase64", "do5", "123")
 	if err != nil {
 		panic(err)
 	}
@@ -161,7 +141,7 @@ func Test_UpdateUserPhoto(t *testing.T) {
 
 // Tests getUserByUsername when user exists.
 func Test_GetUserByUsername_UserExists(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	user := &User{
 		Username: "weenjeen",
@@ -179,7 +159,7 @@ func Test_GetUserByUsername_UserExists(t *testing.T) {
 }
 
 func Test_GetUserByUsername_NoUser(t *testing.T) {
-	DBConn, _ = InitDB(TEST_DB_PATH)
+	DBConn = initTestDB()
 
 	_, err := getUserByUsername("weenjeen")
 	if err == nil {

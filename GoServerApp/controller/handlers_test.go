@@ -12,21 +12,43 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 const (
 	TEST_DB_PATH = "file::memory:?cache=shared"
 )
 
-// Tests that Logout() returns correct status code.
-func Test_handleLogout(t *testing.T) {
+// Initializes a DB for testing purposes. Just a wrapper
+// for InitDB() and error handling to save space in tests.
+// Also declared in model because golang.
+func initTestDB() *gorm.DB {
+	var err error
+	model.DBConn, err = model.InitDB(TEST_DB_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	return model.DBConn
+}
+
+// Sets up a router for testing purposes.
+func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
+
 	test_store := cookie.NewStore([]byte("test"))
 	router.Use(sessions.Sessions("test_session", test_store))
 
 	SetupHandlers(router)
+
+	return router
+}
+
+// Tests that Logout() returns correct status code.
+func Test_handleLogout(t *testing.T) {
+	router := setupTestRouter()
 
 	// mock request
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/logout", nil)
@@ -40,19 +62,8 @@ func Test_handleLogout(t *testing.T) {
 
 // Test login for user that actually exists.
 func Test_handleLogin_GoodCredentials(t *testing.T) {
-	var err error
-	model.DBConn, err = model.InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
-
-	SetupHandlers(router)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
 
 	// Add user to DB
 	user := &model.User{
@@ -90,19 +101,8 @@ func Test_handleLogin_GoodCredentials(t *testing.T) {
 
 // Test Login for user that doesn't exist.
 func Test_handleLogin_BadCredentials(t *testing.T) {
-	var err error
-	model.DBConn, err = model.InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
-
-	SetupHandlers(router)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
 
 	fakeUser := &model.User{
 		Username: "doesnt_matter",
@@ -132,19 +132,8 @@ func Test_handleLogin_BadCredentials(t *testing.T) {
 // Tests that login returns HTTP Status Bad Request
 // when JSON is not correct.
 func Test_handleLogin_BadJSON(t *testing.T) {
-	var err error
-	model.DBConn, err = model.InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
-
-	SetupHandlers(router)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
 
 	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer([]byte("bad data")))
 	req.Header.Set("Content-Type", "application/json")
@@ -162,11 +151,8 @@ func Test_handleLogin_BadJSON(t *testing.T) {
 // Tests handleCreateTeamNotification() when a valid teamNotification
 // JSON is sent over and all success conditions are met.
 func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
-	var err error
-	model.DBConn, err = model.InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
@@ -177,12 +163,6 @@ func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 		Username: "colbert",
 		Role:     model.PLAYER,
 	})
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
 
 	router.POST("/test", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
@@ -213,13 +193,7 @@ func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 // requested when a user is not logged in/there is no vali
 // session.
 func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
-
-	SetupHandlers(router)
+	router := setupTestRouter()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/createTeamRequest", nil)
@@ -233,13 +207,8 @@ func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
 // Tests case that handleCreateTeamNotification is called when there
 // is not a valid user logged in.
 func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
-	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
 
 	router.POST("/test", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
@@ -259,17 +228,13 @@ func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
 // Tests case that handleCreateTeamNotification is called without a valid
 // JSON request body in context.
 func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
-	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
+
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
 	})
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
 
 	router.POST("/test", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
@@ -292,18 +257,13 @@ func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
 // SenderUsername of the TeamNotification is not the same as the logged
 // in user.
 func Test_handleCreateTeamNotification_BadSender(t *testing.T) {
-	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
 	})
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
 
 	router.POST("/test", func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
@@ -331,20 +291,15 @@ func Test_handleCreateTeamNotification_BadSender(t *testing.T) {
 
 // Make sure update info handler returns correct status code.
 func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
-	// generic user for this test
-	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
+
 	user := &model.User{
 		Username: "jaluhrman",
 		Password: "ween",
 	}
 	model.DBConn.Create(user)
 	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
 
 	// test endpoint just to set session for this test
 	router.POST("/testWrapper", func(ctx *gin.Context) {
@@ -378,13 +333,7 @@ func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
 // Tests that update info handler returns HTTP Status Unauthorized
 // when session doesn't exist.
 func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
-
-	SetupHandlers(router)
+	router := setupTestRouter()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/updatePersonalInfo", nil)
@@ -397,20 +346,15 @@ func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
 
 // Make sure update info handler returns correct status code for bad request.
 func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
-	// generic user for this test
-	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
+
 	user := &model.User{
 		Username: "jaluhrman",
 		Password: "ween",
 	}
 	model.DBConn.Create(user)
 	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
 
 	// test endpoint just to set session for this test
 	router.POST("/testWrapper", func(ctx *gin.Context) {
@@ -429,18 +373,11 @@ func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
 }
 
 func Test_handleCreateAccount_Valid(t *testing.T) {
-	var err error
-	model.DBConn, err = model.InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
+
 	defer model.DBConn.Exec("DELETE FROM users")
 	defer model.DBConn.Exec("DELETE FROM user_personal_infos")
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	SetupHandlers(router)
 
 	testUser := &model.User{
 		Username: "jdo",
@@ -451,7 +388,7 @@ func Test_handleCreateAccount_Valid(t *testing.T) {
 	// format as JSON
 	reader, err := json.Marshal(testUser)
 	if err != nil {
-		fmt.Printf("could not marshal json: %s\n", err)
+		t.Errorf("could not marshal json: %s\n", err)
 		return
 	}
 
@@ -469,18 +406,13 @@ func Test_handleCreateAccount_Valid(t *testing.T) {
 
 // Test whether a Photo can be inserted into the database
 func Test_handleCreatePhoto_Valid(t *testing.T) {
-	// generic user for this test
-	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
+
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
 	})
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
 
 	// test endpoint just to set session for this test
 	router.POST("/testWrapper", func(ctx *gin.Context) {
@@ -508,18 +440,13 @@ func Test_handleCreatePhoto_Valid(t *testing.T) {
 
 // Test whether the correct response is given for an invalid call to CreatePhoto
 func Test_handleCreatePhoto_Invalid(t *testing.T) {
-	// generic user for this test
-	model.DBConn, _ = model.InitDB(TEST_DB_PATH)
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
+
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman2",
 		Password: "ween",
 	})
-
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
 
 	// test endpoint just to set session for this test
 	router.POST("/testWrapper", func(ctx *gin.Context) {
@@ -546,11 +473,9 @@ func Test_handleCreatePhoto_Invalid(t *testing.T) {
 }
 
 func Test_handleCreateTeam_Valid(t *testing.T) {
-	var err error
-	model.DBConn, err = model.InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+	model.DBConn = initTestDB()
+	router := setupTestRouter()
+
 	user := &model.User{
 		Username: "kevin",
 		Password: "wasspord",
@@ -558,14 +483,6 @@ func Test_handleCreateTeam_Valid(t *testing.T) {
 	}
 	model.DBConn.Create(user)
 	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
-
-	gin.SetMode(gin.TestMode)
-	router := gin.Default()
-
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
-
-	SetupHandlers(router)
 
 	router.POST("/testWrapper", func(ctx *gin.Context) {
 		setSessionUser(ctx, "kevin", "wasspord")
