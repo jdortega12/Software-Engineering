@@ -95,7 +95,8 @@ type UserPersonalInfo struct {
 	DeletedAt gorm.DeletedAt
 }
 
-// Updates the personal info of a user in the DB.
+// Updates the personal info of a user in the DB. Returns error if
+// one ocurred.
 func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 	err := DBConn.Where("id = ?", userPersInfo.ID).
 		Updates(&userPersInfo).Error
@@ -103,9 +104,8 @@ func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 	return err
 }
 
-// Creates a User in the DB. ALso creates
-// a corresponding UserPersonalInfo with
-// the same ID as the User.
+// Creates a User in the DB. ALso creates a corresponding UserPersonalInfo
+// with the same ID as the User. Returns error if one ocurred.
 func CreateUser(user *User) error {
 	err := DBConn.Create(user).Error
 	if err != nil {

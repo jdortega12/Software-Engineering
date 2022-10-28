@@ -17,6 +17,7 @@ const (
 	FINAL
 )
 
+// Corresponds to matches table in DB.
 type Match struct {
 	ID       uint
 	SeasonID uint

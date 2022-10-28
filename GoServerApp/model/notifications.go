@@ -11,11 +11,13 @@ import (
 // notifications.go -> functionality for CRUDing different types of
 // notification in DB
 
-// Struct for table with invites to teams and requests to join teams
+// Corresponds to team_notifications table in DB. If SenderID is a manager,
+// it is a team invite and the ReceiverID must belong to a player. If the
+// roles are reversed, it is a team request. Neither can belong to users with
+// the same role, and neither can belong to an Admin.
 type TeamNotification struct {
 	ID uint
 
-	// if manager, team invite, if player, team request
 	SenderID   uint
 	ReceiverID uint
 
