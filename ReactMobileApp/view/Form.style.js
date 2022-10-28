@@ -18,6 +18,12 @@ export default StyleSheet.create({
     color:"#e32636",
     marginBottom:40
   },
+  teamRequest: {
+    fontWeight:"bold",
+    fontSize:25,
+    color:"#e32636",
+    marginBottom:40
+  },
   inputView:{
     width:"80%",
     backgroundColor:"#e32636",
