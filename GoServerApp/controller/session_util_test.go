@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,12 +13,8 @@ import (
 // session inside a default *gin.Context struct. Uses anonymous
 // func endpoint and a mock GET request which is necessary to
 // set and clear a session.
-func TestClearSession(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
+func Test_clearSession(t *testing.T) {
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
@@ -41,12 +36,8 @@ func TestClearSession(t *testing.T) {
 }
 
 // Test that setSession sets the session correctly.
-func TestSetSession(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
+func Test_setSession(t *testing.T) {
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		setSessionUser(ctx, "test_username", "test_password")
@@ -65,13 +56,10 @@ func TestSetSession(t *testing.T) {
 	router.ServeHTTP(w, req)
 }
 
-// Check that getSessionUser works in the success case.
-func TestGetSessionUser(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	test_store := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", test_store))
+// Check that getSessionUser works when session has been
+// set correctly.
+func Test_getSessionUser_Valid(t *testing.T) {
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		testSession := sessions.Default(ctx)
@@ -97,22 +85,19 @@ func TestGetSessionUser(t *testing.T) {
 
 // Test that getSessionUser works in the case that
 // the session has not been set/doesn't exist.
-func TestGetSessionUserFail(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
-	router := gin.Default()
-	testStore := cookie.NewStore([]byte("test"))
-	router.Use(sessions.Sessions("test_session", testStore))
+func Test_getSessionUser_NilSession(t *testing.T) {
+	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
 		username, password, exists := getSessionUser(ctx)
 
 		if exists == true {
-			t.FailNow()
+			t.Error("getSessionUser should return false when session doesn't exist")
 		}
 
 		if username != "" || password != "" {
-			t.FailNow()
+			t.Error("getSessionUser should retun username and password as empty" +
+				"strings when session doesn't exist")
 		}
 	})
 

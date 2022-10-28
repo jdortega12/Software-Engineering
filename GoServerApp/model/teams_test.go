@@ -1,39 +1,27 @@
 package model
 
 import (
-	"fmt"
 	"testing"
 )
 
 // Tests creating team info
-func TestCreateTeam(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+func Test_CreateTeam_Valid(t *testing.T) {
+	DBConn = initTestDB()
 
-	var testInfo Team
-
-	err = DBConn.Create(&testInfo).Error
-	if err != nil {
-		panic(err)
-	}
-
-	testInfo = Team{
-		TeamID:       1,
+	testInfo := &Team{
 		Name:         "test_teamname",
 		TeamLocation: "test_teamlocation,",
 		// Height and weight not included (unlike in users.go)
 	}
 
-	err = CreateTeam(&testInfo)
+	err := CreateTeam(testInfo)
 	if err != nil {
-		panic(err)
+		t.Errorf("Error: %s", err)
 	}
+	defer DBConn.Unscoped().Where("id = ?", testInfo.ID).Delete(testInfo)
 
 	var testInfoCopy Team
-	err = DBConn.Where("team_id = ?", testInfo.TeamID).Find(&testInfoCopy).Error
+	err = DBConn.Where("id = ?", testInfo.ID).Find(&testInfoCopy).Error
 
 	if err != nil {
 		t.Errorf("Error: %s", err)
@@ -44,8 +32,7 @@ func TestCreateTeam(t *testing.T) {
 	testInfo.UpdatedAt = testInfoCopy.UpdatedAt
 	testInfo.DeletedAt = testInfoCopy.DeletedAt
 
-	if testInfo != testInfoCopy {
-		fmt.Println("hello")
-		t.FailNow()
+	if *testInfo != testInfoCopy {
+		t.Error("Structs should be equal")
 	}
 }

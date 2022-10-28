@@ -7,47 +7,40 @@ import (
 	"gorm.io/gorm"
 )
 
-// Tests updating a user's personal info.
-func TestUpdatePersonalInfo(t *testing.T) {
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+// Tests updating a user's personal info when all conditions
+// are correct.
+func Test_UpdatePersonalInfo(t *testing.T) {
+	DBConn = initTestDB()
 
 	var testInfo UserPersonalInfo
 
-	err = DBConn.Create(&testInfo).Error
+	err := DBConn.Create(&testInfo).Error
 	if err != nil {
 		panic(err)
 	}
 
-	testInfo = UserPersonalInfo{
-		Firstname: "test_firstname",
-		Lastname:  "test_lastname",
-
-		Height: 50,
-		Weight: 225,
-	}
+	testInfo.Firstname = "test_firstname"
+	testInfo.Lastname = "test_lastname"
+	testInfo.Height = 50
+	testInfo.Weight = 225
 
 	// test the upate itself produces no error
 	err = UpdateUserPersonalInfo(&testInfo)
 	if err != nil {
 		panic(err)
 	}
-	defer DBConn.Unscoped().Where("user_personal_info_id", testInfo.UserPersonalInfoID).Delete(testInfo)
+	defer DBConn.Unscoped().Where("id", testInfo.ID).Delete(testInfo)
 
 	// pull record from DB to ensure it was saved correctly
 	var testInfoCopy UserPersonalInfo
-	err = DBConn.Where("user_personal_info_id = ?", testInfo.UserPersonalInfoID).
+	err = DBConn.Where("id = ?", testInfo.ID).
 		Find(&testInfoCopy).Error
 
 	if err != nil {
 		t.Errorf("Error: %s", err)
 	}
 
-	// remove metadata before comparison because its supposed
-	// to be different
+	// remove metadata before comparison
 	testInfo.CreatedAt = time.Time{}
 	testInfo.UpdatedAt = time.Time{}
 	testInfo.DeletedAt = gorm.DeletedAt{}
@@ -56,17 +49,14 @@ func TestUpdatePersonalInfo(t *testing.T) {
 	testInfoCopy.DeletedAt = gorm.DeletedAt{}
 
 	if testInfo != testInfoCopy {
+		t.Error("The updated info was not saved correctly in the DB")
 		t.FailNow()
 	}
 }
 
-func TestCreateUser(t *testing.T) {
-	//Initialize Database
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
-	}
+// Tests creating a user when all conditions are correct.
+func Test_CreateUser(t *testing.T) {
+	DBConn = initTestDB()
 
 	user := &User{
 		Username: "jdo",
@@ -74,15 +64,16 @@ func TestCreateUser(t *testing.T) {
 		Password: "123",
 	}
 
-	err = CreateUser(user)
-	defer DBConn.Unscoped().Where("user_id = ?", user.UserID).Delete(user)
-
+	err := CreateUser(user)
 	if err != nil {
 		panic(err)
 	}
 
+	defer DBConn.Exec("DELETE FROM users")
+	defer DBConn.Exec("DELETE FROM team_notifications")
+
 	user2 := &User{}
-	err = DBConn.Where("user_id = ?", user.UserID).Find(user2).Error
+	err = DBConn.Where("id = ?", user.ID).Find(user2).Error
 	if err != nil {
 		panic(err)
 	}
@@ -99,30 +90,39 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-// test if we can create a user, and then insert a picture without errors
-func TestInsertPhoto(t *testing.T) {
-	//Initialize Database
-	var err error
-	DBConn, err = InitDB(TEST_DB_PATH)
-	if err != nil {
-		panic(err)
+func Test_CreateUser_NilUsername(t *testing.T) {
+	DBConn = initTestDB()
+
+	user := &User{
+		Email:    "jdo@gmail.com",
+		Password: "123",
 	}
-	
-	// Insert a user
+
+	err := CreateUser(user)
+	if err == nil {
+		t.Error("Error should have been returned when username nil")
+	}
+
+	DBConn.Exec("DELETE FROM users")
+	DBConn.Exec("DELETE FROM team_notifications")
+}
+
+// Tests updating a user's profile photo when
+// all conditions are correct.
+func Test_UpdateUserPhoto(t *testing.T) {
+	DBConn = initTestDB()
+
+	//  create a user
 	user := &User{
 		Username: "do5",
 		Email:    "jdo@gmail.com",
 		Password: "123",
 	}
-	
-	err = CreateUser(user)
-	
-	if err != nil {
-		panic(err)
-	}
+	DBConn.Create(user)
+	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
-	// now, try to insert a photo 
-	err = UpdateUserPhoto("thisisntarealbase64", "do5", "123")
+	// now, try to insert a photo
+	err := UpdateUserPhoto("thisisntarealbase64", "do5", "123")
 	if err != nil {
 		panic(err)
 	}
@@ -133,9 +133,36 @@ func TestInsertPhoto(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
- 
+
 	if found_user.Photo == "thisisntrealbase64" {
 		t.FailNow()
 	}
+}
 
+// Tests getUserByUsername when user exists.
+func Test_GetUserByUsername_UserExists(t *testing.T) {
+	DBConn = initTestDB()
+
+	user := &User{
+		Username: "weenjeen",
+	}
+	DBConn.Create(user)
+	defer DBConn.Exec("DELETE FROM users")
+
+	userFromDB, err := getUserByUsername("weenjeen")
+	if err != nil {
+		t.Errorf("Error %s", err)
+	}
+	if userFromDB == nil {
+		t.Error("User is nil when it exists in the DB")
+	}
+}
+
+func Test_GetUserByUsername_NoUser(t *testing.T) {
+	DBConn = initTestDB()
+
+	_, err := getUserByUsername("weenjeen")
+	if err == nil {
+		t.Error("Err should be non-nil, user doesn't exist")
+	}
 }

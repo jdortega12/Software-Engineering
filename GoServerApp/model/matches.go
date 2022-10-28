@@ -17,8 +17,9 @@ const (
 	FINAL
 )
 
+// Corresponds to matches table in DB.
 type Match struct {
-	MatchID  uint
+	ID       uint
 	SeasonID uint
 
 	MatchType matchType `gorm:"not null"`
