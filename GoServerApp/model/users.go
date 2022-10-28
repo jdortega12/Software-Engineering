@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -139,14 +138,9 @@ func UpdateUserPhoto(photo string, username string, password string) error {
 	return err
 }
 
-func GetUserId(username string) (uint, error) {
-	user := User{}
-	result := DBConn.Where("username = ?", username).First(&user)
-	fmt.Println(user)
+func getUserByUsername(username string) (*User, error) {
+	user := &User{}
+	err := DBConn.Where("username = ?", username).First(user).Error
 
-	if result.Error != nil {
-		return 5, result.Error
-	}
-
-	return user.ID, result.Error
+	return user, err
 }

@@ -6,7 +6,7 @@ import (
 )
 
 // Tests creating team info
-func TestCreateTeam(t *testing.T) {
+func Test_CreateTeam_Valid(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {

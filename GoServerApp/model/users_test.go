@@ -9,7 +9,7 @@ import (
 
 // Tests updating a user's personal info when all conditions
 // are correct.
-func TestUpdatePersonalInfo(t *testing.T) {
+func Test_UpdatePersonalInfo(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -59,7 +59,7 @@ func TestUpdatePersonalInfo(t *testing.T) {
 }
 
 // Tests creating a user when all conditions are correct.
-func TestCreateUser(t *testing.T) {
+func Test_CreateUser(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -99,7 +99,7 @@ func TestCreateUser(t *testing.T) {
 
 // Tests updating a user's profile photo when
 // all conditions are correct.
-func TestUpdateUserPhoto(t *testing.T) {
+func Test_UpdateUserPhoto(t *testing.T) {
 	var err error
 	DBConn, err = InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -135,5 +135,32 @@ func TestUpdateUserPhoto(t *testing.T) {
 	if found_user.Photo == "thisisntrealbase64" {
 		t.FailNow()
 	}
+}
 
+// Tests getUserByUsername when user exists.
+func Test_GetUserByUsername_UserExists(t *testing.T) {
+	DBConn, _ = InitDB(TEST_DB_PATH)
+
+	user := &User{
+		Username: "weenjeen",
+	}
+	DBConn.Create(user)
+	defer DBConn.Exec("DELETE FROM users")
+
+	userFromDB, err := getUserByUsername("weenjeen")
+	if err != nil {
+		t.Errorf("Error %s", err)
+	}
+	if userFromDB == nil {
+		t.Error("User is nil when it exists in the DB")
+	}
+}
+
+func Test_GetUserByUsername_NoUser(t *testing.T) {
+	DBConn, _ = InitDB(TEST_DB_PATH)
+
+	_, err := getUserByUsername("weenjeen")
+	if err == nil {
+		t.Error("Err should be non-nil, user doesn't exist")
+	}
 }

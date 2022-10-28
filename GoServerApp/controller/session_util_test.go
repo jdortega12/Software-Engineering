@@ -14,7 +14,7 @@ import (
 // session inside a default *gin.Context struct. Uses anonymous
 // func endpoint and a mock GET request which is necessary to
 // set and clear a session.
-func TestClearSession(t *testing.T) {
+func Test_clearSession(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
@@ -41,7 +41,7 @@ func TestClearSession(t *testing.T) {
 }
 
 // Test that setSession sets the session correctly.
-func TestSetSession(t *testing.T) {
+func Test_setSession(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
@@ -67,7 +67,7 @@ func TestSetSession(t *testing.T) {
 
 // Check that getSessionUser works when session has been
 // set correctly.
-func TestGetSessionUser(t *testing.T) {
+func Test_getSessionUser_Valid(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
@@ -98,7 +98,7 @@ func TestGetSessionUser(t *testing.T) {
 
 // Test that getSessionUser works in the case that
 // the session has not been set/doesn't exist.
-func TestGetSessionUserNil(t *testing.T) {
+func Test_getSessionUser_NilSession(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()

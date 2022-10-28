@@ -2,11 +2,9 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +24,7 @@ func SetupHandlers(router *gin.Engine) {
 		{
 			v1.POST("/logout", handleLogout)
 			v1.POST("/login", handleLogin)
-			v1.POST("/createTeamRequest", handleCreateTeamRequest)
+			v1.POST("/createTeamRequest", handleCreateTeamNotification)
 			v1.POST("/updatePersonalInfo", handleUpdateUserPersonalInfo)
 			v1.POST("/createAccount", handleCreateAccount)
 			v1.POST("/createPhoto", handleCreatePhoto)
@@ -43,7 +41,7 @@ func handleLogout(ctx *gin.Context) {
 	ctx.JSON(http.StatusResetContent, gin.H{})
 }
 
-// Logins in a user using username and password sent
+// Logs in a user using username and password sent
 // by client as JSON. Validates the credentials, sets
 // current session with them, and responds with HTTP
 // Status Accepted. If JSON cannot be bound, aborts
@@ -58,7 +56,7 @@ func handleLogin(ctx *gin.Context) {
 		return
 	}
 
-	_, _, err = model.ValidateUser(user.Username, user.Password)
+	_, err = model.ValidateUser(user.Username, user.Password)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -68,49 +66,44 @@ func handleLogin(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// Takes a POST request with Team request information
-// Adds the request to the database
-func handleCreateTeamRequest(ctx *gin.Context) {
-	body := ctx.Request.Body
-	value, err := io.ReadAll(body)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	var data map[string]string
-
-	if err := json.Unmarshal(value, &data); err != nil {
-		panic(err)
-	}
-
-	username, _, sessionExists := getSessionUser(ctx)
-
+// Receives TeamNotification as JSON from client and passes it to
+// model to be created in the DB. Returns HTTP Status Accepted on success.
+// Returns HTTP Status Unauthorized if session not set or user credentials
+// invalid. Returns HTTP Status Bad Request if JSON cannot be bound, SenderUsername
+// is not the same as the logged in user, or notification cannot be created in DB.
+func handleCreateTeamNotification(ctx *gin.Context) {
+	username, password, sessionExists := getSessionUser(ctx)
 	if !sessionExists {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
-	data["SenderID"] = username
-
-	sender, err2 := model.GetUserId(data["SenderID"])
-
-	if err2 != nil {
+	_, err := model.ValidateUser(username, password)
+	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
-	receiver, err3 := model.GetUserId(data["ReceiverID"])
+	teamNotification := &model.TeamNotification{}
 
-	if err3 != nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+	err = ctx.BindJSON(teamNotification)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
-	data["SenderID"] = strconv.Itoa(int(sender))
-	data["ReceiverID"] = strconv.Itoa(int(receiver))
-
-	if model.InsertTeamNotification(data) == 0 {
-		ctx.JSON(201, gin.H{"Created-notification": "true"})
-	} else {
-		ctx.JSON(201, gin.H{"Created-notification": "false"})
+	if username != teamNotification.SenderUsername {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
+	err = model.CreateTeamNotification(teamNotification)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
 }
 
 // Receives UserPersonalInfo JSON from the client and updates
@@ -125,7 +118,7 @@ func handleUpdateUserPersonalInfo(ctx *gin.Context) {
 	}
 
 	// validate that user
-	userID, _, err := model.ValidateUser(username, password)
+	user, err := model.ValidateUser(username, password)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -139,7 +132,7 @@ func handleUpdateUserPersonalInfo(ctx *gin.Context) {
 		return
 	}
 
-	userPersInfo.ID = userID
+	userPersInfo.ID = user.ID
 
 	err = model.UpdateUserPersonalInfo(&userPersInfo)
 	if err != nil {
@@ -153,7 +146,6 @@ func handleUpdateUserPersonalInfo(ctx *gin.Context) {
 // Take JSON of user info, transfers to user struct
 // Creates user
 func handleCreateAccount(ctx *gin.Context) {
-
 	user := &model.User{}
 	//bind JSON with User struct
 	err := ctx.BindJSON(&user)
@@ -210,8 +202,8 @@ func handleCreateTeam(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	_, role, err := model.ValidateUser(username, password) // _ is userID (not needed)
-	if err != nil || role != model.MANAGER {
+	user, err := model.ValidateUser(username, password) // _ is userID (not needed)
+	if err != nil || user.Role != model.MANAGER {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}

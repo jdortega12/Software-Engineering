@@ -1,8 +1,7 @@
 package model
 
 import (
-	"fmt"
-	"strconv"
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -14,12 +13,16 @@ import (
 // Corresponds to team_notifications table in DB. If SenderID is a manager,
 // it is a team invite and the ReceiverID must belong to a player. If the
 // roles are reversed, it is a team request. Neither can belong to users with
-// the same role, and neither can belong to an Admin.
+// the same role, and neither can belong to an Admin. SenderUsername and
+// ReceiverUsername are included to make converting to/from JSON easier.
 type TeamNotification struct {
 	ID uint
 
-	SenderID   uint
-	ReceiverID uint
+	SenderID   uint `gorm:"not null" json:"sender_id"`
+	ReceiverID uint `gorm:"not null" json: "receiver_id"`
+
+	SenderUsername   string `gorm:"not null" json:"sender_username"`
+	ReceiverUsername string `gorm:"not null" json:"receiver_username"`
 
 	Message string
 
@@ -29,43 +32,30 @@ type TeamNotification struct {
 	DeletedAt gorm.DeletedAt
 }
 
-// Takes a map containing a message, sender, and reciever ID and insert it
-// into the DB as a TeamNotification
-// returns 0 on successful insertion, 1 otherwise
-func InsertTeamNotification(data map[string]string) int {
-	message, checkMessage := data["Message"]
-	senderID, checkSender := data["SenderID"]
-	recieverID, checkReciever := data["ReceiverID"]
-
-	if !checkMessage || !checkSender || !checkReciever {
-		return 1
-	}
-
-	senderID_int, err := strconv.ParseUint(senderID, 10, 64)
-
+// Creates a TeamNotification in the DB. Makes sure that the receiver exists,
+// neither sender nor receiver are admins, and that that they are not both players
+// or managers. Returns error if one occurred.
+func CreateTeamNotification(teamNotification *TeamNotification) error {
+	sender, err := getUserByUsername(teamNotification.SenderUsername)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	receiverID_int, err := strconv.ParseUint(recieverID, 10, 64)
-
+	receiver, err := getUserByUsername(teamNotification.ReceiverUsername)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	newNotification := TeamNotification{
-		Message:    message,
-		SenderID:   uint(senderID_int),
-		ReceiverID: uint(receiverID_int),
+	if sender.Role == ADMIN || receiver.Role == ADMIN {
+		return errors.
+			New("team notifications: neither sender nor receiver can be ADMIN")
 	}
 
-	fmt.Println(DBConn)
-
-	result := DBConn.Create(&newNotification)
-
-	if result.Error != nil {
-		panic(result.Error)
+	if sender.Role == receiver.Role {
+		return errors.
+			New("team notifications: sender and receiver cannot both be player or manager")
 	}
 
-	return 0
+	err = DBConn.Create(teamNotification).Error
+	return err
 }

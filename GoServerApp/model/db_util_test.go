@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	TEST_DB_PATH = "../test.db"
+	TEST_DB_PATH = "file::memory:?cache=shared"
 )
 
 // Checks that InitDB() does not return any errors when
 // given a valid path.
-func TestInitDB(t *testing.T) {
+func Test_InitDB(t *testing.T) {
 	var err error
 	_, err = InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -21,7 +21,7 @@ func TestInitDB(t *testing.T) {
 
 // Checks that InitDB() does return an error when the
 // path given is bad.
-func TestInitDBBadPath(t *testing.T) {
+func Test_InitDB_BadPath(t *testing.T) {
 	var err error
 	_, err = InitDB(" ")
 	if err == nil {
