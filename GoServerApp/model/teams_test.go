@@ -4,7 +4,8 @@ import (
 	"testing"
 )
 
-// Tests creating team info
+// Tests CreateTeam() creates the team in the DB correctly when
+// the struct passed is correct.
 func Test_CreateTeam_Valid(t *testing.T) {
 	initTestDB()
 

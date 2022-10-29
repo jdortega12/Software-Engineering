@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// Tests validate user success case.
+// Tests ValidateUser() when user exists.
 func Test_ValidateUser_Exists(t *testing.T) {
 	initTestDB()
 
@@ -27,7 +27,7 @@ func Test_ValidateUser_Exists(t *testing.T) {
 	}
 }
 
-// Tests that error is returned when credentials are bad.
+// Tests that ValidateUser() returns error when credentials are bad.
 func Test_ValidateUser_BadCredentials(t *testing.T) {
 	initTestDB()
 
@@ -46,8 +46,7 @@ func Test_ValidateUser_BadCredentials(t *testing.T) {
 	}
 }
 
-// Tests that err is returned if provided username
-// is an empty string.
+// Tests that ValidateUser() returns err if provided username is an empty string.
 func Test_ValidateUser_NilUsername(t *testing.T) {
 	initTestDB()
 
@@ -70,8 +69,7 @@ func Test_ValidateUser_NilUsername(t *testing.T) {
 	}
 }
 
-// Tests that err is returned if provided password
-// is an empty string.
+// Tests that ValidateUser() returns error when password is empty string.
 func Test_ValidateUser_NilPassword(t *testing.T) {
 	initTestDB()
 

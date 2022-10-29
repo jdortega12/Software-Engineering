@@ -21,7 +21,7 @@ type Team struct {
 	DeletedAt gorm.DeletedAt
 }
 
-// Creates a team in the DB. Returns error if something went wrong.
+// Creates a team in the DB. Returns error if one occurred.
 func CreateTeam(team *Team) error {
 	err := DBConn.Create(team).Error
 	return err

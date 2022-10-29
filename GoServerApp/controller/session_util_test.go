@@ -9,10 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Tests whether clearSession() properly clears an arbitrary
-// session inside a default *gin.Context struct. Uses anonymous
-// func endpoint and a mock GET request which is necessary to
-// set and clear a session.
+// Tests whether clearSession() properly clears an arbitrary session.
 func Test_clearSession(t *testing.T) {
 	router := setupTestRouter()
 
@@ -35,8 +32,8 @@ func Test_clearSession(t *testing.T) {
 	router.ServeHTTP(w, req)
 }
 
-// Test that setSession sets the session correctly.
-func Test_setSession(t *testing.T) {
+// Test that setSessionUser() sets the session correctly.
+func Test_setSessionUser(t *testing.T) {
 	router := setupTestRouter()
 
 	router.GET("/test", func(ctx *gin.Context) {
@@ -56,8 +53,7 @@ func Test_setSession(t *testing.T) {
 	router.ServeHTTP(w, req)
 }
 
-// Check that getSessionUser works when session has been
-// set correctly.
+// Check that getSessionUser() works when session has been set correctly.
 func Test_getSessionUser_Valid(t *testing.T) {
 	router := setupTestRouter()
 
@@ -83,8 +79,7 @@ func Test_getSessionUser_Valid(t *testing.T) {
 	router.ServeHTTP(w, req)
 }
 
-// Test that getSessionUser works in the case that
-// the session has not been set/doesn't exist.
+// Test that getSessionUser() works in the case that the session has not been set.
 func Test_getSessionUser_NilSession(t *testing.T) {
 	router := setupTestRouter()
 

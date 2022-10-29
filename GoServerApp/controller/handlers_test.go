@@ -18,9 +18,8 @@ const (
 	TEST_DB_PATH = "file::memory:?cache=shared"
 )
 
-// Initializes a DB for testing purposes. Just a wrapper
-// for InitDB() and error handling to save space in tests.
-// Also declared in model because golang.
+// Just a wrapper for InitDB() and error handling to save
+// space in tests. Also declared in model because golang.
 func initTestDB() {
 	err := model.InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -42,7 +41,7 @@ func setupTestRouter() *gin.Engine {
 	return router
 }
 
-// Tests that Logout() returns correct status code.
+// Tests that handleLogout() responds HTTP Status Reset Content.
 func Test_handleLogout(t *testing.T) {
 	router := setupTestRouter()
 
@@ -56,7 +55,8 @@ func Test_handleLogout(t *testing.T) {
 	}
 }
 
-// Test login for user that actually exists.
+// Tests handleLogin() for user that actually exists. Should respond
+// HTTP Status Accepted.
 func Test_handleLogin_GoodCredentials(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -95,7 +95,8 @@ func Test_handleLogin_GoodCredentials(t *testing.T) {
 
 }
 
-// Test Login for user that doesn't exist.
+// Test handleLogin() when credentials are invalid. Should
+// respond HTTP Status Unauthorized.
 func Test_handleLogin_BadCredentials(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -125,7 +126,7 @@ func Test_handleLogin_BadCredentials(t *testing.T) {
 	}
 }
 
-// Tests that login returns HTTP Status Bad Request
+// Tests that handleLogin() responds with HTTP Status Bad Request
 // when JSON is not correct.
 func Test_handleLogin_BadJSON(t *testing.T) {
 	initTestDB()
@@ -145,7 +146,8 @@ func Test_handleLogin_BadJSON(t *testing.T) {
 }
 
 // Tests handleCreateTeamNotification() when a valid teamNotification
-// JSON is sent over and all success conditions are met.
+// JSON is sent over and all success conditions are met. Should return
+// HTTP Status Accepted.
 func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -186,8 +188,8 @@ func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 }
 
 // Tests case that handleCreateTeamNotification() endpoint is
-// requested when a user is not logged in/there is no vali
-// session.
+// requested when a user is not logged in/there is no valid
+// session. Should respond HTTP Status Unauthorized.
 func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
 	router := setupTestRouter()
 
@@ -200,8 +202,9 @@ func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
 	}
 }
 
-// Tests case that handleCreateTeamNotification is called when there
-// is not a valid user logged in.
+// Tests case that handleCreateTeamNotification() is called
+// when a session exists but the user is not valid. Should respond
+// HTTP Status Unauthorized.
 func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -221,8 +224,8 @@ func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
 	}
 }
 
-// Tests case that handleCreateTeamNotification is called without a valid
-// JSON request body in context.
+// Tests case that handleCreateTeamNotification() is called without a valid
+// JSON request body in context. Should respond HTTP Status Bad Request.
 func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -249,9 +252,9 @@ func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
 	model.DBConn.Exec("DELETE FROM users")
 }
 
-// Tests case that handleCreateTeamNotification is called when the
+// Tests case that handleCreateTeamNotification() is called when the
 // SenderUsername of the TeamNotification is not the same as the logged
-// in user.
+// in user. Should respond HTTP Status Bad Request.
 func Test_handleCreateTeamNotification_BadSender(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -285,7 +288,8 @@ func Test_handleCreateTeamNotification_BadSender(t *testing.T) {
 	model.DBConn.Exec("DELETE FROM users")
 }
 
-// Make sure update info handler returns correct status code.
+// Tests that handleUpdataeUserPersonalInfo() responds HTTP Status Accepted
+// when everything is valid.
 func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -326,7 +330,7 @@ func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
 	}
 }
 
-// Tests that update info handler returns HTTP Status Unauthorized
+// Tests that handleUpdataeUserPersonalInfo() responds HTTP Status Unauthorized
 // when session doesn't exist.
 func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
 	router := setupTestRouter()
@@ -340,7 +344,8 @@ func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
 	}
 }
 
-// Make sure update info handler returns correct status code for bad request.
+// Tests handleUpdataeUserPersonalInfo() responds HTTP Status Bad Request
+// when the JSON is not correct.
 func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -368,6 +373,8 @@ func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
 	}
 }
 
+// Tests handleCreateAccount() responds HTTP Status Accepted when
+// all conditions are met.
 func Test_handleCreateAccount_Valid(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -388,7 +395,7 @@ func Test_handleCreateAccount_Valid(t *testing.T) {
 		return
 	}
 
-	//Mock request
+	// mock request
 	req, _ := http.NewRequest("POST", "/api/v1/createAccount", bytes.NewBuffer(reader))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -400,7 +407,8 @@ func Test_handleCreateAccount_Valid(t *testing.T) {
 	}
 }
 
-// Test whether a Photo can be inserted into the database
+// Tests handleCreatePhoto() returns HTTP Status Accepted
+// when the request is correct.
 func Test_handleCreatePhoto_Valid(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -434,7 +442,8 @@ func Test_handleCreatePhoto_Valid(t *testing.T) {
 	}
 }
 
-// Test whether the correct response is given for an invalid call to CreatePhoto
+// Tests that handleCreatePhoto() responds with HTTP Status Bad
+// Request when the request doesn't have the correct key value pair.
 func Test_handleCreatePhoto_Invalid(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
@@ -468,6 +477,8 @@ func Test_handleCreatePhoto_Invalid(t *testing.T) {
 	}
 }
 
+// Tests that handleCreateTeam() responds with HTTP Status Accepted
+// when all conditions are correct.
 func Test_handleCreateTeam_Valid(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()

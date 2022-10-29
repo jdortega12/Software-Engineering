@@ -9,8 +9,7 @@ import (
 
 // users.go -> database CRUDing for users
 
-// Enum definition for user roles. Defaults
-// in DB to PLAYER.
+// Enum definition for user roles. Defaults in DB to PLAYER.
 type userRole uint
 
 const (
@@ -19,12 +18,11 @@ const (
 	ADMIN
 )
 
-// Enum definition for player positions. Defaults
-// in DB to NULL.
+// Enum definition for player positions. Defaults to NULL in DB.
 type playerPosition uint
 
 const (
-	// NULL for non-players
+	// NULL for non-players or players not on team
 	NULL playerPosition = iota
 
 	// offense
@@ -95,8 +93,7 @@ type UserPersonalInfo struct {
 	DeletedAt gorm.DeletedAt
 }
 
-// Updates the personal info of a user in the DB. Returns error if
-// one ocurred.
+// Updates the personal info of a user in the DB. Returns error if one ocurred.
 func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 	err := DBConn.Where("id = ?", userPersInfo.ID).
 		Updates(&userPersInfo).Error
@@ -128,8 +125,7 @@ func CreateUser(user *User) error {
 	return err
 }
 
-// Takes photo as base64 String, username, password
-// updates user photo to the new phot
+// Takes photo as base64 string, username, password, and updates user's photo
 func UpdateUserPhoto(photo string, username string, password string) error {
 	user := User{}
 	err := DBConn.Where("username = ?", username, &user).Error
@@ -143,6 +139,7 @@ func UpdateUserPhoto(photo string, username string, password string) error {
 	return err
 }
 
+// Pulls User out of DB by username.
 func getUserByUsername(username string) (*User, error) {
 	user := &User{}
 	err := DBConn.Where("username = ?", username).First(user).Error

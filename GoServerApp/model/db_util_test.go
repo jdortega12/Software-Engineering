@@ -8,9 +8,8 @@ const (
 	TEST_DB_PATH = "file::memory:?cache=shared"
 )
 
-// Initializes a DB for testing purposes. Just a wrapper
-// for InitDB() and error handling to save space in tests.
-// Also declared in handler because go tests are strange.
+// Just a wrapper for InitDB() and error handling to save
+// space in tests. Also declared in handler.
 func initTestDB() {
 	err := InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -18,8 +17,7 @@ func initTestDB() {
 	}
 }
 
-// Checks that InitDB() does not return any errors when
-// given a valid path.
+// Checks that InitDB() does not return any errors when given a valid path.
 func Test_InitDB(t *testing.T) {
 	err := InitDB(TEST_DB_PATH)
 	if err != nil {
@@ -27,8 +25,7 @@ func Test_InitDB(t *testing.T) {
 	}
 }
 
-// Checks that InitDB() does return an error when the
-// path given is bad.
+// Checks that InitDB() does return an error when the path given is bad.
 func Test_InitDB_BadPath(t *testing.T) {
 	err := InitDB(" ")
 	if err == nil {

@@ -7,9 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// Tests updating a user's personal info when all conditions
-// are correct.
-func Test_UpdatePersonalInfo(t *testing.T) {
+// Tests UpdateUserPersonalInfo() when all conditions are correct.
+func Test_UpdateUserPersonalInfo(t *testing.T) {
 	initTestDB()
 
 	var testInfo UserPersonalInfo
@@ -54,7 +53,7 @@ func Test_UpdatePersonalInfo(t *testing.T) {
 	}
 }
 
-// Tests creating a user when all conditions are correct.
+// Tests CreateUser() when all conditions are correct.
 func Test_CreateUser(t *testing.T) {
 	initTestDB()
 
@@ -90,6 +89,7 @@ func Test_CreateUser(t *testing.T) {
 	}
 }
 
+// Tests CreateUser() when username was not supplied.
 func Test_CreateUser_NilUsername(t *testing.T) {
 	initTestDB()
 
@@ -107,8 +107,7 @@ func Test_CreateUser_NilUsername(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
-// Tests updating a user's profile photo when
-// all conditions are correct.
+// Tests UpdateUserPhoto() when all conditions are correct.
 func Test_UpdateUserPhoto(t *testing.T) {
 	initTestDB()
 
@@ -139,7 +138,7 @@ func Test_UpdateUserPhoto(t *testing.T) {
 	}
 }
 
-// Tests getUserByUsername when user exists.
+// Tests getUserByUsername() when user exists.
 func Test_GetUserByUsername_UserExists(t *testing.T) {
 	initTestDB()
 
@@ -158,6 +157,7 @@ func Test_GetUserByUsername_UserExists(t *testing.T) {
 	}
 }
 
+// Tests that getUserByUsername() returns error when user doesn't exist.
 func Test_GetUserByUsername_NoUser(t *testing.T) {
 	initTestDB()
 

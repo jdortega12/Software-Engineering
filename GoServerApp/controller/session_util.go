@@ -18,7 +18,7 @@ func setSessionUser(ctx *gin.Context, username string, password string) {
 }
 
 // Returns username and password of current session user as well
-// as a bool for whether the session has been correctly set or not.
+// as a bool for whether the session user key values exist or not.
 func getSessionUser(ctx *gin.Context) (string, string, bool) {
 	sessionExists := false
 

@@ -2,7 +2,7 @@ package model
 
 import "testing"
 
-// Tests that CreateTeamNotification returns no errors
+// Tests that CreateTeamNotification() returns no errors
 // in the case of a valid invite from a manager to a player.
 func Test_CreateTeamNotification_ValidInvite(t *testing.T) {
 	initTestDB()
@@ -30,7 +30,7 @@ func Test_CreateTeamNotification_ValidInvite(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
-// Tests that CreateTeamNotification produces no error in the case
+// Tests that CreateTeamNotification() produces no error in the case
 // of a valid request from a player to a manager.
 func Test_CreateTeamNotification_ValidRequest(t *testing.T) {
 	initTestDB()
@@ -58,7 +58,7 @@ func Test_CreateTeamNotification_ValidRequest(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
-// Tests that CreateTeamNotification produces an error when
+// Tests that CreateTeamNotification() produces an error when
 // the sender and receiver are both players.
 func Test_CreateTeamNotification_BothPlayers(t *testing.T) {
 	initTestDB()
@@ -86,6 +86,8 @@ func Test_CreateTeamNotification_BothPlayers(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
+// Tests that CreateTeamNotification() produces an error when
+// the sender and receiver are both managers.
 func Test_CreateTeamNotification_BothManagers(t *testing.T) {
 	initTestDB()
 
@@ -112,6 +114,8 @@ func Test_CreateTeamNotification_BothManagers(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
+// Tests that CreateTeamNotification() returns an error when
+// both sender and receiver are admins.
 func Test_CreateTeamNotification_BothAdmins(t *testing.T) {
 	initTestDB()
 
@@ -138,6 +142,8 @@ func Test_CreateTeamNotification_BothAdmins(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
+// Tests that CreateTeamNotification() returns an error when
+// SenderUsername is not the same as the logged in user.
 func Test_CreateTeamNotification_InvalidSender(t *testing.T) {
 	initTestDB()
 
@@ -160,6 +166,8 @@ func Test_CreateTeamNotification_InvalidSender(t *testing.T) {
 	DBConn.Exec("DELETE FROM team_notifications")
 }
 
+// Tests that CreateTeamNotification() produces an error when the
+// ReceiverUsername is not valid.
 func Test_CreateTeamNotification_InvalidReceiver(t *testing.T) {
 	initTestDB()
 

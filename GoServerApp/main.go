@@ -15,6 +15,7 @@ const (
 	DB_PATH = "database.db"
 )
 
+// Initializes DB and router, runs server.
 func main() {
 	err := model.InitDB(DB_PATH)
 	if err != nil {
