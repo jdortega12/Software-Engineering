@@ -14,9 +14,9 @@ ok      jdortega12/Software-Engineering/GoServerApp/model       1.641s  coverage
 ok      jdortega12/Software-Engineering/GoServerApp     1.430s [no tests to run]
 
 Branch coverage: 0/2
-
+```
 ```controller``` package:
-``` text
+```text
 ok      jdortega12/Software-Engineering/GoServerApp/controller  1.546s
 
 Branch coverage: 37/52
