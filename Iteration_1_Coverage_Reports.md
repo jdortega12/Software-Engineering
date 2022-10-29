@@ -1,6 +1,14 @@
 # Iteration 1 Coverage Reports
 
 ## Golang Server App
+### Statement Coverage
+The main package has no test files becuase it's just the main function.
+```text
+?       jdortega12/Software-Engineering/GoServerApp     [no test files]
+ok      jdortega12/Software-Engineering/GoServerApp/controller  1.462s  coverage: 82.9% of statements
+ok      jdortega12/Software-Engineering/GoServerApp/model       1.641s  coverage: 88.9% of statements
+```
+### Branch Coverage
 
 ## React Native Mobile App
 ```text
