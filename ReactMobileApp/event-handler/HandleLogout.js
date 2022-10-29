@@ -7,6 +7,8 @@ export default function handleLogout() {
         fetch("http://10.0.2.2:8080/api/v1/logout", {
             method: "POST",
         })
+
+        sessionStorage.clear()
     } catch(err) {
         console.log(err)
     }
