@@ -25,7 +25,7 @@ export default function LoginScreen(){
             <View style={FormStyle.inputView} >
              <TextInput
                 style={FormStyle.inputText}
-                placeholder="Email..."
+                placeholder="Username..."
                 placeholderTextColor="white"
                 onChangeText={setUsername}
                 autoCapitalize={false}/>
