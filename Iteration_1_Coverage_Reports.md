@@ -2,13 +2,33 @@
 
 ## Golang Server App
 ### Statement Coverage
-The main package has no test files becuase it's just the main function.
+The main package has no test files because it's just the main function.
 ```text
 ?       jdortega12/Software-Engineering/GoServerApp     [no test files]
 ok      jdortega12/Software-Engineering/GoServerApp/controller  1.462s  coverage: 82.9% of statements
 ok      jdortega12/Software-Engineering/GoServerApp/model       1.641s  coverage: 88.9% of statements
 ```
 ### Branch Coverage
+```main``` package (no tests):
+```text
+ok      jdortega12/Software-Engineering/GoServerApp     1.430s [no tests to run]
+
+Branch coverage: 0/2
+
+```controller``` package:
+``` text
+ok      jdortega12/Software-Engineering/GoServerApp/controller  1.546s
+
+Branch coverage: 37/52
+```
+
+```model``` package:
+```text
+ok      jdortega12/Software-Engineering/GoServerApp/model       1.581s
+
+Branch coverage: 23/30
+```
+#### Total Branch Coverage: 60/84 (~71%)
 
 ## React Native Mobile App
 ```text
