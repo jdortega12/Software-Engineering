@@ -18,7 +18,7 @@ const (
 // Sets up the handling functions bound to the Engine's api endpoints.
 func SetupHandlers(router *gin.Engine) {
 	router.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+		ctx.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
 	// all handlers should go inside v1 (besides NoRoute)
