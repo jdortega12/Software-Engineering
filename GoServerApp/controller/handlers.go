@@ -93,6 +93,7 @@ func SetupHandlers(router *gin.Engine) {
 					managerAuth.POST("/createTeam", handleCreateTeam)
 				}
 
+				// endpoints requiring user to be an admin
 				adminAuth := userAuth.Group("")
 				adminAuth.Use(adminAuthMiddleware)
 				{

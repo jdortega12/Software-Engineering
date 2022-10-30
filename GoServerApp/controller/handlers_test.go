@@ -405,7 +405,7 @@ func Test_handleCreatePhoto_Invalid(t *testing.T) {
 	cleanUpDB()
 }
 
-// Tests that handleCreateTeam() responds with HTTP Status Accepted
+// Tests that create team endpoint responds with HTTP Status Accepted
 // when all conditions are correct.
 func Test_handleCreateTeam_Valid(t *testing.T) {
 	model.DBConn.Create(&model.User{
@@ -433,6 +433,38 @@ func Test_handleCreateTeam_Valid(t *testing.T) {
 
 	if w.Code != http.StatusAccepted {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
+
+// Tests that the create team endpoint correctly rejects a non-manager.
+func Test_handleCreateTeam_NotMan(t *testing.T) {
+	model.DBConn.Create(&model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		Role:     model.PLAYER,
+	})
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+		ctx.Next()
+	})
+
+	info := &model.Team{
+		Name:         "Greyhounds",
+		TeamLocation: "Baltimore",
+	}
+
+	jsonData, err := json.Marshal(info)
+	if err != nil {
+		t.Error(err)
+	}
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeam", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusUnauthorized)
 	}
 
 	cleanUpDB()
