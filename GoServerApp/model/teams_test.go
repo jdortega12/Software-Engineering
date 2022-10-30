@@ -7,8 +7,6 @@ import (
 // Tests CreateTeam() creates the team in the DB correctly when
 // the struct passed is correct.
 func Test_CreateTeam_Valid(t *testing.T) {
-	initTestDB()
-
 	testInfo := &Team{
 		Name:         "test_teamname",
 		TeamLocation: "test_teamlocation,",
@@ -19,7 +17,6 @@ func Test_CreateTeam_Valid(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %s", err)
 	}
-	defer DBConn.Unscoped().Where("id = ?", testInfo.ID).Delete(testInfo)
 
 	var testInfoCopy Team
 	err = DBConn.Where("id = ?", testInfo.ID).Find(&testInfoCopy).Error
@@ -36,4 +33,6 @@ func Test_CreateTeam_Valid(t *testing.T) {
 	if *testInfo != testInfoCopy {
 		t.Error("Structs should be equal")
 	}
+
+	cleanUpDB()
 }

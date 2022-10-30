@@ -6,6 +6,7 @@ import (
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gin-contrib/sessions"
@@ -66,10 +67,17 @@ func sendMockHTTPRequest(method string, endpoint string, data *bytes.Buffer, rou
 // Cleans up all DB tables.
 func cleanUpDB() {
 	model.DBConn.Exec("DELETE FROM users")
-	model.DBConn.Exec("DELETE FROM users_personal_infos")
+	model.DBConn.Exec("DELETE FROM user_personal_infos")
 	model.DBConn.Exec("DELETE FROM teams")
 	model.DBConn.Exec("DELETE FROM team_notifications")
 	model.DBConn.Exec("DELETE FROM matches")
+}
+
+// Initializes db then runs all tests in controller
+func TestMain(m *testing.M) {
+	initTestDB()
+	rc := m.Run()
+	os.Exit(rc)
 }
 
 // Tests that handleLogout() responds HTTP Status Reset Content.
@@ -87,7 +95,6 @@ func Test_handleLogout(t *testing.T) {
 // Tests handleLogin() for user that actually exists. Should respond
 // HTTP Status Accepted.
 func Test_handleLogin_GoodCredentials(t *testing.T) {
-	initTestDB()
 	router := setupTestRouter()
 
 	// Add user to DB
@@ -122,7 +129,6 @@ func Test_handleLogin_GoodCredentials(t *testing.T) {
 // Test handleLogin() when credentials are invalid. Should
 // respond HTTP Status Unauthorized.
 func Test_handleLogin_BadCredentials(t *testing.T) {
-	initTestDB()
 	router := setupTestRouter()
 
 	fakeUser := &model.User{
@@ -146,7 +152,6 @@ func Test_handleLogin_BadCredentials(t *testing.T) {
 // Tests that handleLogin() responds with HTTP Status Bad Request
 // when JSON is not correct.
 func Test_handleLogin_BadJSON(t *testing.T) {
-	initTestDB()
 	router := setupTestRouter()
 
 	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer([]byte("bad data")), router)
@@ -160,8 +165,6 @@ func Test_handleLogin_BadJSON(t *testing.T) {
 // JSON is sent over and all success conditions are met. Should return
 // HTTP Status Accepted.
 func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
-	initTestDB()
-
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
@@ -210,7 +213,6 @@ func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
 // when a session exists but the user is not valid. Should respond
 // HTTP Status Unauthorized.
 func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
-	initTestDB()
 	router := setupTestRouter(func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
 		ctx.Next()
@@ -226,8 +228,6 @@ func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
 // Tests case that handleCreateTeamNotification() is called without a valid
 // JSON request body in context. Should respond HTTP Status Bad Request.
 func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
-	initTestDB()
-
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
@@ -250,8 +250,6 @@ func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
 // Tests that handleUpdataeUserPersonalInfo() responds HTTP Status Accepted
 // when everything is valid.
 func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
-	initTestDB()
-
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
@@ -298,8 +296,6 @@ func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
 // Tests handleUpdataeUserPersonalInfo() responds HTTP Status Bad Request
 // when the JSON is not correct.
 func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
-	initTestDB()
-
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
@@ -323,7 +319,6 @@ func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
 // Tests handleCreateAccount() responds HTTP Status Accepted when
 // all conditions are met.
 func Test_handleCreateAccount_Valid(t *testing.T) {
-	initTestDB()
 	router := setupTestRouter()
 
 	testUser := &model.User{
@@ -350,8 +345,6 @@ func Test_handleCreateAccount_Valid(t *testing.T) {
 // Tests handleCreatePhoto() returns HTTP Status Accepted
 // when the request is correct.
 func Test_handleCreatePhoto_Valid(t *testing.T) {
-	initTestDB()
-
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
@@ -383,8 +376,6 @@ func Test_handleCreatePhoto_Valid(t *testing.T) {
 // Tests that handleCreatePhoto() responds with HTTP Status Bad
 // Request when the request doesn't have the correct key value pair.
 func Test_handleCreatePhoto_Invalid(t *testing.T) {
-	initTestDB()
-
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
@@ -417,8 +408,6 @@ func Test_handleCreatePhoto_Invalid(t *testing.T) {
 // Tests that handleCreateTeam() responds with HTTP Status Accepted
 // when all conditions are correct.
 func Test_handleCreateTeam_Valid(t *testing.T) {
-	initTestDB()
-
 	model.DBConn.Create(&model.User{
 		Username: "kevin",
 		Password: "wasspord",

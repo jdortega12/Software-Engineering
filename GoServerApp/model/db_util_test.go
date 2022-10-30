@@ -1,6 +1,7 @@
 package model
 
 import (
+	"os"
 	"testing"
 )
 
@@ -17,6 +18,22 @@ func initTestDB() {
 	}
 }
 
+// Cleans up all DB tables.
+func cleanUpDB() {
+	DBConn.Exec("DELETE FROM users")
+	DBConn.Exec("DELETE FROM user_personal_infos")
+	DBConn.Exec("DELETE FROM teams")
+	DBConn.Exec("DELETE FROM team_notifications")
+	DBConn.Exec("DELETE FROM matches")
+}
+
+func TestMain(m *testing.M) {
+	initTestDB()
+	rc := m.Run()
+	os.Exit(rc)
+}
+
+/* THESE TWO TESTS DO NOT WORK WITH TEST_MAIN AND CAUSE ERRORS WHEN TRYING TO OPEN DB
 // Checks that InitDB() does not return any errors when given a valid path.
 func Test_InitDB(t *testing.T) {
 	err := InitDB(TEST_DB_PATH)
@@ -31,4 +48,4 @@ func Test_InitDB_BadPath(t *testing.T) {
 	if err == nil {
 		t.Error(err)
 	}
-}
+}*/

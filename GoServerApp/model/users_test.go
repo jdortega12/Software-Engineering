@@ -9,13 +9,11 @@ import (
 
 // Tests UpdateUserPersonalInfo() when all conditions are correct.
 func Test_UpdateUserPersonalInfo(t *testing.T) {
-	initTestDB()
-
 	var testInfo UserPersonalInfo
 
 	err := DBConn.Create(&testInfo).Error
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	testInfo.Firstname = "test_firstname"
@@ -26,9 +24,8 @@ func Test_UpdateUserPersonalInfo(t *testing.T) {
 	// test the upate itself produces no error
 	err = UpdateUserPersonalInfo(&testInfo)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
-	defer DBConn.Unscoped().Where("id", testInfo.ID).Delete(testInfo)
 
 	// pull record from DB to ensure it was saved correctly
 	var testInfoCopy UserPersonalInfo
@@ -49,14 +46,13 @@ func Test_UpdateUserPersonalInfo(t *testing.T) {
 
 	if testInfo != testInfoCopy {
 		t.Error("The updated info was not saved correctly in the DB")
-		t.FailNow()
 	}
+
+	cleanUpDB()
 }
 
 // Tests CreateUser() when all conditions are correct.
 func Test_CreateUser(t *testing.T) {
-	initTestDB()
-
 	user := &User{
 		Username: "jdo",
 		Email:    "jdo@gmail.com",
@@ -65,16 +61,13 @@ func Test_CreateUser(t *testing.T) {
 
 	err := CreateUser(user)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
-
-	defer DBConn.Exec("DELETE FROM users")
-	defer DBConn.Exec("DELETE FROM team_notifications")
 
 	user2 := &User{}
 	err = DBConn.Where("id = ?", user.ID).Find(user2).Error
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	user.CreatedAt = time.Time{}
@@ -85,14 +78,14 @@ func Test_CreateUser(t *testing.T) {
 	user2.DeletedAt = gorm.DeletedAt{}
 
 	if *user != *user2 {
-		t.FailNow()
+		t.Error()
 	}
+
+	cleanUpDB()
 }
 
 // Tests CreateUser() when username was not supplied.
 func Test_CreateUser_NilUsername(t *testing.T) {
-	initTestDB()
-
 	user := &User{
 		Email:    "jdo@gmail.com",
 		Password: "123",
@@ -103,14 +96,11 @@ func Test_CreateUser_NilUsername(t *testing.T) {
 		t.Error("Error should have been returned when username nil")
 	}
 
-	DBConn.Exec("DELETE FROM users")
-	DBConn.Exec("DELETE FROM team_notifications")
+	cleanUpDB()
 }
 
 // Tests UpdateUserPhoto() when all conditions are correct.
 func Test_UpdateUserPhoto(t *testing.T) {
-	initTestDB()
-
 	//  create a user
 	user := &User{
 		Username: "do5",
@@ -118,35 +108,33 @@ func Test_UpdateUserPhoto(t *testing.T) {
 		Password: "123",
 	}
 	DBConn.Create(user)
-	defer DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	// now, try to insert a photo
 	err := UpdateUserPhoto("thisisntarealbase64", "do5", "123")
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	// now, retrieve the user and check if it has the photo we inserted
 	found_user := User{}
 	err = DBConn.Where("photo = ?", "thisisntrealbase64", &found_user).Error
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	if found_user.Photo == "thisisntrealbase64" {
-		t.FailNow()
+		t.Fail()
 	}
+
+	cleanUpDB()
 }
 
 // Tests getUserByUsername() when user exists.
 func Test_GetUserByUsername_UserExists(t *testing.T) {
-	initTestDB()
-
 	user := &User{
 		Username: "weenjeen",
 	}
 	DBConn.Create(user)
-	defer DBConn.Exec("DELETE FROM users")
 
 	userFromDB, err := getUserByUsername("weenjeen")
 	if err != nil {
@@ -155,12 +143,12 @@ func Test_GetUserByUsername_UserExists(t *testing.T) {
 	if userFromDB == nil {
 		t.Error("User is nil when it exists in the DB")
 	}
+
+	cleanUpDB()
 }
 
 // Tests that getUserByUsername() returns error when user doesn't exist.
 func Test_GetUserByUsername_NoUser(t *testing.T) {
-	initTestDB()
-
 	_, err := getUserByUsername("weenjeen")
 	if err == nil {
 		t.Error("Err should be non-nil, user doesn't exist")
