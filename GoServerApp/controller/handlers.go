@@ -15,6 +15,9 @@ const (
 
 // handlers.go -> endpoint setup and funcs bound to them
 
+// Middleware for authenticating a user. Responds with HTTP Status Unauthorized
+// if session not set or user cannot be authenticated. Sets user in context with
+// USER_KEY to be accessed by next handlers in chain.
 func userAuthMiddleware(ctx *gin.Context) {
 	username, password, sessionExists := getSessionUser(ctx)
 	if !sessionExists {
@@ -29,6 +32,32 @@ func userAuthMiddleware(ctx *gin.Context) {
 	}
 
 	ctx.Set("user", user)
+
+	ctx.Next()
+}
+
+// Middleware for authenticating that a user is a manager. Aborts with
+// HTTP Status Unauthorized if user is not manager.
+func managerAuthMiddleware(ctx *gin.Context) {
+	user := ctx.Keys[USER_KEY].(*model.User)
+
+	if user.Role != model.MANAGER {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	ctx.Next()
+}
+
+// Middleware for authenticating that a user is an admin. Aborts with
+// HTTP Status Unauthorized if user is not admin.
+func adminAuthMiddleware(ctx *gin.Context) {
+	user := ctx.Keys[USER_KEY].(*model.User)
+
+	if user.Role != model.ADMIN {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
 	ctx.Next()
 }
@@ -50,13 +79,25 @@ func SetupHandlers(router *gin.Engine) {
 			v1.POST("/logout", handleLogout)
 
 			// endpoints requiring user authentication
-			auth := v1.Group("").Use(userAuthMiddleware)
+			userAuth := v1.Group("")
+			userAuth.Use(userAuthMiddleware)
 			{
-				auth.POST("/createTeamRequest", handleCreateTeamNotification)
-				auth.POST("/updatePersonalInfo", handleUpdateUserPersonalInfo)
-				auth.POST("/createPhoto", handleCreatePhoto)
+				userAuth.POST("/createTeamRequest", handleCreateTeamNotification)
+				userAuth.POST("/updatePersonalInfo", handleUpdateUserPersonalInfo)
+				userAuth.POST("/createPhoto", handleCreatePhoto)
 
-				auth.POST("/createTeam", handleCreateTeam)
+				// endpoints requiring user to be a manager
+				managerAuth := userAuth.Group("")
+				managerAuth.Use(managerAuthMiddleware)
+				{
+					managerAuth.POST("/createTeam", handleCreateTeam)
+				}
+
+				adminAuth := userAuth.Group("")
+				adminAuth.Use(adminAuthMiddleware)
+				{
+
+				}
 			}
 		}
 	}
@@ -73,6 +114,8 @@ func handleCreateAccount(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+
+	user.Role = model.PLAYER
 
 	err = model.CreateUser(user)
 	if err != nil {
