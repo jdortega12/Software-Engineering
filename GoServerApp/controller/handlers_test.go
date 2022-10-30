@@ -3,7 +3,6 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
 	"net/http/httptest"
@@ -27,8 +26,9 @@ func initTestDB() {
 	}
 }
 
-// Sets up a router for testing purposes.
-func setupTestRouter() *gin.Engine {
+// Sets up a router for testing purposes. You can pass any number of custom
+// middlewares depending on how you want to set up your test.
+func setupTestRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	router := gin.Default()
@@ -36,9 +36,40 @@ func setupTestRouter() *gin.Engine {
 	testStore := cookie.NewStore([]byte("test"))
 	router.Use(sessions.Sessions("test_session", testStore))
 
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
+
 	SetupHandlers(router)
 
 	return router
+}
+
+// Sends a mock HTTP request and returns *httptest.ResponseRecorder. Panics if error encountered.
+func sendMockHTTPRequest(method string, endpoint string, data *bytes.Buffer, router *gin.Engine) *httptest.ResponseRecorder {
+	w := httptest.NewRecorder()
+
+	if data == nil {
+		data = &bytes.Buffer{}
+	}
+
+	req, err := http.NewRequest(method, endpoint, data)
+	if err != nil {
+		panic(err)
+	}
+
+	router.ServeHTTP(w, req)
+
+	return w
+}
+
+// Cleans up all DB tables.
+func cleanUpDB() {
+	model.DBConn.Exec("DELETE FROM users")
+	model.DBConn.Exec("DELETE FROM users_personal_infos")
+	model.DBConn.Exec("DELETE FROM teams")
+	model.DBConn.Exec("DELETE FROM team_notifications")
+	model.DBConn.Exec("DELETE FROM matches")
 }
 
 // Tests that handleLogout() responds HTTP Status Reset Content.
@@ -46,12 +77,10 @@ func Test_handleLogout(t *testing.T) {
 	router := setupTestRouter()
 
 	// mock request
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/logout", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/logout", nil, router)
 
 	if w.Code != http.StatusResetContent {
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusResetContent)
 	}
 }
 
@@ -68,7 +97,6 @@ func Test_handleLogin_GoodCredentials(t *testing.T) {
 		Password: "123",
 	}
 	model.DBConn.Create(user)
-	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
 
 	// create mock login credentials
 	userCpy := &model.User{
@@ -80,19 +108,15 @@ func Test_handleLogin_GoodCredentials(t *testing.T) {
 	reader, err := json.Marshal(userCpy)
 	if err != nil {
 		t.Errorf("Error: %s\n", err)
-		return
 	}
 
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader))
-	req.Header.Set("Content-Type", "application/json")
-
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader), router)
 
 	if w.Code != http.StatusAccepted {
-		t.FailNow()
+		t.Errorf("Response code was %d, should have been %d", w.Code, http.StatusAccepted)
 	}
 
+	cleanUpDB()
 }
 
 // Test handleLogin() when credentials are invalid. Should
@@ -110,19 +134,12 @@ func Test_handleLogin_BadCredentials(t *testing.T) {
 	reader, err := json.Marshal(fakeUser)
 	if err != nil {
 		t.Errorf("Error: %s\n", err)
-		return
 	}
 
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader))
-	req.Header.Set("Content-Type", "application/json")
-
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	fmt.Println(w.Code)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reader), router)
 
 	if w.Code != http.StatusUnauthorized {
-		t.FailNow()
+		t.Errorf("Response code was %d, should have been %d", w.Code, http.StatusUnauthorized)
 	}
 }
 
@@ -132,16 +149,10 @@ func Test_handleLogin_BadJSON(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
 
-	req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer([]byte("bad data")))
-	req.Header.Set("Content-Type", "application/json")
-
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	fmt.Println(w.Code)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer([]byte("bad data")), router)
 
 	if w.Code != http.StatusBadRequest {
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
 	}
 }
 
@@ -150,7 +161,6 @@ func Test_handleLogin_BadJSON(t *testing.T) {
 // HTTP Status Accepted.
 func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 	initTestDB()
-	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
@@ -162,10 +172,9 @@ func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 		Role:     model.PLAYER,
 	})
 
-	router.POST("/test", func(ctx *gin.Context) {
+	router := setupTestRouter(func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
-
-		handleCreateTeamNotification(ctx)
+		ctx.Next()
 	})
 
 	notification := &model.TeamNotification{
@@ -175,16 +184,13 @@ func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 
 	jsonData, _ := json.Marshal(notification)
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/test", bytes.NewBuffer(jsonData))
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeamRequest", bytes.NewBuffer(jsonData), router)
 
 	if w.Code != http.StatusAccepted {
 		t.Errorf("Status code: %d, should have been %d", w.Code, http.StatusAccepted)
 	}
 
-	model.DBConn.Exec("DELETE FROM users")
-	model.DBConn.Exec("DELETE FROM notifications")
+	cleanUpDB()
 }
 
 // Tests case that handleCreateTeamNotification() endpoint is
@@ -193,9 +199,7 @@ func Test_handleCreateTeamNotification_ValidInvite(t *testing.T) {
 func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
 	router := setupTestRouter()
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/createTeamRequest", nil)
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeamRequest", nil, router)
 
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("Status code: %d, should have been %d", w.Code, http.StatusUnauthorized)
@@ -207,17 +211,12 @@ func Test_handleCreateTeamNotification_NoSession(t *testing.T) {
 // HTTP Status Unauthorized.
 func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
 	initTestDB()
-	router := setupTestRouter()
-
-	router.POST("/test", func(ctx *gin.Context) {
+	router := setupTestRouter(func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
-
-		handleCreateTeamNotification(ctx)
+		ctx.Next()
 	})
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/test", nil)
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeamRequest", nil, router)
 
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("Status code: %d, should have been %d", w.Code, http.StatusUnauthorized)
@@ -228,84 +227,39 @@ func Test_handleCreateTeamNotification_InvalidUser(t *testing.T) {
 // JSON request body in context. Should respond HTTP Status Bad Request.
 func Test_handleCreateTeamNotification_BadJSON(t *testing.T) {
 	initTestDB()
-	router := setupTestRouter()
 
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
 	})
 
-	router.POST("/test", func(ctx *gin.Context) {
+	router := setupTestRouter(func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
-
-		handleCreateTeamNotification(ctx)
+		ctx.Next()
 	})
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/test", nil)
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeamRequest", nil, router)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("Status code: %d, should have been %d", w.Code, http.StatusBadRequest)
 	}
 
-	model.DBConn.Exec("DELETE FROM users")
-}
-
-// Tests case that handleCreateTeamNotification() is called when the
-// SenderUsername of the TeamNotification is not the same as the logged
-// in user. Should respond HTTP Status Bad Request.
-func Test_handleCreateTeamNotification_BadSender(t *testing.T) {
-	initTestDB()
-	router := setupTestRouter()
-
-	model.DBConn.Create(&model.User{
-		Username: "jaluhrman",
-		Password: "ween",
-	})
-
-	router.POST("/test", func(ctx *gin.Context) {
-		setSessionUser(ctx, "jaluhrman", "ween")
-
-		handleCreateTeamNotification(ctx)
-	})
-
-	notification := &model.TeamNotification{
-		SenderUsername:   "not_jaluhrman",
-		ReceiverUsername: "colbert",
-	}
-
-	jsonData, _ := json.Marshal(notification)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/test", bytes.NewBuffer(jsonData))
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("Status code: %d, should have been %d", w.Code, http.StatusBadRequest)
-	}
-
-	model.DBConn.Exec("DELETE FROM users")
+	cleanUpDB()
 }
 
 // Tests that handleUpdataeUserPersonalInfo() responds HTTP Status Accepted
 // when everything is valid.
 func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
 	initTestDB()
-	router := setupTestRouter()
 
-	user := &model.User{
+	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
-	}
-	model.DBConn.Create(user)
-	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
+	})
 
-	// test endpoint just to set session for this test
-	router.POST("/testWrapper", func(ctx *gin.Context) {
+	router := setupTestRouter(func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
-
-		handleUpdateUserPersonalInfo(ctx)
+		ctx.Next()
 	})
 
 	info := &model.UserPersonalInfo{
@@ -314,20 +268,19 @@ func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
 		Height:    50,
 		Weight:    240,
 	}
-	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(info)
 
-	json_info, err := json.Marshal(info)
+	jsonData, err := json.Marshal(info)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/updatePersonalInfo", bytes.NewBuffer(jsonData), router)
 
 	if w.Code != http.StatusAccepted {
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
 	}
+
+	cleanUpDB()
 }
 
 // Tests that handleUpdataeUserPersonalInfo() responds HTTP Status Unauthorized
@@ -335,12 +288,10 @@ func Test_handleUpdateUserPersonalInfo_Valid(t *testing.T) {
 func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
 	router := setupTestRouter()
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/updatePersonalInfo", nil)
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/updatePersonalInfo", nil, router)
 
 	if w.Code != http.StatusUnauthorized {
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusUnauthorized)
 	}
 }
 
@@ -348,29 +299,25 @@ func Test_handleUpdateUserPersonalInfo_NilSession(t *testing.T) {
 // when the JSON is not correct.
 func Test_handleUpdateUserPersonalInfo_BadJSON(t *testing.T) {
 	initTestDB()
-	router := setupTestRouter()
 
-	user := &model.User{
+	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
 		Password: "ween",
-	}
-	model.DBConn.Create(user)
-	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
-
-	// test endpoint just to set session for this test
-	router.POST("/testWrapper", func(ctx *gin.Context) {
-		setSessionUser(ctx, "jaluhrman", "ween")
-
-		handleUpdateUserPersonalInfo(ctx)
 	})
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/testWrapper", nil)
-	router.ServeHTTP(w, req)
+	// test endpoint just to set session for this test
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+		ctx.Next()
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/updatePersonalInfo", nil, router)
 
 	if w.Code != http.StatusBadRequest {
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
 	}
+
+	cleanUpDB()
 }
 
 // Tests handleCreateAccount() responds HTTP Status Accepted when
@@ -379,39 +326,64 @@ func Test_handleCreateAccount_Valid(t *testing.T) {
 	initTestDB()
 	router := setupTestRouter()
 
-	defer model.DBConn.Exec("DELETE FROM users")
-	defer model.DBConn.Exec("DELETE FROM user_personal_infos")
-
 	testUser := &model.User{
 		Username: "jdo",
 		Email:    "jdo@gmail.com",
 		Password: "123",
 	}
 
-	// format as JSON
-	reader, err := json.Marshal(testUser)
+	jsonData, err := json.Marshal(testUser)
 	if err != nil {
 		t.Errorf("could not marshal json: %s\n", err)
-		return
 	}
 
 	// mock request
-	req, _ := http.NewRequest("POST", "/api/v1/createAccount", bytes.NewBuffer(reader))
-	req.Header.Set("Content-Type", "application/json")
-
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createAccount", bytes.NewBuffer(jsonData), router)
 
 	if w.Code != http.StatusAccepted {
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
 	}
+
+	cleanUpDB()
 }
 
 // Tests handleCreatePhoto() returns HTTP Status Accepted
 // when the request is correct.
 func Test_handleCreatePhoto_Valid(t *testing.T) {
 	initTestDB()
-	router := setupTestRouter()
+
+	model.DBConn.Create(&model.User{
+		Username: "jaluhrman",
+		Password: "ween",
+	})
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+		ctx.Next()
+	})
+
+	info := gin.H{
+		"photo": "dfjekjfcks",
+	}
+
+	jsonData, err := json.Marshal(info)
+	if err != nil {
+		panic(err)
+	}
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createPhoto", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
+
+// Tests that handleCreatePhoto() responds with HTTP Status Bad
+// Request when the request doesn't have the correct key value pair.
+func Test_handleCreatePhoto_Invalid(t *testing.T) {
+	initTestDB()
 
 	model.DBConn.Create(&model.User{
 		Username: "jaluhrman",
@@ -419,101 +391,60 @@ func Test_handleCreatePhoto_Valid(t *testing.T) {
 	})
 
 	// test endpoint just to set session for this test
-	router.POST("/testWrapper", func(ctx *gin.Context) {
+	router := setupTestRouter(func(ctx *gin.Context) {
 		setSessionUser(ctx, "jaluhrman", "ween")
-		handleCreatePhoto(ctx)
-	})
-
-	info := gin.H{
-		"photo": "dfjekjfcks",
-	}
-
-	json_info, err := json.Marshal(info)
-	if err != nil {
-		panic(err)
-	}
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusAccepted {
-		t.FailNow()
-	}
-}
-
-// Tests that handleCreatePhoto() responds with HTTP Status Bad
-// Request when the request doesn't have the correct key value pair.
-func Test_handleCreatePhoto_Invalid(t *testing.T) {
-	initTestDB()
-	router := setupTestRouter()
-
-	model.DBConn.Create(&model.User{
-		Username: "jaluhrman2",
-		Password: "ween",
-	})
-
-	// test endpoint just to set session for this test
-	router.POST("/testWrapper", func(ctx *gin.Context) {
-		setSessionUser(ctx, "jaluhrman", "ween")
-		handleCreatePhoto(ctx)
+		ctx.Next()
 	})
 
 	info := gin.H{
 		"thisfieldisntrelevant": "dfjekjfcks",
 	}
 
-	json_info, err := json.Marshal(info)
+	jsonData, err := json.Marshal(info)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createPhoto", bytes.NewBuffer(jsonData), router)
 
 	if w.Code != http.StatusBadRequest {
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
 	}
+
+	cleanUpDB()
 }
 
 // Tests that handleCreateTeam() responds with HTTP Status Accepted
 // when all conditions are correct.
 func Test_handleCreateTeam_Valid(t *testing.T) {
 	initTestDB()
-	router := setupTestRouter()
 
-	user := &model.User{
+	model.DBConn.Create(&model.User{
 		Username: "kevin",
 		Password: "wasspord",
 		Role:     model.MANAGER,
-	}
-	model.DBConn.Create(user)
-	defer model.DBConn.Unscoped().Where("id = ?", user.ID).Delete(user)
+	})
 
-	router.POST("/testWrapper", func(ctx *gin.Context) {
+	router := setupTestRouter(func(ctx *gin.Context) {
 		setSessionUser(ctx, "kevin", "wasspord")
-
-		handleCreateTeam(ctx)
+		ctx.Next()
 	})
 
 	info := &model.Team{
 		Name:         "Greyhounds",
 		TeamLocation: "Baltimore",
 	}
-	defer model.DBConn.Unscoped().Where("name = ?", "Greyhounds").Delete(info)
 
-	json_info, err := json.Marshal(info)
+	jsonData, err := json.Marshal(info)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/testWrapper", bytes.NewBuffer(json_info))
-	router.ServeHTTP(w, req)
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeam", bytes.NewBuffer(jsonData), router)
 
 	if w.Code != http.StatusAccepted {
-		fmt.Println("Http status failed")
-		t.FailNow()
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
 	}
+
+	cleanUpDB()
 }

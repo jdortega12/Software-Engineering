@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-contrib/sessions"
@@ -22,14 +21,11 @@ func Test_clearSession(t *testing.T) {
 		clearSession(ctx)
 
 		if session.Get("test_val_1") != nil || session.Get("test_val_2") != nil {
-			t.FailNow()
+			t.Error("session values could not be retrieved")
 		}
 	})
 
-	// mock request
-	req, _ := http.NewRequest(http.MethodGet, "/test", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	sendMockHTTPRequest(http.MethodGet, "/test", nil, router)
 }
 
 // Test that setSessionUser() sets the session correctly.
@@ -47,10 +43,7 @@ func Test_setSessionUser(t *testing.T) {
 		}
 	})
 
-	// mock request
-	req, _ := http.NewRequest(http.MethodGet, "/test", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	sendMockHTTPRequest(http.MethodGet, "/test", nil, router)
 }
 
 // Check that getSessionUser() works when session has been set correctly.
@@ -73,10 +66,7 @@ func Test_getSessionUser_Valid(t *testing.T) {
 		}
 	})
 
-	// mock request
-	req, _ := http.NewRequest(http.MethodGet, "/test", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	sendMockHTTPRequest(http.MethodGet, "/test", nil, router)
 }
 
 // Test that getSessionUser() works in the case that the session has not been set.
@@ -96,8 +86,5 @@ func Test_getSessionUser_NilSession(t *testing.T) {
 		}
 	})
 
-	// mock request
-	req, _ := http.NewRequest(http.MethodGet, "/test", nil)
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	sendMockHTTPRequest(http.MethodGet, "/test", nil, router)
 }
