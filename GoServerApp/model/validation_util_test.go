@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-// Tests ValidateUser() when user exists.
-func Test_ValidateUser_Exists(t *testing.T) {
+// Tests AuthenticateUser() when user exists.
+func Test_AuthenticateUser_Exists(t *testing.T) {
 	user := &User{
 		Username: "test_username",
 		Password: "test_password",
@@ -17,7 +17,7 @@ func Test_ValidateUser_Exists(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = ValidateUser(user.Username, user.Password)
+	_, err = AuthenticateUser(user.Username, user.Password)
 	if err != nil {
 		t.Errorf("Error %s", err)
 	}
@@ -25,8 +25,8 @@ func Test_ValidateUser_Exists(t *testing.T) {
 	cleanUpDB()
 }
 
-// Tests that ValidateUser() returns error when credentials are bad.
-func Test_ValidateUser_BadCredentials(t *testing.T) {
+// Tests that AuthenticateUser() returns error when credentials are bad.
+func Test_AuthenticateUser_BadCredentials(t *testing.T) {
 	user := &User{}
 
 	err := DBConn.Create(user).Error
@@ -34,16 +34,16 @@ func Test_ValidateUser_BadCredentials(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = ValidateUser("test_username", "test_password")
+	_, err = AuthenticateUser("test_username", "test_password")
 	if err == nil {
-		t.Error("validateUser() should have returned non-nil error when user doesn't exist")
+		t.Error("AuthenticateUser() should have returned non-nil error when user doesn't exist")
 	}
 
 	cleanUpDB()
 }
 
-// Tests that ValidateUser() returns err if provided username is an empty string.
-func Test_ValidateUser_NilUsername(t *testing.T) {
+// Tests that AuthenticateUser() returns err if provided username is an empty string.
+func Test_AuthenticateUser_NilUsername(t *testing.T) {
 	user := &User{
 		Username: "test_username",
 		Password: "test_password",
@@ -55,16 +55,16 @@ func Test_ValidateUser_NilUsername(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = ValidateUser("", user.Password)
+	_, err = AuthenticateUser("", user.Password)
 	if err == nil {
-		t.Error("validateUser() returned no error when username was nil")
+		t.Error("AuthenticateUser() returned no error when username was nil")
 	}
 
 	cleanUpDB()
 }
 
-// Tests that ValidateUser() returns error when password is empty string.
-func Test_ValidateUser_NilPassword(t *testing.T) {
+// Tests that AuthenticateUser() returns error when password is empty string.
+func Test_AuthenticateUser_NilPassword(t *testing.T) {
 	user := &User{
 		Username: "test_username",
 		Password: "test_password",
@@ -76,9 +76,9 @@ func Test_ValidateUser_NilPassword(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = ValidateUser(user.Username, "")
+	_, err = AuthenticateUser(user.Username, "")
 	if err == nil {
-		t.Error("validateUser() returned no error when password was nil")
+		t.Error("AuthenticateUser() returned no error when password was nil")
 	}
 
 	cleanUpDB()

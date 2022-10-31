@@ -94,7 +94,7 @@ func handleLogin(ctx *gin.Context) {
 		return
 	}
 
-	_, err = model.ValidateUser(user.Username, user.Password)
+	_, err = model.AuthenticateUser(user.Username, user.Password)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -104,20 +104,18 @@ func handleLogin(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// Logs out current user by clearing the current session.
-// Do not need to validate user or any permissions. Responds
-// with HTTP reset content status code.
+// Logs out current user by clearing the current session. Do not need to validate
+// user or any permissions. Responds with HTTP reset content status code.
 func handleLogout(ctx *gin.Context) {
 	clearSession(ctx)
 
 	ctx.Status(http.StatusResetContent)
 }
 
-// Receives UserPersonalInfo JSON from the client and updates it in the DB
-// through the model. Responds with HTTP Status Accepted on success. Responds
-// HTTP Status Unauthorized if session not set or user cannot be validated.
-// Responds HTTP Status Bad Request if JSON cannot be bound. Responds HTTP
-// Status Internal Server Error if DB cannot be updated.
+// Receives UserPersonalInfo JSON from the client and updates it in the DB through
+// the model. Responds with HTTP Status Accepted on success. Responds HTTP Status
+// Bad Request if JSON cannot be bound. Responds HTTP Status Internal Server Error
+// if DB cannot be updated.
 func handleUpdateUserPersonalInfo(ctx *gin.Context) {
 	user := ctx.Keys[USER_KEY].(*model.User)
 
@@ -141,8 +139,7 @@ func handleUpdateUserPersonalInfo(ctx *gin.Context) {
 }
 
 // Receives image string in request body and updates current user's photo
-// in the DB. Returns HTTP Status Accepted on success. Returns
-// HTTP Unprocessable Entity if session doesn't exist. Responds HTTP Status
+// in the DB. Returns HTTP Status Accepted on success. Responds HTTP Status
 // Bad Request if image cannot be processed.
 func handleCreatePhoto(ctx *gin.Context) {
 	user := ctx.Keys[USER_KEY].(*model.User)
@@ -174,8 +171,7 @@ func handleCreatePhoto(ctx *gin.Context) {
 }
 
 // Receives Team JSON in response body and passes to model to be created in DB.
-// Responds HTTP Status Accepted on success. Returns HTTP Status Unauthorized
-// if session doesn't exist or user cannot be validated. Responds HTTP Bad Request
+// Responds HTTP Status Accepted on success. Responds HTTP Bad Request
 // if JSON cannot be bound and HTTP Status Internal Server Error if Team cannot
 // be created in DB.
 func handleCreateTeam(ctx *gin.Context) {
@@ -196,8 +192,7 @@ func handleCreateTeam(ctx *gin.Context) {
 
 // Receives TeamNotification as JSON and passes it to model to be
 // created in the DB. Returns HTTP Status Accepted on success. Returns
-// HTTP Status Unauthorized if session not set or user credentials invalid.
-// Returns HTTP Status Bad Request if JSON cannot be bound or notification
+// HTTP Status Bad Request if JSON cannot be bound or notification
 // cannot be created in DB.
 func handleCreateTeamNotification(ctx *gin.Context) {
 	user := ctx.Keys[USER_KEY].(*model.User)

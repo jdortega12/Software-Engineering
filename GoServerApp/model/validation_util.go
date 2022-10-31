@@ -1,10 +1,10 @@
 package model
 
-// validation_util.go -> utilities for validating user permissions
+// validation_util.go -> utilities for authenticating user permissions
 
-// Validates a user based on username and password. Returns pointer
+// Authenticates a user based on username and password. Returns pointer
 // to User if succeeded and error if could not find user.
-func ValidateUser(username string, password string) (*User, error) {
+func AuthenticateUser(username string, password string) (*User, error) {
 	user := &User{}
 
 	err := DBConn.Where("username = ? AND password = ?", username, password).

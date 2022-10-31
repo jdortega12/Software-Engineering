@@ -19,7 +19,7 @@ func userAuthMiddleware(ctx *gin.Context) {
 		return
 	}
 
-	user, err := model.ValidateUser(username, password)
+	user, err := model.AuthenticateUser(username, password)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
