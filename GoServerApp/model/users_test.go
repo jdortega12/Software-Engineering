@@ -155,8 +155,8 @@ func Test_getUserByUsername_NoUser(t *testing.T) {
 	}
 }
 
-// Tests that AssignUserToTeam() correctly updates user in DB.
-func Test_AssignUserToTeam(t *testing.T) {
+// Tests that UpdateUserTeam() correctly updates user in DB.
+func Test_UpdateUserTeam(t *testing.T) {
 	user := &User{
 		Username: "jaluhrman",
 		Password: "peepee",
@@ -166,7 +166,7 @@ func Test_AssignUserToTeam(t *testing.T) {
 
 	DBConn.Create(user)
 
-	AssignUserToTeam(user, 5)
+	UpdateUserTeam(user, 5)
 
 	userUpdated := &User{}
 	DBConn.Where("id = ?", user.ID).First(userUpdated)

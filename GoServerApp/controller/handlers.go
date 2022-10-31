@@ -195,7 +195,7 @@ func handleCreateTeam(ctx *gin.Context) {
 		return
 	}
 
-	err = model.AssignUserToTeam(user, team.ID)
+	err = model.UpdateUserTeam(user, team.ID)
 	if err != nil {
 		model.DeleteTeam(team)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
