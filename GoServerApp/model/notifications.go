@@ -19,7 +19,7 @@ type TeamNotification struct {
 	ID uint
 
 	SenderID   uint `gorm:"not null" json:"sender_id"`
-	ReceiverID uint `gorm:"not null" json: "receiver_id"`
+	ReceiverID uint `gorm:"not null" json:"receiver_id"`
 
 	SenderUsername   string `gorm:"not null" json:"sender_username"`
 	ReceiverUsername string `gorm:"not null" json:"receiver_username"`
