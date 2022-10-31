@@ -36,3 +36,45 @@ func Test_CreateTeam_Valid(t *testing.T) {
 
 	cleanUpDB()
 }
+
+// Tests that DeleteTeam() deletes team correctly.
+func Test_DeleteTeam(t *testing.T) {
+	team := &Team{
+		Name:         "Badgers",
+		TeamLocation: "Badgertown",
+	}
+
+	err := DBConn.Create(team).Error
+	if err != nil {
+		t.Error(err)
+	}
+
+	teamID := team.ID
+
+	err = DeleteTeam(team)
+	if err != nil {
+		t.Error(err)
+	}
+
+	teamAfter := &Team{}
+	err = DBConn.Where("id = ?", teamID).First(teamAfter).Error
+	if err == nil {
+		t.Error("Team should not have been findable in DB after deletion")
+	}
+
+	cleanUpDB()
+}
+
+// Tests that DeleteTeam() does not return an error even if team doesn't exist.
+func Test_DeleteTeam_NotInDB(t *testing.T) {
+	team := &Team{
+		ID:           5,
+		Name:         "Badgers",
+		TeamLocation: "Badgertown",
+	}
+
+	err := DeleteTeam(team)
+	if err != nil {
+		t.Error(err)
+	}
+}

@@ -171,10 +171,18 @@ func handleCreatePhoto(ctx *gin.Context) {
 }
 
 // Receives Team JSON in response body and passes to model to be created in DB.
-// Responds HTTP Status Accepted on success. Responds HTTP Bad Request
-// if JSON cannot be bound and HTTP Status Internal Server Error if Team cannot
-// be created in DB.
+// Responds HTTP Status Accepted on success. Responds HTTP Status Conflict if
+// manager already has a team, HTTP Bad Request if JSON cannot be bound, and
+// HTTP Status Internal Server Error if Team cannot be created in DB or manager
+// TeamID cannot be updated.
 func handleCreateTeam(ctx *gin.Context) {
+	user := ctx.Keys[USER_KEY].(*model.User)
+
+	if user.TeamID != 0 {
+		ctx.AbortWithStatus(http.StatusConflict)
+		return
+	}
+
 	team := &model.Team{}
 	err := ctx.BindJSON(team)
 	if err != nil {
@@ -183,6 +191,13 @@ func handleCreateTeam(ctx *gin.Context) {
 	}
 	err = model.CreateTeam(team)
 	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	err = model.AssignUserToTeam(user, team.ID)
+	if err != nil {
+		model.DeleteTeam(team)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

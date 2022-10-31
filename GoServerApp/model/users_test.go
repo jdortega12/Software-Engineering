@@ -130,7 +130,7 @@ func Test_UpdateUserPhoto(t *testing.T) {
 }
 
 // Tests getUserByUsername() when user exists.
-func Test_GetUserByUsername_UserExists(t *testing.T) {
+func Test_getUserByUsername_UserExists(t *testing.T) {
 	user := &User{
 		Username: "weenjeen",
 	}
@@ -148,9 +148,32 @@ func Test_GetUserByUsername_UserExists(t *testing.T) {
 }
 
 // Tests that getUserByUsername() returns error when user doesn't exist.
-func Test_GetUserByUsername_NoUser(t *testing.T) {
+func Test_getUserByUsername_NoUser(t *testing.T) {
 	_, err := getUserByUsername("weenjeen")
 	if err == nil {
 		t.Error("Err should be non-nil, user doesn't exist")
 	}
+}
+
+// Tests that AssignUserToTeam() correctly updates user in DB.
+func Test_AssignUserToTeam(t *testing.T) {
+	user := &User{
+		Username: "jaluhrman",
+		Password: "peepee",
+		Role:     PLAYER,
+		TeamID:   0,
+	}
+
+	DBConn.Create(user)
+
+	AssignUserToTeam(user, 5)
+
+	userUpdated := &User{}
+	DBConn.Where("id = ?", user.ID).First(userUpdated)
+
+	if userUpdated.TeamID != 5 {
+		t.Error("user's TeamID was not updated correctly")
+	}
+
+	cleanUpDB()
 }

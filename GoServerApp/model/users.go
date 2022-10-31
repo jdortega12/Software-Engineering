@@ -139,6 +139,12 @@ func UpdateUserPhoto(photo string, username string, password string) error {
 	return err
 }
 
+// Assigns a user to a given TeamID.
+func AssignUserToTeam(user *User, teamID uint) error {
+	err := DBConn.Model(&User{}).Where("id = ?", user.ID).Update("team_id", teamID).Error
+	return err
+}
+
 // Pulls User out of DB by username.
 func getUserByUsername(username string) (*User, error) {
 	user := &User{}

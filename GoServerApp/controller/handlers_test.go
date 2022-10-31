@@ -469,3 +469,51 @@ func Test_handleCreateTeam_NotMan(t *testing.T) {
 
 	cleanUpDB()
 }
+
+// Tests that create team endpoint responds Status Conflict
+// if manager already has a team.
+func Test_handleCreateTeam_AlreadyHasTeam(t *testing.T) {
+	model.DBConn.Create(&model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		Role:     model.MANAGER,
+		TeamID:   1,
+	})
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+		ctx.Next()
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeam", nil, router)
+
+	if w.Code != http.StatusConflict {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusConflict)
+	}
+
+	cleanUpDB()
+}
+
+// Tests that create team endpoint responds Status Bad Request
+// when JSON is not correct.
+func Test_handleCreateTeam_BadJSON(t *testing.T) {
+	model.DBConn.Create(&model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		Role:     model.MANAGER,
+		TeamID:   0,
+	})
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+		ctx.Next()
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createTeam", nil, router)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	}
+
+	cleanUpDB()
+}

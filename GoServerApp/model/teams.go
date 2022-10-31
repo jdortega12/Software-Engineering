@@ -26,3 +26,9 @@ func CreateTeam(team *Team) error {
 	err := DBConn.Create(team).Error
 	return err
 }
+
+// Soft deletes a team from the DB.
+func DeleteTeam(team *Team) error {
+	err := DBConn.Where("id = ?", team.ID).Delete(team).Error
+	return err
+}
