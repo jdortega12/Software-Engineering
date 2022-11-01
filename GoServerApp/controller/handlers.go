@@ -27,7 +27,7 @@ func SetupHandlers(router *gin.Engine) {
 		v1 := api.Group("/v1")
 		{
 			// endpoints requiring no authentication
-			v1.GET("/get-user", handleGetUser)
+			v1.GET("/get-user/:username", handleGetUser)
 
 			v1.POST("/createAccount", handleCreateAccount)
 			v1.POST("/login", handleLogin)
@@ -239,19 +239,14 @@ func handleCreateTeamNotification(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// Receives a username in a User JSON and responds with JSON of the public info
-// about that user. Returns HTTP Status Found on success. Aborts with Status Bad
-// Request if JSON cannot be bound, Not Found if user doesn't exist, and Internal
-// Server Error if the user's personal info or team cannot be found.
+// Receives a username in URL params and responds with JSON of the public info
+// about that user. Returns HTTP Status Found on success. Aborts with Not Found
+// if user doesn't exist and Internal Server Error if the user's personal
+// info or team cannot be found.
 func handleGetUser(ctx *gin.Context) {
-	userToGet := &model.User{}
-	err := ctx.BindJSON(userToGet)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
+	usernameToGet := ctx.Param("username")
 
-	userFound, err := model.GetUserByUsername(userToGet.Username)
+	userFound, err := model.GetUserByUsername(usernameToGet)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return

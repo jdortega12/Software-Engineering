@@ -552,12 +552,7 @@ func Test_handleGetUser_Valid(t *testing.T) {
 
 	router := setupTestRouter()
 
-	requestJSON, _ := json.Marshal(&model.User{
-		Username: "Jimmy",
-	})
-
-	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user",
-		bytes.NewBuffer(requestJSON), router)
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user/Jimmy", nil, router)
 
 	if w.Code != http.StatusFound {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusFound)
@@ -621,12 +616,7 @@ func Test_handleGetUser_NoTeam(t *testing.T) {
 
 	router := setupTestRouter()
 
-	requestJSON, _ := json.Marshal(&model.User{
-		Username: "Jimmy",
-	})
-
-	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user",
-		bytes.NewBuffer(requestJSON), router)
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user/Jimmy", nil, router)
 
 	if w.Code != http.StatusFound {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusFound)
@@ -665,13 +655,13 @@ func Test_handleGetUser_NoTeam(t *testing.T) {
 }
 
 // Tests that get-user endpoint returns bad request when the json isn't correct.
-func Test_handleGetUser_BadJSON(t *testing.T) {
+func Test_handleGetUser_BadURL(t *testing.T) {
 	router := setupTestRouter()
 
 	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user", nil, router)
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	if w.Code != http.StatusNotFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusNotFound)
 	}
 }
 
@@ -679,11 +669,7 @@ func Test_handleGetUser_BadJSON(t *testing.T) {
 func Test_handleGetUser_NoUser(t *testing.T) {
 	router := setupTestRouter()
 
-	jsonData, _ := json.Marshal(&model.User{
-		Username: "doesn't matter",
-	})
-
-	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user", bytes.NewBuffer(jsonData), router)
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user/jasdasd", nil, router)
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusNotFound)
