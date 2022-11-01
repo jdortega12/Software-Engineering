@@ -5,7 +5,7 @@ import TeamRequestForm from './TeamRequestForm'
 export default class InvitePlayerRequestForm extends React.Component {
     render() {
         return (
-            <TeamRequestForm ReceiverID={this.props.ReceiverID} type="1"/>
+            <TeamRequestForm ReceiverUsername={this.props.ReceiverUsername} type="1"/>
         )
     }
 }

@@ -5,7 +5,7 @@ import TeamRequestForm from './TeamRequestForm'
 export default class AskManagerRequestForm extends React.Component {
     render() {
         return (
-            <TeamRequestForm ReceiverID={this.props.ReceiverID} type="0"/>
+            <TeamRequestForm ReceiverUsername={this.props.ReceiverUsername} type="0"/>
         )
     }
 }

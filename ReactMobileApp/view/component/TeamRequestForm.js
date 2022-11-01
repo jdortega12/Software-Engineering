@@ -5,22 +5,22 @@ import FormStyle from "../Form.style";
 
 export default class TeamRequestForm extends React.Component {
     state = {
-        ReceiverID: null,
+        ReceiverUsername: null,
         Message: null
     }
 
     async handleSubmit() {
         console.log(this.state);
         try {
-            const response = await fetch('http://localhost:8080/api/v1/createTeamRequest', {
+            const response = await fetch('http://10.0.2.2:8080/api/v1/createTeamRequest', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json'
                 },
                 body: {
-                    'ReceiverID': this.state.ReceiverID,
-                    'Message': this.state.Message
+                    'receiver_username': this.state.ReceiverUsername,
+                    'message': this.state.Message
                 }
             })
 
@@ -32,8 +32,8 @@ export default class TeamRequestForm extends React.Component {
 
     render() {
         console.log(this.props);
-        this.state.ReceiverID = this.props.ReceiverID;
-        const titleString = this.props.type == '0' ? 'Request to join ' + this.state.ReceiverID + '\'s team' : 'Invite ' + this.state.ReceiverID + ' to Your Team';
+        this.state.ReceiverUsername = this.props.ReceiverUsername;
+        const titleString = this.props.type == '0' ? 'Request to join ' + this.state.ReceiverUsername + '\'s team' : 'Invite ' + this.state.ReceiverUsername + ' to Your Team';
         return (
             <View style={FormStyle.container}>
                 <Text style={FormStyle.teamRequest}>{titleString}</Text>
