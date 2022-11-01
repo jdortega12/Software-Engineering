@@ -27,6 +27,8 @@ func SetupHandlers(router *gin.Engine) {
 		v1 := api.Group("/v1")
 		{
 			// endpoints requiring no authentication
+			v1.GET("/get-user", handleGetUser)
+
 			v1.POST("/createAccount", handleCreateAccount)
 			v1.POST("/login", handleLogin)
 			v1.POST("/logout", handleLogout)
@@ -229,4 +231,50 @@ func handleCreateTeamNotification(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusAccepted)
+}
+
+// Receives a username in a User JSON and responds with JSON of the public info
+// about that user. Returns HTTP Status Found on success. Aborts with Status Bad
+// Request if JSON cannot be bound, Not Found if user doesn't exist, and Internal
+// Server Error if the user's personal info or team cannot be found.
+func handleGetUser(ctx *gin.Context) {
+	userToGet := &model.User{}
+	err := ctx.BindJSON(userToGet)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	userFound, err := model.GetUserByUsername(userToGet.Username)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	userFound.Password = ""
+
+	userInfoFound, err := model.GetUserPersonalInfoByID(userFound.ID)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	teamName := ""
+	if userFound.TeamID != 0 {
+		userTeamFound, err := model.GetTeamByID(userFound.TeamID)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		teamName = userTeamFound.Name
+	}
+
+	userData := &userDataWrapper{
+		User:         *userFound,
+		PersonalInfo: *userInfoFound,
+		TeamName:     teamName,
+	}
+
+	ctx.JSON(http.StatusFound, userData)
 }

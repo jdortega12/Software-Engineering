@@ -129,14 +129,14 @@ func Test_UpdateUserPhoto(t *testing.T) {
 	cleanUpDB()
 }
 
-// Tests getUserByUsername() when user exists.
-func Test_getUserByUsername_UserExists(t *testing.T) {
+// Tests GetUserByUsername() when user exists.
+func Test_GetUserByUsername_UserExists(t *testing.T) {
 	user := &User{
 		Username: "weenjeen",
 	}
 	DBConn.Create(user)
 
-	userFromDB, err := getUserByUsername("weenjeen")
+	userFromDB, err := GetUserByUsername("weenjeen")
 	if err != nil {
 		t.Errorf("Error %s", err)
 	}
@@ -147,9 +147,9 @@ func Test_getUserByUsername_UserExists(t *testing.T) {
 	cleanUpDB()
 }
 
-// Tests that getUserByUsername() returns error when user doesn't exist.
-func Test_getUserByUsername_NoUser(t *testing.T) {
-	_, err := getUserByUsername("weenjeen")
+// Tests that GetUserByUsername() returns error when user doesn't exist.
+func Test_GetUserByUsername_NoUser(t *testing.T) {
+	_, err := GetUserByUsername("weenjeen")
 	if err == nil {
 		t.Error("Err should be non-nil, user doesn't exist")
 	}
@@ -176,4 +176,47 @@ func Test_UpdateUserTeam(t *testing.T) {
 	}
 
 	cleanUpDB()
+}
+
+// Tests that GetUserPersonalInfoByID() works when info exists.
+func Test_GetUserPersonalInfoByID_Valid(t *testing.T) {
+	testUserID := uint(1)
+
+	testInfo := &UserPersonalInfo{
+		ID:        testUserID,
+		Firstname: "Joe",
+		Lastname:  "Luhrman",
+		Height:    50,
+		Weight:    50,
+	}
+	if err := DBConn.Create(testInfo).Error; err != nil {
+		t.Error(err)
+	}
+
+	testInfoCpy, err := GetUserPersonalInfoByID(testUserID)
+	if err != nil {
+		t.Error(err)
+	}
+
+	testInfoCpy.CreatedAt = testInfo.CreatedAt
+	testInfoCpy.UpdatedAt = testInfo.UpdatedAt
+	testInfoCpy.DeletedAt = testInfo.DeletedAt
+
+	if *testInfo != *testInfoCpy {
+		t.Error("structs should be the same before creating and after reading from DB")
+	}
+
+	cleanUpDB()
+}
+
+// Makes sure that GetUserPersonalInfoByID() returns error when info
+// does not exist in the DB.
+func Test_GetUserPersonalInfoByID_NotExists(t *testing.T) {
+	testUserID := uint(1)
+
+	_, err := GetUserPersonalInfoByID(testUserID)
+	if err == nil {
+		t.Error("should have produced an error when user info not in DB")
+	}
+
 }

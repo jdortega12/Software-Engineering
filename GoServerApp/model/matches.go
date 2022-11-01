@@ -19,8 +19,8 @@ const (
 
 // Corresponds to matches table in DB.
 type Match struct {
-	ID       uint
-	SeasonID uint
+	ID       uint `json:"-"`
+	SeasonID uint `json:"-"`
 
 	MatchType matchType `gorm:"not null"`
 
@@ -46,7 +46,7 @@ type Match struct {
 	// player's profile permanently or both
 
 	// metadata
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
 }

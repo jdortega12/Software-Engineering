@@ -16,7 +16,7 @@ import (
 // the same role, and neither can belong to an Admin. SenderUsername and
 // ReceiverUsername are included to make converting to/from JSON easier.
 type TeamNotification struct {
-	ID uint
+	ID uint `json:"-"`
 
 	SenderID   uint `gorm:"not null" json:"sender_id"`
 	ReceiverID uint `gorm:"not null" json:"receiver_id"`
@@ -27,21 +27,21 @@ type TeamNotification struct {
 	Message string
 
 	// metadata
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
 // Creates a TeamNotification in the DB. Makes sure that the receiver exists,
 // neither sender nor receiver are admins, and that that they are not both players
 // or managers. Returns error if one occurred.
 func CreateTeamNotification(teamNotification *TeamNotification) error {
-	sender, err := getUserByUsername(teamNotification.SenderUsername)
+	sender, err := GetUserByUsername(teamNotification.SenderUsername)
 	if err != nil {
 		return err
 	}
 
-	receiver, err := getUserByUsername(teamNotification.ReceiverUsername)
+	receiver, err := GetUserByUsername(teamNotification.ReceiverUsername)
 	if err != nil {
 		return err
 	}

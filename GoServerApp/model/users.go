@@ -56,30 +56,30 @@ const (
 
 // Corresponds to users table in DB.
 type User struct {
-	ID     uint
-	TeamID uint
+	ID     uint `json:"-"`
+	TeamID uint `json:"-"`
 
 	Username string `gorm:"unique;not null" json:"username"`
 	Email    string `json:"email"`
 	Password string `gorm:"not null" json:"password"`
 
-	Role userRole `gorm:"not null"`
+	Role userRole `gorm:"not null" json:"role"`
 
-	Position playerPosition
+	Position playerPosition `json:"position"`
 
-	Photo string
+	Photo string `json:"photo"`
 
 	// metadata
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
 // Personal info of a user that they can change at any time
 // without any permission or extra complication.
 type UserPersonalInfo struct {
 	// must be same ID as user whom it belongs to
-	ID uint
+	ID uint `json:"-"`
 
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
@@ -88,9 +88,9 @@ type UserPersonalInfo struct {
 	Weight uint `json:"weight,string"` // lbs
 
 	// metadata
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
 // Updates the personal info of a user in the DB. Returns error if one ocurred.
@@ -146,9 +146,17 @@ func UpdateUserTeam(user *User, teamID uint) error {
 }
 
 // Pulls User out of DB by username.
-func getUserByUsername(username string) (*User, error) {
+func GetUserByUsername(username string) (*User, error) {
 	user := &User{}
 	err := DBConn.Where("username = ?", username).First(user).Error
 
 	return user, err
+}
+
+// Pulls a user's personal info by user's ID
+func GetUserPersonalInfoByID(id uint) (*UserPersonalInfo, error) {
+	info := &UserPersonalInfo{}
+	err := DBConn.Where("id = ?", id).First(info).Error
+
+	return info, err
 }

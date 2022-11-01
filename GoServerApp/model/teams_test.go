@@ -78,3 +78,35 @@ func Test_DeleteTeam_NotInDB(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+// Tests that GetTeamByID() returns correct team when it exists.
+func Test_GetTeamByID_Valid(t *testing.T) {
+	team := &Team{
+		ID:   5,
+		Name: "Badgers",
+	}
+	DBConn.Create(team)
+
+	teamFromDB, err := GetTeamByID(5)
+	if err != nil {
+		t.Error(err)
+	}
+
+	team.CreatedAt = teamFromDB.CreatedAt
+	team.UpdatedAt = teamFromDB.UpdatedAt
+	team.DeletedAt = teamFromDB.DeletedAt
+
+	if *teamFromDB != *team {
+		t.Error("team taken from db was not the same as what was created")
+	}
+
+	cleanUpDB()
+}
+
+// Makes sure GetTeamByID() returns an error when team doesn't exist.
+func Test_GetTeamByID_Invalid(t *testing.T) {
+	_, err := GetTeamByID(5)
+	if err == nil {
+		t.Error("should have produced an error when team doesn't exist")
+	}
+}

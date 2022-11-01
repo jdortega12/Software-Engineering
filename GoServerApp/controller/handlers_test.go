@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
 	"net/http/httptest"
@@ -516,4 +517,174 @@ func Test_handleCreateTeam_BadJSON(t *testing.T) {
 	}
 
 	cleanUpDB()
+}
+
+// Tests that get-user endpoint responds http found and correct
+// data when all conditions are met.
+func Test_handleGetUser_Valid(t *testing.T) {
+	userToGet := &model.User{
+		ID:       5,
+		TeamID:   3,
+		Username: "Jimmy",
+		Email:    "j@j.com",
+		Password: "shouldn't matter",
+		Role:     model.PLAYER,
+		Position: model.QUARTERBACK,
+		Photo:    "asdfasdfasdf",
+	}
+	model.DBConn.Create(userToGet)
+
+	userInfoToGet := &model.UserPersonalInfo{
+		ID:        5,
+		Firstname: "Joe",
+		Lastname:  "Luhrman",
+		Height:    50,
+		Weight:    50,
+	}
+	model.DBConn.Create(userInfoToGet)
+
+	teamUserBelongsTo := &model.Team{
+		ID:   3,
+		Name: "Jumbos",
+	}
+	model.DBConn.Create(teamUserBelongsTo)
+
+	router := setupTestRouter()
+
+	requestJSON, _ := json.Marshal(&model.User{
+		Username: "Jimmy",
+	})
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user",
+		bytes.NewBuffer(requestJSON), router)
+
+	if w.Code != http.StatusFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusFound)
+	}
+
+	responseData := &userDataWrapper{}
+	err := json.NewDecoder(w.Result().Body).Decode(responseData)
+	if err != nil {
+		t.Error(err)
+	}
+
+	originalData := &userDataWrapper{
+		User:         *userToGet,
+		PersonalInfo: *userInfoToGet,
+		TeamName:     teamUserBelongsTo.Name,
+	}
+	originalData.User.Password = ""
+
+	// marshall and unmarshall the data to remove non-json fields before
+	// final comparison with response data
+	originalDataJSON, _ := json.Marshal(originalData)
+
+	originalDataUnMarsh := &userDataWrapper{}
+	err = json.Unmarshal(originalDataJSON, originalDataUnMarsh)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(responseData)
+	fmt.Println(originalDataUnMarsh)
+
+	if *responseData != *originalDataUnMarsh {
+		t.Error("structs are not equal")
+	}
+
+	cleanUpDB()
+}
+
+// Tests that get-user endpoint returns found and correct data
+// when user doesn't belong to a team.
+func Test_handleGetUser_NoTeam(t *testing.T) {
+	userToGet := &model.User{
+		ID:       5,
+		Username: "Jimmy",
+		Email:    "j@j.com",
+		Password: "shouldn't matter",
+		Role:     model.PLAYER,
+		Position: model.QUARTERBACK,
+		Photo:    "asdfasdfasdf",
+	}
+	model.DBConn.Create(userToGet)
+
+	userInfoToGet := &model.UserPersonalInfo{
+		ID:        5,
+		Firstname: "Joe",
+		Lastname:  "Luhrman",
+		Height:    50,
+		Weight:    50,
+	}
+	model.DBConn.Create(userInfoToGet)
+
+	router := setupTestRouter()
+
+	requestJSON, _ := json.Marshal(&model.User{
+		Username: "Jimmy",
+	})
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user",
+		bytes.NewBuffer(requestJSON), router)
+
+	if w.Code != http.StatusFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusFound)
+	}
+
+	responseData := &userDataWrapper{}
+	err := json.NewDecoder(w.Result().Body).Decode(responseData)
+	if err != nil {
+		t.Error(err)
+	}
+
+	originalData := &userDataWrapper{
+		User:         *userToGet,
+		PersonalInfo: *userInfoToGet,
+	}
+	originalData.User.Password = ""
+
+	// marshall and unmarshall the data to remove non-json fields before
+	// final comparison with response data
+	originalDataJSON, _ := json.Marshal(originalData)
+
+	originalDataUnMarsh := &userDataWrapper{}
+	err = json.Unmarshal(originalDataJSON, originalDataUnMarsh)
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(responseData)
+	fmt.Println(originalDataUnMarsh)
+
+	if *responseData != *originalDataUnMarsh {
+		t.Error("structs are not equal")
+	}
+
+	cleanUpDB()
+}
+
+// Tests that get-user endpoint returns bad request when the json isn't correct.
+func Test_handleGetUser_BadJSON(t *testing.T) {
+	router := setupTestRouter()
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user", nil, router)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+// Makes sure get-user endpoint responds http not found when user doesn't exist.
+func Test_handleGetUser_NoUser(t *testing.T) {
+	router := setupTestRouter()
+
+	jsonData, _ := json.Marshal(&model.User{
+		Username: "doesn't matter",
+	})
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/get-user", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusNotFound)
+	}
 }
