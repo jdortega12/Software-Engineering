@@ -30,6 +30,19 @@ func userAuthMiddleware(ctx *gin.Context) {
 	ctx.Next()
 }
 
+// Middleware for authenticating that a user is a player. Aborts with HTTP
+// Status Unauthorized if not.
+func playerAuthMiddleware(ctx *gin.Context) {
+	user := ctx.Keys[USER_KEY].(*model.User)
+
+	if user.Role != model.PLAYER {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	ctx.Next()
+}
+
 // Middleware for authenticating that a user is a manager. Aborts with
 // HTTP Status Unauthorized if user is not manager.
 func managerAuthMiddleware(ctx *gin.Context) {

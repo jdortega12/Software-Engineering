@@ -168,3 +168,40 @@ func Test_CreateTeamNotification_InvalidReceiver(t *testing.T) {
 
 	cleanUpDB()
 }
+
+// Tests that CreatePromotionToManagerRequest() returns no errors when all
+// required fields are present.
+func Test_CreatePromotionToManagerRequest_Valid(t *testing.T) {
+	err := CreatePromotionToManagerRequest(&PromotionToManagerRequest{
+		SenderID:       0,
+		SenderUsername: "doesnt matter",
+	})
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	cleanUpDB()
+}
+
+// Test that GetPromoToManReqBySendUsername returns no error when the request exists in the DB.
+func Test_GetPromoToManReqBySendUsername_Exists(t *testing.T) {
+	DBConn.Create(&PromotionToManagerRequest{
+		SenderUsername: "jaluhrman",
+	})
+
+	_, err := GetPromoToManReqBySendUsername("jaluhrman")
+	if err != nil {
+		t.Error(err)
+	}
+
+	cleanUpDB()
+}
+
+// Tests that func returns an error when the user doesn't exist.
+func Test_GetPromoToManReqBySendUsername_DoesntExist(t *testing.T) {
+	_, err := GetPromoToManReqBySendUsername("jaluhrman")
+	if err == nil {
+		t.Error("should have produced an error when user doesn't exist")
+	}
+}

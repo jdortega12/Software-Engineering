@@ -25,6 +25,7 @@ func cleanUpDB() {
 	DBConn.Exec("DELETE FROM teams")
 	DBConn.Exec("DELETE FROM team_notifications")
 	DBConn.Exec("DELETE FROM matches")
+	DBConn.Exec("DELETE FROM promotion_to_manager_requests")
 }
 
 func TestMain(m *testing.M) {

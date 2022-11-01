@@ -41,6 +41,12 @@ func SetupHandlers(router *gin.Engine) {
 				userAuth.POST("/updatePersonalInfo", handleUpdateUserPersonalInfo)
 				userAuth.POST("/createPhoto", handleCreatePhoto)
 
+				playerAuth := userAuth.Group("")
+				playerAuth.Use(playerAuthMiddleware)
+				{
+					playerAuth.POST("/create-promotion-to-manager-request", handleCreatePromotionToManagerRequest)
+				}
+
 				// endpoints requiring user to be a manager
 				managerAuth := userAuth.Group("")
 				managerAuth.Use(managerAuthMiddleware)
@@ -277,4 +283,36 @@ func handleGetUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusFound, userData)
+}
+
+// Receives a PromotionToManagerRequest JSON and passes to model to be created.
+// Responds HTTP Status Accepted on success. Returns HTTP Status Conflict if user
+// already has an open request, HTTP Status Bad Request if JSON cannot be bound, and
+// HTTP Internal Server Error if request cannot be created in DB.
+func handleCreatePromotionToManagerRequest(ctx *gin.Context) {
+	user := ctx.Keys[USER_KEY].(*model.User)
+
+	// make sure user has no open requests
+	_, err := model.GetPromoToManReqBySendUsername(user.Username)
+	if err == nil {
+		ctx.AbortWithStatus(http.StatusConflict)
+		return
+	}
+
+	request := &model.PromotionToManagerRequest{}
+	if err := ctx.BindJSON(request); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	request.SenderID = user.ID
+	request.SenderUsername = user.Username
+
+	err = model.CreatePromotionToManagerRequest(request)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
 }

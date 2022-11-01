@@ -72,6 +72,7 @@ func cleanUpDB() {
 	model.DBConn.Exec("DELETE FROM teams")
 	model.DBConn.Exec("DELETE FROM team_notifications")
 	model.DBConn.Exec("DELETE FROM matches")
+	model.DBConn.Exec("DELETE FROM promotion_to_manager_requests")
 }
 
 // Initializes db then runs all tests in controller
@@ -687,4 +688,89 @@ func Test_handleGetUser_NoUser(t *testing.T) {
 	if w.Code != http.StatusNotFound {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusNotFound)
 	}
+}
+
+// Tests that create-promotion-to-manager-request responds Status Accepted when everything
+// is valid.
+func Test_handleCreatePromotionToManagerRequest_Valid(t *testing.T) {
+	user := &model.User{
+		Username: "jaluhrman",
+		Password: "ween",
+		Role:     model.PLAYER,
+	}
+	model.DBConn.Create(user)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+		ctx.Next()
+	})
+
+	request := &model.PromotionToManagerRequest{
+		Message: "UH OH",
+	}
+
+	jsonData, _ := json.Marshal(request)
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/create-promotion-to-manager-request",
+		bytes.NewBuffer(jsonData), router)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
+
+// Tests that create-promotion-to-manager-request endpoint responds status conflict
+// when user already has an open request.
+func Test_handleCreatePromotionToManagerRequest_Conflict(t *testing.T) {
+	user := &model.User{
+		Username: "jaluhrman",
+		Password: "ween",
+		Role:     model.PLAYER,
+	}
+	model.DBConn.Create(user)
+
+	conflictReq := &model.PromotionToManagerRequest{
+		SenderID:       user.ID,
+		SenderUsername: user.Username,
+	}
+	model.DBConn.Create(conflictReq)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+		ctx.Next()
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/create-promotion-to-manager-request", nil, router)
+
+	if w.Code != http.StatusConflict {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusConflict)
+	}
+
+	cleanUpDB()
+}
+
+// Makes sure create-promotion-to-manager-request endpoint responds bad request
+// when the JSON is invalid.
+func Test_handleCreatePromotionToManagerRequest_BadJSON(t *testing.T) {
+	user := &model.User{
+		Username: "jaluhrman",
+		Password: "ween",
+		Role:     model.PLAYER,
+	}
+	model.DBConn.Create(user)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "jaluhrman", "ween")
+		ctx.Next()
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/create-promotion-to-manager-request", nil, router)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	}
+
+	cleanUpDB()
 }

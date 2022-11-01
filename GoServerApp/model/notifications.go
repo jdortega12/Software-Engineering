@@ -24,7 +24,22 @@ type TeamNotification struct {
 	SenderUsername   string `gorm:"not null" json:"sender_username"`
 	ReceiverUsername string `gorm:"not null" json:"receiver_username"`
 
-	Message string
+	Message string `json:"message"`
+
+	// metadata
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
+}
+
+// Corresponds to promotion_to_manager_requests table in DB.
+type PromotionToManagerRequest struct {
+	ID uint `json:"-"`
+
+	SenderID       uint   `gorm:"not null" json:"-"`
+	SenderUsername string `gorm:"not null" json:"sender_username"`
+
+	Message string `json:"message"`
 
 	// metadata
 	CreatedAt time.Time      `json:"-"`
@@ -58,4 +73,18 @@ func CreateTeamNotification(teamNotification *TeamNotification) error {
 
 	err = DBConn.Create(teamNotification).Error
 	return err
+}
+
+// Creates a PromotionToManagerRequest in the DB.
+func CreatePromotionToManagerRequest(request *PromotionToManagerRequest) error {
+	err := DBConn.Create(request).Error
+	return err
+}
+
+// Finds a PromotionToManagerRequest by the sender's username.
+func GetPromoToManReqBySendUsername(username string) (*PromotionToManagerRequest, error) {
+	request := &PromotionToManagerRequest{}
+	err := DBConn.Where("sender_username = ?", username).First(request).Error
+
+	return request, err
 }
