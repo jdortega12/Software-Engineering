@@ -1,6 +1,6 @@
-import React from "react"
-import {Button, Text, View, TouchableOpacity} from "react-native"
-import {launchImageLibrary} from 'react-native-image-picker'
+import React from "react";
+import {Button, Text, View, TouchableOpacity} from "react-native";
+import {launchImageLibrary} from 'react-native-image-picker';
 import ImgToBase64 from 'react-native-image-base64'
 import FormStyle from "../Form.style";
 
@@ -30,7 +30,7 @@ export default class UploadImage extends React.Component {
             console.log(this.state.photo.assets[0].uri);
             ImgToBase64.getBase64String(this.state.photo.assets[0].uri).then( 
                 (base64String) => {
-                    fetch('http://localhost:8080/api/v1/createPhoto', {
+                    fetch('http://10.0.2.2:8080/api/v1/createPhoto', {
                         method: "POST", 
                         headers: {
                             Accept: "application/json",
