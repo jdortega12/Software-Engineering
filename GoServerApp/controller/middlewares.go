@@ -25,7 +25,7 @@ func userAuthMiddleware(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Set("user", user)
+	ctx.Set(USER_KEY, user)
 
 	ctx.Next()
 }
