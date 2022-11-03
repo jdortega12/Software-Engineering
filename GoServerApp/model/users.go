@@ -10,48 +10,48 @@ import (
 // users.go -> database CRUDing for users
 
 // Enum definition for user roles. Defaults in DB to PLAYER.
-type userRole uint
+type userRole string
 
 const (
-	PLAYER userRole = iota
-	MANAGER
-	ADMIN
+	PLAYER  userRole = "player"
+	MANAGER userRole = "panager"
+	ADMIN   userRole = "admin"
 )
 
 // Enum definition for player positions. Defaults to NULL in DB.
-type playerPosition uint
+type playerPosition string
 
 const (
 	// NULL for non-players or players not on team
-	NULL playerPosition = iota
+	NO_POSITION playerPosition = "no position"
 
 	// offense
-	QUARTERBACK
-	RUNNING_BACK
-	FULLBACK
-	WIDE_REC
-	TIGHT_END
-	OFF_TACKLE
-	OFF_GUARD
-	CENTER
+	QUARTERBACK  playerPosition = "quarterback"
+	RUNNING_BACK playerPosition = "running back"
+	FULLBACK     playerPosition = "fullback"
+	WIDE_REC     playerPosition = "wide receiver"
+	TIGHT_END    playerPosition = "tight end"
+	OFF_TACKLE   playerPosition = "offensive tackle"
+	OFF_GUARD    playerPosition = "offensive guard"
+	CENTER       playerPosition = "center"
 
 	// defense
-	NOSE_TACKLE
-	DEF_TACKLE
-	DEF_END
-	MID_LINEBACK
-	OUT_LINEBACK
-	CORNERBACK
-	FREE_SAFETY
-	STRONG_SAFETY
+	NOSE_TACKLE   playerPosition = "nose tackle"
+	DEF_TACKLE    playerPosition = "defensive tackle"
+	DEF_END       playerPosition = "defensive end"
+	MID_LINEBACK  playerPosition = "middle linebacker"
+	OUT_LINEBACK  playerPosition = "outside linebacker"
+	CORNERBACK    playerPosition = "cornerback"
+	FREE_SAFETY   playerPosition = "free safety"
+	STRONG_SAFETY playerPosition = "strong safety"
 
 	// special teams
-	KICKER
-	PUNTER
-	LONG_SNAP
-	HOLDER
-	KICK_RETURN
-	PUNT_RETURN
+	KICKER      playerPosition = "kicker"
+	PUNTER      playerPosition = "punter"
+	LONG_SNAP   playerPosition = "long snapper"
+	HOLDER      playerPosition = "holder"
+	KICK_RETURN playerPosition = "kick returner"
+	PUNT_RETURN playerPosition = "punt returner"
 )
 
 // Corresponds to users table in DB.
@@ -63,9 +63,9 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `gorm:"not null" json:"password"`
 
-	Role userRole `gorm:"not null" json:"role"`
+	Role userRole `gorm:"not null;default:player" json:"role"`
 
-	Position playerPosition `json:"position"`
+	Position playerPosition `gorm:"default:no position" json:"position"`
 
 	Photo string `json:"photo"`
 
