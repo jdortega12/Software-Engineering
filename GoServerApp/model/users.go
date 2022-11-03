@@ -128,7 +128,8 @@ func CreateUser(user *User) error {
 // Takes photo as base64 string, username, password, and updates user's photo
 func UpdateUserPhoto(photo string, username string, password string) error {
 	user := User{}
-	err := DBConn.Where("username = ?", username, &user).Error
+	result := DBConn.First(&user, "username = ?", username)
+	err := result.Error; 
 
 	if err != nil || user.Password != password {
 		return err
@@ -136,6 +137,7 @@ func UpdateUserPhoto(photo string, username string, password string) error {
 
 	user.Photo = photo
 	DBConn.Save(&user)
+
 	return err
 }
 
