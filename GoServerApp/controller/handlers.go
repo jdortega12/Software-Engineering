@@ -58,7 +58,7 @@ func SetupHandlers(router *gin.Engine) {
 				adminAuth := userAuth.Group("")
 				adminAuth.Use(adminAuthMiddleware)
 				{
-
+					adminAuth.GET("/promotion-to-manager-requests", handleGetPromotionToManagerRequests)
 				}
 			}
 		}
@@ -310,4 +310,17 @@ func handleCreatePromotionToManagerRequest(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusAccepted)
+}
+
+// Responds with JSON of all PromotionToManagerRequest's in the DB for an admin's
+// notifications. Responds HTTP Status Found on success and Internal Sever Error
+// if for some reason there is an error retrieved the requests.
+func handleGetPromotionToManagerRequests(ctx *gin.Context) {
+	requests, err := model.GetAllPromotionToManagerRequests()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusFound, requests)
 }
