@@ -1,11 +1,11 @@
 import React from "react"
 import {Text, View, TouchableOpacity, Image} from "react-native"
-import TopBar from "../component/TopBar"
-import ProfileStyle from "../Profile.style"
-import handleGetUserProfile from "../../event-handler/HandleGetUserProfile"
+import TopBar from "../../component/TopBar"
+import ProfileStyle from "../../Profile.style"
+import handleGetUserProfile from "../../../event-handler/HandleGetUserProfile"
+import handleRequestToBeManager from "../../../event-handler/request_manager_promotion/HandleRequestToBeManager"
 
-// Screen for displaying a user's profile. Accepts bool isSelf for whether
-// the profile to display belongs to the logged in user or not.
+// Screen for displaying a user's profile. 
 export default class UserProfileScreen extends React.Component {
     state = {
         responseReceived: false,
@@ -37,10 +37,29 @@ export default class UserProfileScreen extends React.Component {
         // if no data was returned (bad request or some other error)
         if(this.state.userData == null) {
             return (
-                <Text>
-                    User not found.
-                </Text>
+                <>
+                    <TopBar/>
+                    <Text>
+                        User not found.
+                    </Text>
+                </>
             )
+        }
+
+        // determine whether to display the request to become manager button
+        // if this is the logged in user's profile and they are not already
+        // a manager
+        let isSelf = this.props.isSelf
+
+        if (isSelf) {
+            button = (
+                <TouchableOpacity style={ProfileStyle.interactionArea} onPress={() => handleRequestToBeManager("blah blah")}>
+                    <Text style={ProfileStyle.interactionText}>
+                        Request to become manager
+                    </Text>
+                </TouchableOpacity>)
+        } else {
+            button = <></>
         }
 
         let user = this.state.userData.user
@@ -103,11 +122,7 @@ export default class UserProfileScreen extends React.Component {
                 </View>
 
                 <View style={ProfileStyle.interactionsSectionView}> 
-                    <TouchableOpacity style={ProfileStyle.interactionArea}>
-                        <Text style={ProfileStyle.interactionText}>
-                            Contextual button
-                        </Text>
-                    </TouchableOpacity>
+                    {button}
                 </View>
 
                 <View style={ProfileStyle.emptySpaceView}/>

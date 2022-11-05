@@ -6,14 +6,14 @@ export default StyleSheet.create({
         paddingHorizontal: 5,
         margin: 10,
         borderColor: "grey",
-        borderWidth:3,
+        borderBottomWidth:3,
         borderRadius:15,
         backgroundColor: 'white',
         alignItems: "flex-start",
     },
     photoSectionView: {
         flex: 1.10,
-        margin: 10,
+        margin: 20,
         backgroundColor: 'white',
         justifyContent:'space-between',
         flexDirection:'row'
@@ -32,7 +32,7 @@ export default StyleSheet.create({
     interactionsSectionView: {
         borderWidth:3,
         borderRadius:15,
-        flex: .80,
+        flex: 1.5,
         margin: 10,
         backgroundColor: "white",
         alignItems: "flex-start",
@@ -78,12 +78,15 @@ export default StyleSheet.create({
         width: 100,
         margin: 10,
         borderRadius: 10,
+        borderColor:"black",
+        borderWidth:2,
     },
     interactionText: {
         textAlign: 'center',
         textAlignVertical: 'center',
         color:'black',
         fontWeight: 'bold',
-        fontSize: 15,
+        fontSize: 11,
+        margin:1,
     }
 })

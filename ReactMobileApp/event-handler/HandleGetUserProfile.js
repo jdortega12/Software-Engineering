@@ -1,6 +1,3 @@
-import React from "react"
-import {getCookies} from "./session/session_util"
-
 // Gets the data for a user's profile and displays it 
 export default async function handlGetUserProfile(username) {
     let userData = null
