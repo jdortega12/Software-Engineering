@@ -5,6 +5,7 @@ import (
 	"io"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,6 +33,7 @@ func SetupHandlers(router *gin.Engine) {
 			v1.POST("/createAccount", handleCreateAccount)
 			v1.POST("/login", handleLogin)
 			v1.POST("/logout", handleLogout)
+			v1.GET("/getTeam/:id", handleGetTeam)
 
 			// endpoints requiring user authentication
 			userAuth := v1.Group("")
@@ -312,6 +314,7 @@ func handleCreatePromotionToManagerRequest(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+<<<<<<< HEAD
 // Responds with JSON of all PromotionToManagerRequest's in the DB for an admin's
 // notifications. Responds HTTP Status Found on success and Internal Sever Error
 // if for some reason there is an error retrieved the requests.
@@ -323,4 +326,28 @@ func handleGetPromotionToManagerRequests(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusFound, requests)
+=======
+// Recieves a team ID and returns a JSON containing the id, name, and location of that team
+func handleGetTeam(ctx *gin.Context) {
+	teamID := ctx.Param("id")
+	teamIDInt, err := strconv.Atoi(teamID) 
+
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	team, err2 := model.GetTeamByID(uint(teamIDInt))
+
+	if err2 != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+	}
+
+	ctx.JSON(http.StatusFound, gin.H{
+		"id": team.ID, 
+		"name": team.Name,
+		"location": team.TeamLocation, 
+
+	})
+
+>>>>>>> 8636810ff69f8746e708161345bb71b063cd2f21
 }
