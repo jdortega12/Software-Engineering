@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/gin-contrib/sessions"
@@ -753,6 +754,109 @@ func Test_handleCreatePromotionToManagerRequest_BadJSON(t *testing.T) {
 	})
 
 	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/create-promotion-to-manager-request", nil, router)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	}
+
+	cleanUpDB()
+}
+
+// Tests get promotion to manager requests endpoint responds correct status
+// code when all conditions are met
+func Test_handleGetPromotionToManagerRequests_Valid(t *testing.T) {
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.DBConn.Create(admin)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/promotion-to-manager-requests", nil, router)
+
+	if w.Code != http.StatusFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusFound)
+	}
+
+	cleanUpDB()
+}
+
+// Makes sure get promotion to manager requests endpoint correctly rejects a non-admin.
+func Test_handleGetPromotionToManagerRequests_NotAdmin(t *testing.T) {
+	notAdmin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.MANAGER,
+	}
+	model.DBConn.Create(notAdmin)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, notAdmin.Username, notAdmin.Password)
+	})
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/promotion-to-manager-requests", nil, router)
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusUnauthorized)
+	}
+
+	cleanUpDB()
+}
+
+// Test Retrieving a team with call to getTeam
+func TestHandleGetTeam(t *testing.T) {
+	// Insert team into DB
+	team := model.Team{
+		Name:         "Halal Knots",
+		TeamLocation: "Knott Hall",
+	}
+
+	result := model.DBConn.Create(&team)
+
+	if result.Error != nil {
+		t.Error(result.Error)
+	}
+
+	// Find team based on its name so we know what ID it has
+	teamQuery := model.Team{}
+	err := model.DBConn.Where("name = ?", "Halal Knots").First(&teamQuery).Error
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Now, we send the get request and check if we can retrieve the team with the ID we inserted
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeam/"+strconv.FormatUint(uint64(teamQuery.ID), 10), nil, router)
+
+	if w.Code != http.StatusFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusFound)
+	}
+
+	cleanUpDB()
+}
+
+// Send a request to getTeam with an ID that doesn't exist
+func TestGetTeamInvalidId(t *testing.T) {
+	// We send the get request and check if we get the proper error for an invalid ID
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeam/69", nil, router)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusNotFound)
+	}
+
+	cleanUpDB()
+}
+
+// Send a request to getTeam with an ID that is formatted incorrectly
+func TestGetTeamBadFormat(t *testing.T) {
+	// We send the get request and check if we get the proper error for an invalid ID
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeam/sixtynine", nil, router)
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)

@@ -1,5 +1,5 @@
-import React from "react";
-import {Button, Text, View, TouchableOpacity} from "react-native";
+import React, {useState} from "react";
+import {Button, Text, View, TouchableOpacity, Image} from "react-native";
 import {launchImageLibrary} from 'react-native-image-picker';
 import ImgToBase64 from 'react-native-image-base64'
 import FormStyle from "../Form.style";
@@ -19,7 +19,9 @@ export default class UploadImage extends React.Component {
             console.log(response);
             if (response.assets[0].uri) {
                 console.log('recieved response');
-                this.state.photo = response;
+                this.setState({
+                    photo: response.assets[0]
+                });
             }
         })
     }
@@ -27,8 +29,8 @@ export default class UploadImage extends React.Component {
     handleUploadPhoto = () => {
         console.log(this.state.photo);
         if(this.state.photo != null) {
-            console.log(this.state.photo.assets[0].uri);
-            ImgToBase64.getBase64String(this.state.photo.assets[0].uri).then( 
+            console.log(this.state.photo.uri);
+            ImgToBase64.getBase64String(this.state.photo.uri).then( 
                 (base64String) => {
                     fetch('http://10.0.2.2:8080/api/v1/createPhoto', {
                         method: "POST", 
@@ -38,7 +40,7 @@ export default class UploadImage extends React.Component {
                         },
                         body: JSON.stringify({
                             photo: base64String, 
-                            type: this.state.photo.assets[0].type
+                            type: this.state.photo.type
                         })
                     });
                 }
@@ -48,12 +50,12 @@ export default class UploadImage extends React.Component {
     }
 
     render() {
-        const {photo} = this.state;
+        const photo = this.state.photo;
         return (
             <View style={FormStyle.container}>
                 {photo && (
                     <Image 
-                        source={{ uri: photo.photo.uri }}
+                        source={{ uri: photo.uri }}
                         style={{ width: 300, height: 300 }}
                     />
                 )}

@@ -1,6 +1,9 @@
 package model
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // Tests that CreateTeamNotification() returns no errors
 // in the case of a valid invite from a manager to a player.
@@ -204,4 +207,83 @@ func Test_GetPromoToManReqBySendUsername_DoesntExist(t *testing.T) {
 	if err == nil {
 		t.Error("should have produced an error when user doesn't exist")
 	}
+}
+
+// Tests that func correctly retrieves all PromotionToManagerRequests.
+func Test_GetAllPromotionToManagerRequests_Multiple(t *testing.T) {
+	requests := []*PromotionToManagerRequest{
+		{
+			SenderID:       5,
+			SenderUsername: "user 5",
+			Message:        "test",
+		},
+		{
+			SenderID:       3,
+			SenderUsername: "jacob",
+			Message:        "oof",
+		},
+		{
+			SenderID:       1,
+			SenderUsername: "teepee",
+			Message:        "goof",
+		},
+	}
+	DBConn.Create(&requests)
+
+	requestsPulled, err := GetAllPromotionToManagerRequests()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(requestsPulled) != 3 {
+		t.Error("not all requests were returned")
+	}
+
+	for i := range requestsPulled {
+		requestsPulled[i].CreatedAt = requests[i].CreatedAt
+		requestsPulled[i].UpdatedAt = requests[i].UpdatedAt
+		requestsPulled[i].DeletedAt = requests[i].DeletedAt
+
+		if *requestsPulled[i] != *requests[i] {
+			t.Errorf("requests at index %d where not equal", i)
+		}
+	}
+
+	cleanUpDB()
+}
+
+// Tests that a good amount of requests can be pulled at once.
+func Test_GetAllPromotionToManagerRequests_LotsOfThem(t *testing.T) {
+	requests := make([]*PromotionToManagerRequest, 100)
+
+	for i := 0; i < 100; i++ {
+		requests[i] = &PromotionToManagerRequest{
+			SenderID:       uint(i),
+			SenderUsername: "user_" + fmt.Sprint(i),
+			Message:        "message " + fmt.Sprint(i),
+		}
+	}
+	DBConn.Create(&requests)
+
+	requestsPulled, err := GetAllPromotionToManagerRequests()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(requestsPulled) != len(requests) {
+		t.Errorf("requests inserted: %d, requests returned: %d",
+			len(requests), len(requestsPulled))
+	}
+
+	for i := range requestsPulled {
+		requestsPulled[i].CreatedAt = requests[i].CreatedAt
+		requestsPulled[i].UpdatedAt = requests[i].UpdatedAt
+		requestsPulled[i].DeletedAt = requests[i].DeletedAt
+
+		if *requestsPulled[i] != *requests[i] {
+			t.Errorf("requests at index %d where not equal", i)
+		}
+	}
+
+	cleanUpDB()
 }
