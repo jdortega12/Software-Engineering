@@ -5,6 +5,7 @@ import UpdateUserPersonalInfoScreen from "./view/screen/UpdateUserPersonalInfo";
 import CreateAccount from "./view/screen/CreateAccountScreen"
 import Login from "./view/screen/LoginScreen"
 import CreateTeam from "./view/screen/CreateTeam"
+
 //import UploadImage from "./view/screen/UploadImage"
 import AskManagerRequestForm from "./view/component/AskManagerRequestForm"
 import InvitePlayerRequestForm from "./view/component/InvitePlayerRequestForm"
@@ -27,8 +28,9 @@ export default function App(){
             <Stack.Navigator>
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="CreateAccount" component={CreateAccount} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="CreateTeam" component={CreateTeam} />
             </Stack.Navigator>
-        
         }</NavigationContainer>
 
         //<HomeScreen />
