@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { Text, View, Button } from "react-native";
 import HomeScreen from "./view/screen/HomeScreen";
 import UpdateUserPersonalInfoScreen from "./view/screen/UpdateUserPersonalInfo";
 import CreateAccount from "./view/screen/CreateAccountScreen"
@@ -26,7 +26,7 @@ export default function App(){
         
         <NavigationContainer>{
             <Stack.Navigator>
-                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Fake Football League'}}/>
                 <Stack.Screen name="CreateAccount" component={CreateAccount} />
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="CreateTeam" component={CreateTeam} />
