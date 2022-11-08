@@ -162,3 +162,11 @@ func GetUserPersonalInfoByID(id uint) (*UserPersonalInfo, error) {
 
 	return info, err
 }
+
+// Pulls a Manager given a teamid 
+func GetManagerByTeamID(teamid uint) (User, error) {
+	user := User{}
+	err := DBConn.Where("team_id = ? AND role == ?", teamid, MANAGER).First(&user).Error
+
+	return user, err
+}
