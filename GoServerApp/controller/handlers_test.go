@@ -788,7 +788,7 @@ func TestHandleGetTeam(t *testing.T) {
 	router := setupTestRouter()
 	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeam/" + strconv.FormatUint(uint64(teamQuery.ID), 10), nil, router)
 
-	if w.Code != http.StatusFound {
+	if w.Code != http.StatusAccepted {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusFound)
 	}
 
