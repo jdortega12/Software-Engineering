@@ -60,7 +60,7 @@ func SetupHandlers(router *gin.Engine) {
 				adminAuth := userAuth.Group("")
 				adminAuth.Use(adminAuthMiddleware)
 				{
-
+					adminAuth.GET("/promotion-to-manager-requests", handleGetPromotionToManagerRequests)
 				}
 			}
 		}
@@ -314,10 +314,23 @@ func handleCreatePromotionToManagerRequest(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+// Responds with JSON of all PromotionToManagerRequest's in the DB for an admin's
+// notifications. Responds HTTP Status Found on success and Internal Sever Error
+// if for some reason there is an error retrieved the requests.
+func handleGetPromotionToManagerRequests(ctx *gin.Context) {
+	requests, err := model.GetAllPromotionToManagerRequests()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusFound, requests)
+}
+
 // Recieves a team ID and returns a JSON containing the id, name, and location of that team
 func handleGetTeam(ctx *gin.Context) {
 	teamID := ctx.Param("id")
-	teamIDInt, err := strconv.Atoi(teamID) 
+	teamIDInt, err := strconv.Atoi(teamID)
 
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
@@ -331,11 +344,18 @@ func handleGetTeam(ctx *gin.Context) {
 		return
 	}
 
+<<<<<<< HEAD
 	ctx.JSON(http.StatusAccepted, gin.H{
 		"id": team.ID, 
 		"name": team.Name,
 		"location": team.TeamLocation, 
 
+=======
+	ctx.JSON(http.StatusFound, gin.H{
+		"id":       team.ID,
+		"name":     team.Name,
+		"location": team.TeamLocation,
+>>>>>>> c476fffbb7171ef3c3754f23627ccfb204e62a6e
 	})
 
 }

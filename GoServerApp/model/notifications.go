@@ -88,3 +88,11 @@ func GetPromoToManReqBySendUsername(username string) (*PromotionToManagerRequest
 
 	return request, err
 }
+
+// Returns slice of all PromotionToManagerRequest's in the DB.
+func GetAllPromotionToManagerRequests() ([]*PromotionToManagerRequest, error) {
+	requests := []*PromotionToManagerRequest{}
+	err := DBConn.Find(&requests).Error
+
+	return requests, err
+}
