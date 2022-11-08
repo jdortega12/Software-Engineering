@@ -828,6 +828,16 @@ func TestHandleGetTeam(t *testing.T) {
 		t.Error(err)
 	}
 
+	// Insert manager with that team into DB so that we don't have an error
+	user := model.User {
+		Username: "Joe Douglas",
+		Password: "allgasnobreaks",
+		Role: model.MANAGER,
+		TeamID: teamQuery.ID,
+	}
+	
+	model.DBConn.Create(&user)
+
 	// Now, we send the get request and check if we can retrieve the team with the ID we inserted
 	router := setupTestRouter()
 	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeam/"+strconv.FormatUint(uint64(teamQuery.ID), 10), nil, router)
@@ -864,3 +874,37 @@ func TestGetTeamBadFormat(t *testing.T) {
 
 	cleanUpDB()
 }
+
+// send a request to getTeam for a team that does not have a manager
+func TestGetTeamNoManager(t *testing.T) {
+	// Insert team into DB
+	team := model.Team{
+		Name:         "Halal Knots",
+		TeamLocation: "Knott Hall",
+	}
+
+	result := model.DBConn.Create(&team)
+
+	if result.Error != nil {
+		t.Error(result.Error)
+	}
+
+	// Find team based on its name so we know what ID it has
+	teamQuery := model.Team{}
+	err := model.DBConn.Where("name = ?", "Halal Knots").First(&teamQuery).Error
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Now, we send the get request and check if we can retrieve the team with the ID we inserted
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeam/"+strconv.FormatUint(uint64(teamQuery.ID), 10), nil, router)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusNotFound)
+	}
+
+	cleanUpDB()
+}
+

@@ -344,11 +344,19 @@ func handleGetTeam(ctx *gin.Context) {
 		return
 	}
 
+	manager, err3 := model.GetManagerByTeamID(uint(teamIDInt))
+
+	if err3 != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
 	ctx.JSON(http.StatusAccepted, gin.H{
 		"id": team.ID, 
 		"name": team.Name,
 		"location": team.TeamLocation, 
-
+		"manager_id": manager.ID,
+		"manager_name": manager.Username,
 	})
 
 }
