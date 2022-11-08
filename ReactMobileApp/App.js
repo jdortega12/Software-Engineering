@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, View, Button } from "react-native";
+import TopBar from "./view/component/TopBar"
 import HomeScreen from "./view/screen/HomeScreen";
 import UpdateUserPersonalInfoScreen from "./view/screen/UpdateUserPersonalInfo";
 import CreateAccount from "./view/screen/CreateAccountScreen"
@@ -11,12 +12,18 @@ import AskManagerRequestForm from "./view/component/AskManagerRequestForm"
 import InvitePlayerRequestForm from "./view/component/InvitePlayerRequestForm"
 import TeamRequestForm from "./view/component/TeamRequestForm"
 
+import ProfileScreen from "./view/screen/user_profile/UserProfileScreen"
+import ProfileScreenPersonal from "./view/screen/user_profile/UserProfileScreenPersonal"
+import ProfileScreenNotPersonal from "./view/screen/user_profile/UserProfileScreenNotPersonal"
+
+import AdminNotificationScreen from "./view/screen/admin_notifications/AdminNotificationsScreen"
+
 //Import navigation files
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 //Create stack
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator()
 
 // The plan for the acceptance test presentation is to 
 // manually switch screens becuase we do not yet have the 
