@@ -344,18 +344,11 @@ func handleGetTeam(ctx *gin.Context) {
 		return
 	}
 
-<<<<<<< HEAD
 	ctx.JSON(http.StatusAccepted, gin.H{
 		"id": team.ID, 
 		"name": team.Name,
 		"location": team.TeamLocation, 
 
-=======
-	ctx.JSON(http.StatusFound, gin.H{
-		"id":       team.ID,
-		"name":     team.Name,
-		"location": team.TeamLocation,
->>>>>>> c476fffbb7171ef3c3754f23627ccfb204e62a6e
 	})
 
 }
