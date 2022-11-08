@@ -4,8 +4,8 @@ export default StyleSheet.create({
     titleBarView: {
         backgroundColor:"#e32636",
         height: "8%",
-        flexDirection:"row",
-        justifyContent:"space-between",
+        flex: 1, 
+        alignItems: 'center',  
     },
     titleText: {
         textAlignVertical:"center",

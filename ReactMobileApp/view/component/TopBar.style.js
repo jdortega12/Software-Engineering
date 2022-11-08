@@ -4,8 +4,7 @@ export default StyleSheet.create({
     titleBarView: {
         backgroundColor:"#e32636",
         height: "8%",
-        flexDirection:"row",
-        justifyContent:"space-between",
+        alignItems: 'center',
     },
     menuIconTouchArea: {
         justifyContent:"center"
@@ -22,7 +21,9 @@ export default StyleSheet.create({
         textAlignVertical:"center"
     },
     titleText: {
-        textAlignVertical:"center",
+        //textAlignVertical:"center",
+        //flex: 1, 
+        textAlign: 'center',
         color:"white",
         fontSize:24,
     },

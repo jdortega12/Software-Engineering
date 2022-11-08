@@ -9,14 +9,6 @@ export default function LoginScreen(){
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    /*
-    function handleSubmit(pEmail, pPwd){
-        const userInfo = {login: pEmail, password: pPwd};
-        handleLogin(userInfo)
-        //console.log(JSON.stringify(user));
-        //alert( JSON.stringify(user) );
-    }
-    */
     return (<>
     <TopBar/>
         <View style={FormStyle.container}>
