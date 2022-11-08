@@ -220,3 +220,49 @@ func Test_GetUserPersonalInfoByID_NotExists(t *testing.T) {
 	}
 
 }
+
+
+// Insert a manager into the DB with a TeamId of 1 and check that the record can be recovered
+func TestGetManagerByTeam(t *testing.T) {
+	// insert the manager
+	user := User {
+		TeamID: 1,
+		Username: "Joe Douglas",
+		Password: "allgasnobreaks",
+		Role: MANAGER,
+	}
+
+	DBConn.Create(&user)
+
+	// Now, look for the manager by calling GetManagerByTeamId
+	manager, err := GetManagerByTeamID(1)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if manager.Username != "Joe Douglas" {
+		t.Error("Did not retrieve record")
+	}
+
+	cleanUpDB()
+}
+
+// Insert a player into the DB and make sure it can't retrieve a record
+func TestGetManagerBad(t * testing.T) {
+	// insert the player 
+	user := User {
+		TeamID: 1,
+		Username: "Sauce Gardner",
+		Password: "allgasnobreaks",
+	}
+
+	DBConn.Create(&user)
+
+	_, err := GetManagerByTeamID(1)
+
+	if err == nil {
+		t.Error("This is supposed to fail")
+	}
+
+}
