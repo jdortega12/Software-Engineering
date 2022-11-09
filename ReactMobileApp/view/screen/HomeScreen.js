@@ -4,25 +4,50 @@ import NavBarStyle from "../component/NavBar.style"
 import NavBar from "../component/NavBar"
 import HandleLogout from "../../event-handler/HandleLogout"
 import TopBar from "../component/TopBar"
+import Icon from 'react-native-vector-icons/FontAwesome';
 
+//Imports for navigation
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+
 export default function HomeScreen({navigation}) {
     return (<>
-        <View backgroundColor="#e32636">
-            <Button color="e32636" title="Create Account" onPress={() => navigation.navigate('CreateAccount')}/>
-            <Button color="e32636" title="Login" onPress={() => navigation.navigate('Login')}/>
-            <Button color="e32636" title="Create Team" onPress={() => navigation.navigate('CreateTeam')}/>
-            <Button color="e32636" title="Update User Personal Info" onPress={() => navigation.navigate('UpdateUserPersonalInfo')}/>
-            <Button color="e32636" title="Ask Manager Request Form" onPress={() => navigation.navigate('AskManagerRequestForm')}/>
-            <Button color="e32636" title="Invite Player Request Form" onPress={() => navigation.navigate('InvitePlayerRequestForm')}/>
-            <Button color="e32636" title="Team Request Form" onPress={() => navigation.navigate('TeamRequestForm')}/>
-            <Button color="e32636" title="Logout (temp)" onPress={HandleLogout}/>
+        <View style={NavBarStyle.titleBarView}>
+            <Icon  color="white" name="user-plus" size={30} onPress={() => navigation.navigate('CreateAccount')}/>
+            <Text style={NavBarStyle.iconText}> Create Account </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>
+            <Icon  color="white" name="sign-in" size={30} onPress={() => navigation.navigate('Login')}/>
+            <Text style={NavBarStyle.iconText}> Login </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>
+            <Icon  color="white" name="male" size={30} onPress={() => navigation.navigate('CreateTeam')}/>
+            <Text style={NavBarStyle.iconText}> Create Team </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>
+            <Icon  color="white" name="user" size={30} onPress={() => navigation.navigate('UpdateUserPersonalInfo')}/>
+            <Text style={NavBarStyle.iconText}> Update User Info </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>
+            <Icon  color ="white" name="envelope" size={30} onPress={() => navigation.navigate('AskManagerRequestForm')}/>
+            <Text style={NavBarStyle.iconText}> Ask Manager </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>    
+            <Icon  color ="white" name="send" size={30} onPress={() => navigation.navigate('InvitePlayerRequestForm')}/>
+            <Text style={NavBarStyle.iconText}> Invite Player </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>
+            <Icon  color ="white" name="file" size={30} onPress={() => navigation.navigate('TeamRequestForm')}/>
+            <Text style={NavBarStyle.iconText}> Team Request </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>
+            <Icon  color ="white" name="power-off" size={30} onPress={HandleLogout}/>
+            <Text style={NavBarStyle.iconText}> Logout </Text>
         </View>
         
         <View style={NavBarStyle.centeredText}>
-            <Text style ={NavBarStyle.homeText}> Fake Football League Home </Text>
+            <Text style ={NavBarStyle.homeText}> Fake Football League </Text>
         </View>
         </>
     )
