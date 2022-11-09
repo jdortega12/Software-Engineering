@@ -11,6 +11,7 @@ import CreateTeam from "./view/screen/CreateTeam"
 import AskManagerRequestForm from "./view/component/AskManagerRequestForm"
 import InvitePlayerRequestForm from "./view/component/InvitePlayerRequestForm"
 import TeamRequestForm from "./view/component/TeamRequestForm"
+import AcceptOrDeny from "./view/screen/AcceptOrDeny"
 
 import ProfileScreen from "./view/screen/user_profile/UserProfileScreen"
 import ProfileScreenPersonal from "./view/screen/user_profile/UserProfileScreenPersonal"
@@ -38,18 +39,9 @@ export default function App(){
                 <Stack.Screen name="AskManagerRequestForm" component={AskManagerRequestForm} />
                 <Stack.Screen name="InvitePlayerRequestForm" component={InvitePlayerRequestForm} />
                 <Stack.Screen name="TeamRequestForm" component={TeamRequestForm} />
+                <Stack.Screen name="AcceptOrDeny" component={AcceptOrDeny} />
             </Stack.Navigator>
         }</NavigationContainer>
-
-        //<HomeScreen />
-        //<CreateAccount />
-        //<Login />
-        //<UpdateUserPersonalInfoScreen />
-        //<CreateTeam />
-        //<AskManagerRequestForm />
-        //<InvitePlayerRequestForm />
-        //<TeamRequestForm />
-        //<UploadImage />
         
     );
 }

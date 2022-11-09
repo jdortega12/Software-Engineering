@@ -42,6 +42,10 @@ export default function HomeScreen({navigation}) {
             <Text style={NavBarStyle.iconText}> Team Request </Text>
         </View>
         <View style={NavBarStyle.titleBarView}>
+            <Icon  color ="white" name="file" size={30} onPress={() => navigation.navigate('AcceptOrDeny')}/>
+            <Text style={NavBarStyle.iconText}> Accept Or Deny </Text>
+        </View>
+        <View style={NavBarStyle.titleBarView}>
             <Icon  color ="white" name="power-off" size={30} onPress={HandleLogout}/>
             <Text style={NavBarStyle.iconText}> Logout </Text>
         </View>
