@@ -266,3 +266,54 @@ func TestGetManagerBad(t * testing.T) {
 	}
 
 }
+
+// Insert Players belonging to a team into the DB and make sure they can be recovered
+func TestGetPlayersByTeam(t *testing.T) {
+	user := User {
+		TeamID: 1, 
+		Username: "saucegardner",
+		Password: "allgasnobreaks",
+	}
+
+	user2 := User{
+		TeamID: 1,
+		Username: "zachwilson",
+		Password: "imbad@football",
+	}
+
+	DBConn.Create(&user)
+	DBConn.Create(&user2)
+
+	players, err := GetPlayersByTeamID(1)
+
+	if err != nil {
+		t.Error("Error retrieving players")
+	}
+
+	if players[0].Username != "saucegardner" || players[1].Username != "zachwilson" {
+		t.Error("I didn't retrieve players correctly")
+	}
+
+	cleanUpDB()
+}
+
+// Make sure the DB does not retrieve players belonging to the wrong team
+func TestGetPlayersWrongTeam(t *testing.T) {
+	user := User{
+		TeamID: 2,
+		Username: "imnotintherightteam",
+		Password: "imnotinteam1",
+	}
+
+	DBConn.Create(&user)
+
+	players, err := GetPlayersByTeamID(1)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(players) != 0 {
+		t.Error("I'm not supposed to be here")
+	}
+}
