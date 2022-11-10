@@ -93,6 +93,17 @@ type UserPersonalInfo struct {
 	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
+// Data for Accepting Player
+type AcceptData struct {
+	PlayerName  string `json:"playername"`
+	ManagerName string `json:"managername"`
+
+	// metadata
+	CreatedAt time.Time      `json:"-"`
+	UpdatedAt time.Time      `json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
+}
+
 // Updates the personal info of a user in the DB. Returns error if one ocurred.
 func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 	err := DBConn.Where("id = ?", userPersInfo.ID).
@@ -129,7 +140,7 @@ func CreateUser(user *User) error {
 func UpdateUserPhoto(photo string, username string, password string) error {
 	user := User{}
 	result := DBConn.First(&user, "username = ?", username)
-	err := result.Error; 
+	err := result.Error
 
 	if err != nil || user.Password != password {
 		return err
@@ -163,7 +174,7 @@ func GetUserPersonalInfoByID(id uint) (*UserPersonalInfo, error) {
 	return info, err
 }
 
-// Pulls a Manager given a teamid 
+// Pulls a Manager given a teamid
 func GetManagerByTeamID(teamid uint) (User, error) {
 	user := User{}
 	err := DBConn.Where("team_id = ? AND role == ?", teamid, MANAGER).First(&user).Error

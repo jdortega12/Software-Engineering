@@ -126,7 +126,7 @@ func Test_handleLogin_GoodCredentials(t *testing.T) {
 		t.Errorf("Response code was %d, should have been %d", w.Code, http.StatusAccepted)
 	}
 
-	cleanUpDB()
+	//cleanUpDB()
 }
 
 // Test handleLogin() when credentials are invalid. Should
@@ -829,13 +829,13 @@ func TestHandleGetTeam(t *testing.T) {
 	}
 
 	// Insert manager with that team into DB so that we don't have an error
-	user := model.User {
+	user := model.User{
 		Username: "Joe Douglas",
 		Password: "allgasnobreaks",
-		Role: model.MANAGER,
-		TeamID: teamQuery.ID,
+		Role:     model.MANAGER,
+		TeamID:   teamQuery.ID,
 	}
-	
+
 	model.DBConn.Create(&user)
 
 	// Now, we send the get request and check if we can retrieve the team with the ID we inserted
@@ -908,3 +908,52 @@ func TestGetTeamNoManager(t *testing.T) {
 	cleanUpDB()
 }
 
+// sends data to handler and receives status code
+// Invalid entries are caught by user.go error checking
+func TestAcceptPlayerValid(t *testing.T) {
+	//Add player and manager to DB
+	player := &model.User{
+		Username: "player",
+		Password: "crap",
+		Role:     model.PLAYER,
+	}
+	result := model.DBConn.Create(player)
+	if result.Error != nil {
+		t.Error(result.Error)
+	}
+
+	manager := &model.User{
+		Username: "manager",
+		TeamID:   1,
+		Password: "crapp",
+		Role:     model.MANAGER,
+	}
+	result = model.DBConn.Create(manager)
+	if result.Error != nil {
+		t.Error(result.Error)
+	}
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "manager", "crapp")
+		ctx.Next()
+	})
+
+	data := &model.AcceptData{
+		PlayerName:  "player",
+		ManagerName: "manager",
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		t.Errorf("could not marshal json: %s\n", err)
+	}
+
+	// mock request
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/acceptPlayer", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
