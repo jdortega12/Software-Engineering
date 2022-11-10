@@ -54,6 +54,7 @@ func SetupHandlers(router *gin.Engine) {
 				managerAuth.Use(managerAuthMiddleware)
 				{
 					managerAuth.POST("/createTeam", handleCreateTeam)
+					managerAuth.POST("/acceptPlayer", handleAcceptPlayer)
 				}
 
 				// endpoints requiring user to be an admin
@@ -352,11 +353,47 @@ func handleGetTeam(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusAccepted, gin.H{
-		"id": team.ID, 
-		"name": team.Name,
-		"location": team.TeamLocation, 
-		"manager_id": manager.ID,
+		"id":           team.ID,
+		"name":         team.Name,
+		"location":     team.TeamLocation,
+		"manager_id":   manager.ID,
 		"manager_name": manager.Username,
 	})
 
+}
+
+// Receives player's username and manager's username
+// Updates the player's teamID to match the manager's
+func handleAcceptPlayer(ctx *gin.Context) {
+	data := &model.AcceptData{}
+	println(data.ManagerName)
+	println(data.PlayerName)
+
+	err := ctx.BindJSON(&data)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	playerName := data.PlayerName
+	managerName := data.ManagerName
+
+	player, err := model.GetUserByUsername(playerName)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	manager, err := model.GetUserByUsername(managerName)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+	}
+
+	//change player team ID to match manager team ID
+	err = model.UpdateUserTeam(player, manager.TeamID)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+	}
+
+	ctx.Status(http.StatusAccepted)
 }

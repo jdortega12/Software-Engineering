@@ -19,7 +19,8 @@
     "react-native-image-base64": "^0.1.4",
     "react-native-image-picker": "^4.10.0",
     "react-native-safe-area-context": "^4.4.1",
-    "react-native-screens": "^3.18.2"
+    "react-native-screens": "^3.18.2",
+    "react-native-vector-icons": "^9.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -31,7 +32,7 @@
     "jest": "^26.6.3",
     "metro-react-native-babel-preset": "0.72.3",
     "miragejs": "^0.1.45",
-    "react-test-renderer": "18.1.0",
+    "react-test-renderer": "^18.1.0",
     "xmlhttprequest": "^1.8.0"
   },
   "jest": {

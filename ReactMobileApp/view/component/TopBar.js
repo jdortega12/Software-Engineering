@@ -9,16 +9,8 @@ import TopBarStyle from "./TopBar.style"
 // actual icons working so for now menu and search are just text.
 export default function topBar() {
     return (
-        <View style={TopBarStyle.titleBarView}>
-            <TouchableOpacity style={TopBarStyle.menuIconTouchArea}>
-                <Text style={TopBarStyle.menuIcon}>Menu</Text>
-            </TouchableOpacity>
-            
+        <View style={TopBarStyle.titleBarView}>    
             <Text style={TopBarStyle.titleText}>Fake Football League</Text>
-            
-            <TouchableOpacity style={TopBarStyle.searchIconTouchArea}>
-                <Text style={TopBarStyle.searchIcon}>Search</Text>
-            </TouchableOpacity>
         </View>
 
     )    
