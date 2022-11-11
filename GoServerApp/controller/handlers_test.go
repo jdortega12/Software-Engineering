@@ -957,3 +957,31 @@ func TestAcceptPlayerValid(t *testing.T) {
 
 	cleanUpDB()
 }
+
+// Insert Players into the DB and check if they can be retrieved by TeamID in the frontend
+func TestHandleGetTeamPlayers(t *testing.T) {
+	player := model.User {
+		Username: "saucegardner",
+		Password: "allgasnobrakes", 
+		TeamID: 1,
+	}
+
+	player2 := model.User {
+		Username: "zachwilson",
+		Password: "gocougars",
+		TeamID: 1,
+	}
+
+	model.DBConn.Create(&player)
+	model.DBConn.Create(&player2)
+
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeamPlayers/1", nil, router)
+
+	if w.Code != http.StatusAccepted {
+		t.Error("Unable to retrieve players")
+	}
+
+	cleanUpDB()
+}
+

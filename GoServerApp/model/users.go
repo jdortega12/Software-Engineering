@@ -185,7 +185,7 @@ func GetManagerByTeamID(teamid uint) (User, error) {
 // Pulls Players given a teamid 
 func GetPlayersByTeamID(teamid uint) ([]User, error) {
 	users := []User{}
-	err := DBConn.Where("team_id = ? AND role = ?", teamid, PLAYER).Find(&users).Error
+	err := DBConn.Select("Username, Position").Where("team_id = ? AND role = ?", teamid, PLAYER).Find(&users).Error
 
 	return users, err
 }
