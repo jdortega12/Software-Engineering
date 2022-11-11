@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"jdortega12/Software-Engineering/GoServerApp/controller"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 
@@ -21,8 +20,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(model.DBConn.CreateBatchSize)
 
 	// session store must be set up right after router is initialized
 	router := gin.Default()

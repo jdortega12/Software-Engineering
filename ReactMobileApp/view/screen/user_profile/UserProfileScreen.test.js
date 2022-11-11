@@ -3,19 +3,59 @@ import UserProfileScreen from "./UserProfileScreen"
 import UserProfileScreenPersonal from "./UserProfileScreenPersonal"
 import UserProfileScreenNotPersonal from "./UserProfileScreenNotPersonal"
 import TestRenderer from "react-test-renderer"
-//import { createServer } from "miragejs"
-//import { END_GET_USER } from "../../../GlobalConstants"
+import { END_GET_USER } from "../../../GlobalConstants"
 
-/*
-let server 
+const { createServer } = require("@mocks-server/main");
 
-beforeEach(() => {
-    server = createServer()
-})
+const routes = [
+    {
+        id: "get-user",
+        url: END_GET_USER + "/jaluhrman",
+        method: "GET",
+        variants: [
+            {
+                id: "success",
+                type: "json",
+                options: {
+                    status: 302,
+                    body: [
+                        {
+                            user: {
+                                username: "jaluhrman",
+                                email: "jaluhrman@whatever.com",
+                                role: "player",
+                                position: "none",
+                                photo: "",
+                            },
+                            personal_info: {
+                                firstname: "Joe",
+                                lastname: "Luhrman",
+                                height: 50,
+                                weight: 50,
+                            },
+                            team_name: "badgers",
+                        }
+                    ] 
+                }
+            }
+        ]
+    }
+]
+
+let server
+
+beforeAll(async () => {
+    server = createServer();
+
+    const { loadRoutes } = server.mock.createLoaders();
+    loadRoutes(routes);
+
+    await server.start();
+});
   
-afterEach(() => {
-    server.shutdown()
-})*/
+afterAll(async () => {
+    await server.stop();
+});
 
 test("User Profile Render Smoke Test", () => {
     <UserProfileScreen username="bingus" isSelf={true}/>
@@ -30,6 +70,6 @@ test("Generic Profile Render Smoke Test", () => {
 })
 
 test("Full user Profile render smoke test", () => {
-    const testRenderer = TestRenderer.create(<UserProfileScreen username="jaluhrman" isSelf={true}/>)
-    const testInstance = testRenderer.root
+    const renderer = TestRenderer.create(<UserProfileScreen username="jaluhrman" isSelf={true}/>)
+    const instance = renderer.root
 })
