@@ -2,15 +2,15 @@ import React from "react"
 import UserProfileScreen from "./UserProfileScreen"
 import UserProfileScreenPersonal from "./UserProfileScreenPersonal"
 import UserProfileScreenNotPersonal from "./UserProfileScreenNotPersonal"
-import TestRenderer from "react-test-renderer"
+import { render } from "@testing-library/react-native"
 import { END_GET_USER } from "../../../GlobalConstants"
-
+/*
 const { createServer } = require("@mocks-server/main");
 
 const routes = [
     {
         id: "get-user",
-        url: END_GET_USER + "/jaluhrman",
+        url: "/api/v1/get-user" + "/:username",
         method: "GET",
         variants: [
             {
@@ -45,7 +45,12 @@ const routes = [
 let server
 
 beforeAll(async () => {
-    server = createServer();
+    server = createServer({
+        server: {
+            host: "10.0.2.2",
+            port: 8080,
+        }
+    });
 
     const { loadRoutes } = server.mock.createLoaders();
     loadRoutes(routes);
@@ -56,20 +61,8 @@ beforeAll(async () => {
 afterAll(async () => {
     await server.stop();
 });
-
-test("User Profile Render Smoke Test", () => {
-    <UserProfileScreen username="bingus" isSelf={true}/>
-})
-
-test("Personal Profile Render Smoke Test", () => {
-    eh = UserProfileScreenPersonal("test")
-})
-
-test("Generic Profile Render Smoke Test", () => {
-    meh = UserProfileScreenNotPersonal("test")
-})
+*/
 
 test("Full user Profile render smoke test", () => {
-    const renderer = TestRenderer.create(<UserProfileScreen username="jaluhrman" isSelf={true}/>)
-    const instance = renderer.root
+    const profile = render(<UserProfileScreen username="jaluhrman" isSelf={true}/>)
 })
