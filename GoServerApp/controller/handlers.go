@@ -34,6 +34,7 @@ func SetupHandlers(router *gin.Engine) {
 			v1.POST("/login", handleLogin)
 			v1.POST("/logout", handleLogout)
 			v1.GET("/getTeam/:id", handleGetTeam)
+			v1.GET("/getTeamPlayers/:id", handleGetTeamPlayers)
 
 			// endpoints requiring user authentication
 			userAuth := v1.Group("")
@@ -396,4 +397,30 @@ func handleAcceptPlayer(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusAccepted)
+}
+
+// Takes a team ID in the body and returns a list of players on that team
+func handleGetTeamPlayers(ctx *gin.Context) {
+	teamID := ctx.Param("id")
+	teamIDInt, err := strconv.Atoi(teamID)
+
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return 
+	}
+
+	players, err2 := model.GetPlayersByTeamID(uint(teamIDInt))
+
+	if err2 != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return 
+	}
+
+	j, err3 := json.Marshal(players)
+
+	if err3 != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+	}
+
+	ctx.JSON(http.StatusAccepted, j)
 }
