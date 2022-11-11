@@ -265,6 +265,8 @@ func TestGetManagerBad(t * testing.T) {
 		t.Error("This is supposed to fail")
 	}
 
+	cleanUpDB()
+
 }
 
 // Insert Players belonging to a team into the DB and make sure they can be recovered
@@ -316,4 +318,6 @@ func TestGetPlayersWrongTeam(t *testing.T) {
 	if len(players) != 0 {
 		t.Error("I'm not supposed to be here")
 	}
+
+	cleanUpDB()
 }

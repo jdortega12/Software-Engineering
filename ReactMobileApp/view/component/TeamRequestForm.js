@@ -10,18 +10,17 @@ export default class TeamRequestForm extends React.Component {
     }
 
     async handleSubmit() {
-        console.log(this.state);
+        console.log(this.state.Message);
         try {
             const response = await fetch('http://10.0.2.2:8080/api/v1/createTeamRequest', {
                 method: 'POST',
                 headers: {
-                    Accept: 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: {
+                body: JSON.stringify({
                     'receiver_username': this.state.ReceiverUsername,
                     'message': this.state.Message
-                }
+                })
             })
 
             console.log(response);

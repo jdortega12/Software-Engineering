@@ -416,11 +416,5 @@ func handleGetTeamPlayers(ctx *gin.Context) {
 		return 
 	}
 
-	j, err3 := json.Marshal(players)
-
-	if err3 != nil {
-		ctx.AbortWithStatus(http.StatusNotFound)
-	}
-
-	ctx.JSON(http.StatusAccepted, j)
+	ctx.JSON(http.StatusAccepted, players)
 }
