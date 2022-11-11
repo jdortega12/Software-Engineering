@@ -7,7 +7,7 @@ export default async function handlGetUserProfile(username) {
         userData = await response.json()
     } 
     catch (error) {
-        console.error(error)
+        console.log(error)
     }
     
     return userData
