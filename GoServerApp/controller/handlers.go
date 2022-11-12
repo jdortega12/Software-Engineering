@@ -33,6 +33,8 @@ func SetupHandlers(router *gin.Engine) {
 			v1.POST("/createAccount", handleCreateAccount)
 			v1.POST("/login", handleLogin)
 			v1.POST("/logout", handleLogout)
+			v1.POST("/createManagerRequest", handleCreateManagerRequest)
+			v1.POST("/removePlayer", handleRemovePlayer)
 			v1.GET("/getTeam/:id", handleGetTeam)
 			v1.GET("/getTeamPlayers/:id", handleGetTeamPlayers)
 
@@ -418,3 +420,73 @@ func handleGetTeamPlayers(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusAccepted, players)
 }
+
+func handleCreateManagerRequest(ctx *gin.Context) {
+	username, password, sessionExists := getSessionUser(ctx)
+	if !sessionExists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	_, err := model.AuthenticateUser(username, password)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	managerRequest := &model.ManagerRequest{}
+
+	err = ctx.BindJSON(managerRequest)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	managerRequest.PlayerUsername = username
+
+	err = model.CreateManagerRequest(managerRequest)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func handleRemovePlayer(ctx *gin.Context) {
+
+	const NOTEAMID = 0 // ID for players without teams
+
+	data := &model.RemovePlayer{}
+
+	err := ctx.BindJSON(&data)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	playerName := data.PlayerUsername
+	managerName := data.ManagerUsername
+
+	player, err := model.GetUserByUsername(playerName)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	manager, err := model.GetUserByUsername(managerName)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+	}
+
+	if manager.Role == model.MANAGER {
+		// If player is to be removed then set their team id to 0
+		err = model.UpdateUserTeam(player, NOTEAMID)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusNotFound)
+		}
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
