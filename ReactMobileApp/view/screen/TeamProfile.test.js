@@ -6,12 +6,5 @@ import TeamProfile from "./TeamProfile";
 
 test("team profile renders", () => {
     const testRenderer = TestRenderer.create(<TeamProfile id="1"/>);
-
-});
-
-test("test if request button works", () => {
-    const testRenderer = TestRenderer.create(<TeamProfile id="1"/>);
-    const testInstance = testRenderer.root;
-    expect(testInstance.findByType(Text).props.ReceiverUsername).toBe('joedouglas');
 });
 

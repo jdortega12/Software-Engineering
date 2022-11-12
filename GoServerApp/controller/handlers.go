@@ -465,5 +465,5 @@ func handleGetPlayoffs(ctx *gin.Context) {
 		team_names = append(team_names, team.Name)
 	}
 
-	ctx.JSON(http.StatusAccepted, team_names)
+	ctx.JSON(http.StatusAccepted, team_names[0:8])
 }
