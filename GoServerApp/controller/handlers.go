@@ -6,6 +6,7 @@ import (
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
 	"strconv"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +36,7 @@ func SetupHandlers(router *gin.Engine) {
 			v1.POST("/logout", handleLogout)
 			v1.GET("/getTeam/:id", handleGetTeam)
 			v1.GET("/getTeamPlayers/:id", handleGetTeamPlayers)
+			v1.GET("/getPlayoffs", handleGetPlayoffs)
 
 			// endpoints requiring user authentication
 			userAuth := v1.Group("")
@@ -417,4 +419,49 @@ func handleGetTeamPlayers(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusAccepted, players)
+}
+
+// Return the current top 8 teams (teams in the playoffs) in order
+func handleGetPlayoffs(ctx *gin.Context) {
+	matches, err := model.GetMatchesThisSeason()
+
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+	}
+
+	teams := make(map[uint]int)
+
+	for _, match := range matches {
+		if match.HomeTeamScore > match.AwayTeamScore {
+			teams[match.HomeTeamID] += 1 
+			teams[match.AwayTeamID] -= 1 
+		}
+		if match.AwayTeamScore > match.HomeTeamScore {
+			teams[match.AwayTeamID] += 1 
+			teams[match.HomeTeamID] -= 1 
+		}
+	}
+
+	keys := make([]uint, 0)
+
+	for k := range teams {
+		keys = append(keys, k)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return teams[keys[i]] < teams[keys[j]]
+	})
+
+	team_names := make([]string, 0)
+
+	for k := range keys {
+		team, err := model.GetTeamByID(uint(k))
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusNotFound)
+		}
+
+		team_names = append(team_names, team.Name)
+	}
+
+	ctx.JSON(http.StatusAccepted, team_names)
 }

@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -980,6 +981,70 @@ func TestHandleGetTeamPlayers(t *testing.T) {
 
 	if w.Code != http.StatusAccepted {
 		t.Error("Unable to retrieve players")
+	}
+
+	cleanUpDB()
+}
+
+// See if we can retrieve playoff teams after we insert teams and matches 
+func TestHandleGetPlayoffs(t *testing.T) {
+	// first we must insert teams
+	team_names := []string{"gormgobblers", "gormfighters", "gormlovers", "gormhaters", "gorm4lyfe", "earthgorm", "gormstormers", "gormgorm", "outofgormstuff", "lastgorm"}
+
+	for team := range team_names {
+		temp := model.Team {
+			Name: team_names[team],
+		}
+
+		model.DBConn.Create(&temp)
+	}
+
+	// Everything that can be the same between matches
+	match_type := model.REGULAR
+	location := "GORM Stadium"
+	start_time := time.Now()
+
+	// Only scores and ID's vary 
+	home_scores := []uint{10, 9, 8, 7, 6}
+	away_scores := []uint{11, 12, 13, 14, 15}
+	home_ids := []uint{1, 2, 3, 4, 5}
+	away_ids := []uint{6, 7, 8, 9, 10}
+
+	// Now, we insert the matches 
+	for index := range home_scores {
+		temp := model.Match {
+			MatchType: match_type,
+			Location: location,
+			StartTime: start_time,
+			HomeTeamScore: home_scores[index],
+			AwayTeamScore: away_scores[index],
+			HomeTeamID: home_ids[index],
+			AwayTeamID: away_ids[index],
+		}
+
+		model.DBConn.Create(&temp)
+	}
+
+	// Finally, we extract the playoff teams and see if they are the correct ones
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getPlayoffs", nil, router)
+
+	if w.Code != http.StatusAccepted {
+		t.Error("something went wrong")
+	}
+
+	responseData := make([]string, 0)
+	err := json.NewDecoder(w.Result().Body).Decode(&responseData)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// check for correct teams. It should be the last 8 names
+	for index := range responseData {
+		if responseData[index] != team_names[len(team_names) - index - 1] {
+			t.Error("We didn't get the correct teams")
+		}
 	}
 
 	cleanUpDB()
