@@ -1041,10 +1041,17 @@ func TestHandleGetPlayoffs(t *testing.T) {
 	}
 
 	// check for correct teams. It should be the last 8 names
-	for index := range responseData {
-		if responseData[index] != team_names[len(team_names) - index - 1] {
-			t.Error("We didn't get the correct teams")
+	for i := range [5]int{} {
+		target := team_names[len(team_names) - i - 1]
+		for j := range responseData {
+			if responseData[j] == target {
+				break 
+			}
+			if j == len(responseData) - 1 {
+				t.Error("we were supposed to find this")
+			}
 		}
+		
 	}
 
 	cleanUpDB()

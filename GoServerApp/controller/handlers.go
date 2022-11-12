@@ -427,6 +427,7 @@ func handleGetPlayoffs(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
+		return 
 	}
 
 	teams := make(map[uint]int)
@@ -449,15 +450,16 @@ func handleGetPlayoffs(ctx *gin.Context) {
 	}
 
 	sort.SliceStable(keys, func(i, j int) bool {
-		return teams[keys[i]] < teams[keys[j]]
+		return teams[keys[i]] > teams[keys[j]]
 	})
 
 	team_names := make([]string, 0)
 
 	for k := range keys {
-		team, err := model.GetTeamByID(uint(k))
+		team, err := model.GetTeamByID(uint(keys[k]))
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusNotFound)
+			return
 		}
 
 		team_names = append(team_names, team.Name)
