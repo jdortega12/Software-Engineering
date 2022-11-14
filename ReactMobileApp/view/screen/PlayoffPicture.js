@@ -1,5 +1,6 @@
+import { ThemeProvider } from "@react-navigation/native";
 import React from "react";
-import {Text, TouchableNativeFeedback, View, SafeAreaView} from "react-native";
+import {Text, TouchableNativeFeedback, View, SafeAreaView, TouchableOpacity} from "react-native";
 import TopBar from "../component/TopBar";
 import FormStyle from "../Form.style";
 import PlayoffStyle from "./Playoff.style";
@@ -7,7 +8,9 @@ import PlayoffStyle from "./Playoff.style";
 export default class PlayoffPicture extends React.Component {
     state = {
         teams: [], 
-        loaded: false
+        loaded: false, 
+        rounds: [[], [], []],
+        currentRound: 0
     }
 
     getTeams = async() => {
@@ -38,7 +41,22 @@ export default class PlayoffPicture extends React.Component {
 
         this.setState({
             teams: matchups,
-            loaded: true
+            loaded: true,
+            rounds: [matchups, [[], []], [[]]],
+            currentRound: 0
+        });
+    }
+
+    changeRound(increase) {
+        this.state.currentRound = increase ? this.state.currentRound + 1 : this.state.currentRound - 1; 
+        this.state.currentRound = this.state.currentRound >= 0 ? this.state.currentRound : 2;
+        this.state.currentRound = this.state.currentRound < 3 ? this.state.currentRound : 0; 
+
+        this.setState({
+            teams: this.state.rounds[this.state.currentRound], 
+            loaded: true, 
+            rounds: this.state.rounds,
+            currentRound: this.state.currentRound
         });
     }
 
@@ -70,6 +88,16 @@ export default class PlayoffPicture extends React.Component {
                                 {this.boxWithTeams(item.name1, item.name2, item.seed1, item.seed2)}
                             </View>
                         ))}
+                        <Text style={PlayoffStyle.roundText}>Round #{this.state.currentRound + 1}</Text>
+                        <View style={PlayoffStyle.row2}>
+                            <TouchableOpacity style={PlayoffStyle.button} onPress={() => this.changeRound(false)}>
+                                <Text>{'<'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={PlayoffStyle.button} onPress={() => this.changeRound(false)}>
+                                <Text>{'>'}</Text>
+                            </TouchableOpacity>
+                        </View>
+
                 </View>
             </SafeAreaView> 
         )
