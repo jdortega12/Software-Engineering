@@ -93,7 +93,7 @@ export default class PlayoffPicture extends React.Component {
                             <TouchableOpacity style={PlayoffStyle.button} onPress={() => this.changeRound(false)}>
                                 <Text>{'<'}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={PlayoffStyle.button} onPress={() => this.changeRound(false)}>
+                            <TouchableOpacity style={PlayoffStyle.button} onPress={() => this.changeRound(true)}>
                                 <Text>{'>'}</Text>
                             </TouchableOpacity>
                         </View>
