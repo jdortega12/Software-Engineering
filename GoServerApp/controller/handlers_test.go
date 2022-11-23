@@ -909,6 +909,41 @@ func TestGetTeamNoManager(t *testing.T) {
 	cleanUpDB()
 }
 
+// Handle get teams valid
+func TestHandleGetTeams(t *testing.T) {
+	team1 := model.Team{
+		Name: "Desk",
+	}
+
+	team2 := model.Team{
+		Name: "Chair",
+	}
+
+	model.DBConn.Create(&team1)
+	model.DBConn.Create(&team2)
+
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeams", nil, router)
+
+	if w.Code != http.StatusAccepted {
+		t.Error("Unable to retrieve teams")
+	}
+
+	cleanUpDB()
+}
+
+// Handle Get teams when there are no teams
+func TestHandleGetTeamsInvalid(t *testing.T) {
+	router := setupTestRouter()
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getTeams", nil, router)
+
+	if w.Code != http.StatusAccepted {
+		t.Error("Unable to retrieve teams")
+	}
+
+	cleanUpDB()
+}
+
 // sends data to handler and receives status code
 // Invalid entries are caught by user.go error checking
 func TestAcceptPlayerValid(t *testing.T) {
@@ -961,16 +996,16 @@ func TestAcceptPlayerValid(t *testing.T) {
 
 // Insert Players into the DB and check if they can be retrieved by TeamID in the frontend
 func TestHandleGetTeamPlayers(t *testing.T) {
-	player := model.User {
+	player := model.User{
 		Username: "saucegardner",
-		Password: "allgasnobrakes", 
-		TeamID: 1,
+		Password: "allgasnobrakes",
+		TeamID:   1,
 	}
 
-	player2 := model.User {
+	player2 := model.User{
 		Username: "zachwilson",
 		Password: "gocougars",
-		TeamID: 1,
+		TeamID:   1,
 	}
 
 	model.DBConn.Create(&player)
@@ -986,13 +1021,13 @@ func TestHandleGetTeamPlayers(t *testing.T) {
 	cleanUpDB()
 }
 
-// See if we can retrieve playoff teams after we insert teams and matches 
+// See if we can retrieve playoff teams after we insert teams and matches
 func TestHandleGetPlayoffs(t *testing.T) {
 	// first we must insert teams
 	team_names := []string{"gormgobblers", "gormfighters", "gormlovers", "gormhaters", "gorm4lyfe", "earthgorm", "gormstormers", "gormgorm", "outofgormstuff", "lastgorm"}
 
 	for team := range team_names {
-		temp := model.Team {
+		temp := model.Team{
 			Name: team_names[team],
 		}
 
@@ -1004,22 +1039,22 @@ func TestHandleGetPlayoffs(t *testing.T) {
 	location := "GORM Stadium"
 	start_time := time.Now()
 
-	// Only scores and ID's vary 
+	// Only scores and ID's vary
 	home_scores := []uint{10, 9, 8, 7, 6}
 	away_scores := []uint{11, 12, 13, 14, 15}
 	home_ids := []uint{1, 2, 3, 4, 5}
 	away_ids := []uint{6, 7, 8, 9, 10}
 
-	// Now, we insert the matches 
+	// Now, we insert the matches
 	for index := range home_scores {
-		temp := model.Match {
-			MatchType: match_type,
-			Location: location,
-			StartTime: start_time,
+		temp := model.Match{
+			MatchType:     match_type,
+			Location:      location,
+			StartTime:     start_time,
 			HomeTeamScore: home_scores[index],
 			AwayTeamScore: away_scores[index],
-			HomeTeamID: home_ids[index],
-			AwayTeamID: away_ids[index],
+			HomeTeamID:    home_ids[index],
+			AwayTeamID:    away_ids[index],
 		}
 
 		model.DBConn.Create(&temp)
@@ -1042,18 +1077,17 @@ func TestHandleGetPlayoffs(t *testing.T) {
 
 	// check for correct teams. It should be the last 8 names
 	for i := range [5]int{} {
-		target := team_names[len(team_names) - i - 1]
+		target := team_names[len(team_names)-i-1]
 		for j := range responseData {
 			if responseData[j] == target {
-				break 
+				break
 			}
-			if j == len(responseData) - 1 {
+			if j == len(responseData)-1 {
 				t.Error("we were supposed to find this")
 			}
 		}
-		
+
 	}
 
 	cleanUpDB()
 }
-

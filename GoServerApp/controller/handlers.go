@@ -5,8 +5,8 @@ import (
 	"io"
 	"jdortega12/Software-Engineering/GoServerApp/model"
 	"net/http"
-	"strconv"
 	"sort"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +35,7 @@ func SetupHandlers(router *gin.Engine) {
 			v1.POST("/login", handleLogin)
 			v1.POST("/logout", handleLogout)
 			v1.GET("/getTeam/:id", handleGetTeam)
+			v1.GET("/getTeams", handleGetTeams)
 			v1.GET("/getTeamPlayers/:id", handleGetTeamPlayers)
 			v1.GET("/getPlayoffs", handleGetPlayoffs)
 
@@ -365,6 +366,17 @@ func handleGetTeam(ctx *gin.Context) {
 
 }
 
+// Return the teams from the database
+func handleGetTeams(ctx *gin.Context) {
+	teams, err := model.GetTeams()
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	ctx.JSON(http.StatusAccepted, teams)
+}
+
 // Receives player's username and manager's username
 // Updates the player's teamID to match the manager's
 func handleAcceptPlayer(ctx *gin.Context) {
@@ -408,14 +420,14 @@ func handleGetTeamPlayers(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
-		return 
+		return
 	}
 
 	players, err2 := model.GetPlayersByTeamID(uint(teamIDInt))
 
 	if err2 != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
-		return 
+		return
 	}
 
 	ctx.JSON(http.StatusAccepted, players)
@@ -427,19 +439,19 @@ func handleGetPlayoffs(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
-		return 
+		return
 	}
 
 	teams := make(map[uint]int)
 
 	for _, match := range matches {
 		if match.HomeTeamScore > match.AwayTeamScore {
-			teams[match.HomeTeamID] += 1 
-			teams[match.AwayTeamID] -= 1 
+			teams[match.HomeTeamID] += 1
+			teams[match.AwayTeamID] -= 1
 		}
 		if match.AwayTeamScore > match.HomeTeamScore {
-			teams[match.AwayTeamID] += 1 
-			teams[match.HomeTeamID] -= 1 
+			teams[match.AwayTeamID] += 1
+			teams[match.HomeTeamID] -= 1
 		}
 	}
 
