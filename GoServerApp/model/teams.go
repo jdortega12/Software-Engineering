@@ -14,6 +14,8 @@ type Team struct {
 	Name         string `gorm:"unique;not null" json:"team_name"`
 	TeamLocation string `json:"team_location"`
 	// TeamManager uint (maybe??)
+	Wins  uint `json:"wins"`
+	Loses uint `json:"loses"`
 
 	// metadata
 	CreatedAt time.Time      `json:"-"`
@@ -31,6 +33,13 @@ func CreateTeam(team *Team) error {
 func DeleteTeam(team *Team) error {
 	err := DBConn.Where("id = ?", team.ID).Delete(team).Error
 	return err
+}
+
+// returns all the teams in the database
+func GetTeams() ([]Team, error) {
+	teams := []Team{}
+	err := DBConn.Find(&teams).Error
+	return teams, err
 }
 
 func GetTeamByID(id uint) (*Team, error) {

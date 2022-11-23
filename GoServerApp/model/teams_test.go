@@ -79,6 +79,48 @@ func Test_DeleteTeam_NotInDB(t *testing.T) {
 	}
 }
 
+func Test_GetTeams_Valid(t *testing.T) {
+	team1 := &Team{
+		ID:   1,
+		Name: "Desk",
+	}
+	DBConn.Create(team1)
+
+	team2 := &Team{
+		ID:   2,
+		Name: "Chair",
+	}
+	DBConn.Create(team2)
+
+	teams, err := GetTeams()
+
+	if err != nil {
+		t.Error("Error retrieving teams")
+	}
+
+	if teams[0].Name != "Desk" || teams[1].Name != "Chair" {
+		t.Error("I didn't retrieve teams correctly")
+	}
+
+	cleanUpDB()
+
+}
+
+func Test_GetTeams_Invalid(t *testing.T) {
+	teams, err := GetTeams()
+
+	if err != nil {
+		t.Error("Error retrieving teams")
+	}
+
+	if len(teams) != 0 {
+		t.Error("I somehow retreived teams")
+	}
+
+	cleanUpDB()
+
+}
+
 // Tests that GetTeamByID() returns correct team when it exists.
 func Test_GetTeamByID_Valid(t *testing.T) {
 	team := &Team{
