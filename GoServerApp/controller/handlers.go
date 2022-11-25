@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -66,6 +67,8 @@ func SetupHandlers(router *gin.Engine) {
 				adminAuth.Use(adminAuthMiddleware)
 				{
 					adminAuth.GET("/promotion-to-manager-requests", handleGetPromotionToManagerRequests)
+
+					adminAuth.POST("/start-match", handleStartMatch)
 				}
 			}
 		}
@@ -478,4 +481,48 @@ func handleGetPlayoffs(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusAccepted, team_names[0:8])
+}
+
+// Receives match struct in JSON and creates it in the DB, setting InProgress = true. Responds
+// HTTP Status Created on success. Responds HTTP Status Bad Request if JSON cannot be bound or
+// if one or both of the teams don't exist, and HTTP Status Internal Server Error if the match
+// cannot be created in the DB.
+func handleStartMatch(ctx *gin.Context) {
+	match := &model.Match{}
+
+	err := ctx.BindJSON(match)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	teamIDs := []uint{match.HomeTeamID, match.AwayTeamID}
+
+	// make sure teams exist
+	for _, id := range teamIDs {
+		_, err = model.GetTeamByID(id)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+	}
+
+	// set match in progress and start time to current time
+	match.InProgress = true
+	match.StartTime = time.Now()
+
+	// make sure other values are defaulted
+	match.EndTime = time.Time{}
+	match.HomeTeamScore = 0
+	match.AwayTeamScore = 0
+	match.Likes = 0
+	match.Dislikes = 0
+
+	err = model.CreateMatch(match)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
 }

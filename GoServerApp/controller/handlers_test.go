@@ -1091,3 +1091,107 @@ func TestHandleGetPlayoffs(t *testing.T) {
 
 	cleanUpDB()
 }
+
+// Makes sure that correct status code is returned when all conditions are met.
+func Test_handleStartMatch_Valid(t *testing.T) {
+	defer cleanUpDB()
+
+	// create test admin
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.DBConn.Create(admin)
+
+	// two test teams
+	teams := make([]*model.Team, 2)
+
+	// create two test teams
+	for i := range teams {
+		teams[i] = &model.Team{
+			Name:         "team " + fmt.Sprint(i),
+			TeamLocation: "location " + fmt.Sprint(i),
+		}
+		model.DBConn.Create(teams[i])
+	}
+
+	// add middleware to set session to admin
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	match := &model.Match{
+		HomeTeamID: teams[0].ID,
+		AwayTeamID: teams[1].ID,
+	}
+
+	jsonData, _ := json.Marshal(match)
+	buffer := bytes.NewBuffer(jsonData)
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/start-match", buffer, router)
+	if w.Code != http.StatusCreated {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusCreated)
+	}
+}
+
+// Test that correct status is returned when JSON is nil.
+func Test_handleStartMatch_BadJSON(t *testing.T) {
+	defer cleanUpDB()
+
+	// create test admin
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.DBConn.Create(admin)
+
+	// add middleware to set session to admin
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/start-match", nil, router)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	}
+}
+
+// Test correct status is returned when one of the teams doesn't exist.
+func Test_handleStartMatch_BadTeam(t *testing.T) {
+	defer cleanUpDB()
+
+	// create test admin
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.DBConn.Create(admin)
+
+	// create only one team
+	team := &model.Team{
+		Name:         "team 1",
+		TeamLocation: "location 1",
+	}
+	model.DBConn.Create(team)
+
+	// add middleware to set session to admin
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	match := &model.Match{
+		HomeTeamID: team.ID,
+		AwayTeamID: team.ID + 1, // doesn't exist
+	}
+
+	jsonData, _ := json.Marshal(match)
+	buffer := bytes.NewBuffer(jsonData)
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/start-match", buffer, router)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	}
+}

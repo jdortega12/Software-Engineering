@@ -2,6 +2,7 @@ package model
 
 import (
 	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -30,6 +31,9 @@ type Match struct {
 	// date AND time
 	StartTime time.Time `gorm:"not null" json:"start_time"`
 	EndTime   time.Time
+
+	// whether match is currently in progress or archived
+	InProgress bool
 
 	HomeTeamID uint `gorm:"not null" json:"home_id"`
 	AwayTeamID uint `gorm:"not null" json:"away_id"`
@@ -69,7 +73,3 @@ func GetMatchesThisSeason() ([]Match, error) {
 	err := DBConn.Find(&matches).Error
 	return matches, err
 }
-
-
-
-
