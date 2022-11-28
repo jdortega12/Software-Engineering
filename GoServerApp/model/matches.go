@@ -35,6 +35,10 @@ type Match struct {
 	// whether match is currently in progress or archived
 	InProgress bool
 
+	// quarter and how much time is left within the quarter
+	Quarter uint
+	QuarterTime time.Time
+
 	HomeTeamID uint `gorm:"not null" json:"home_id"`
 	AwayTeamID uint `gorm:"not null" json:"away_id"`
 
