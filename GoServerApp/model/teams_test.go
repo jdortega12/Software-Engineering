@@ -1,8 +1,26 @@
 package model
 
 import (
+	"fmt"
 	"testing"
 )
+
+func Test_SortTeams(t *testing.T) {
+	team1 := Team{
+		Name:  "Chair",
+		Wins:  1,
+		Loses: 0,
+	}
+	team2 := Team{
+		Name:  "Chair",
+		Wins:  0,
+		Loses: 1,
+	}
+
+	teams := []Team{team1, team2}
+
+	SortTeams(teams)
+}
 
 // Tests CreateTeam() creates the team in the DB correctly when
 // the struct passed is correct.
@@ -81,25 +99,31 @@ func Test_DeleteTeam_NotInDB(t *testing.T) {
 
 func Test_GetTeams_Valid(t *testing.T) {
 	team1 := &Team{
-		ID:   1,
-		Name: "Desk",
+		ID:    1,
+		Name:  "Desk",
+		Wins:  2,
+		Loses: 0,
 	}
-	DBConn.Create(team1)
 
 	team2 := &Team{
-		ID:   2,
-		Name: "Chair",
+		ID:    2,
+		Name:  "Chair",
+		Wins:  1,
+		Loses: 0,
 	}
 	DBConn.Create(team2)
+	DBConn.Create(team1)
 
 	teams, err := GetTeams()
+
+	fmt.Println(teams)
 
 	if err != nil {
 		t.Error("Error retrieving teams")
 	}
 
-	if teams[0].Name != "Desk" || teams[1].Name != "Chair" {
-		t.Error("I didn't retrieve teams correctly")
+	if teams[0].Wins < teams[1].Wins {
+		t.Error("Teams not sorted")
 	}
 
 	cleanUpDB()
