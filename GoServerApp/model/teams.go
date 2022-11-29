@@ -35,16 +35,38 @@ func DeleteTeam(team *Team) error {
 	return err
 }
 
+// sorts teams based on number of wins
+func SortTeams(teams []Team) []Team {
+	for i := 0; i < len(teams); i++ {
+		for j := 1; j < len(teams); j++ {
+			if teams[i].Wins < teams[j].Wins {
+				temp := teams[i]
+				teams[i] = teams[j]
+				teams[j] = temp
+			}
+		}
+	}
+	return teams
+}
+
 // returns all the teams in the database
 func GetTeams() ([]Team, error) {
 	teams := []Team{}
 	err := DBConn.Find(&teams).Error
+	teams = SortTeams(teams)
 	return teams, err
 }
 
 func GetTeamByID(id uint) (*Team, error) {
 	team := &Team{}
 	err := DBConn.Where("id = ?", id).First(team).Error
+
+	return team, err
+}
+
+func GetTeamByName(name string) (*Team, error) {
+	team := &Team{}
+	err := DBConn.Where("name = ?", name).First(team).Error
 
 	return team, err
 }

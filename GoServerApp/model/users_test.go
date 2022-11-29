@@ -221,15 +221,14 @@ func Test_GetUserPersonalInfoByID_NotExists(t *testing.T) {
 
 }
 
-
 // Insert a manager into the DB with a TeamId of 1 and check that the record can be recovered
 func TestGetManagerByTeam(t *testing.T) {
 	// insert the manager
-	user := User {
-		TeamID: 1,
+	user := User{
+		TeamID:   1,
 		Username: "Joe Douglas",
 		Password: "allgasnobreaks",
-		Role: MANAGER,
+		Role:     MANAGER,
 	}
 
 	DBConn.Create(&user)
@@ -249,10 +248,10 @@ func TestGetManagerByTeam(t *testing.T) {
 }
 
 // Insert a player into the DB and make sure it can't retrieve a record
-func TestGetManagerBad(t * testing.T) {
-	// insert the player 
-	user := User {
-		TeamID: 1,
+func TestGetManagerBad(t *testing.T) {
+	// insert the player
+	user := User{
+		TeamID:   1,
 		Username: "Sauce Gardner",
 		Password: "allgasnobreaks",
 	}
@@ -271,14 +270,14 @@ func TestGetManagerBad(t * testing.T) {
 
 // Insert Players belonging to a team into the DB and make sure they can be recovered
 func TestGetPlayersByTeam(t *testing.T) {
-	user := User {
-		TeamID: 1, 
+	user := User{
+		TeamID:   1,
 		Username: "saucegardner",
 		Password: "allgasnobreaks",
 	}
 
 	user2 := User{
-		TeamID: 1,
+		TeamID:   1,
 		Username: "zachwilson",
 		Password: "imbad@football",
 	}
@@ -302,7 +301,7 @@ func TestGetPlayersByTeam(t *testing.T) {
 // Make sure the DB does not retrieve players belonging to the wrong team
 func TestGetPlayersWrongTeam(t *testing.T) {
 	user := User{
-		TeamID: 2,
+		TeamID:   2,
 		Username: "imnotintherightteam",
 		Password: "imnotinteam1",
 	}
@@ -320,4 +319,79 @@ func TestGetPlayersWrongTeam(t *testing.T) {
 	}
 
 	cleanUpDB()
+}
+
+func Test_GetUsers_Valid(t *testing.T) {
+	user1 := &User{
+		TeamID:   1,
+		Username: "Jaymin",
+	}
+
+	user2 := &User{
+		TeamID:   2,
+		Username: "Evan",
+	}
+	DBConn.Create(user1)
+	DBConn.Create(user2)
+
+	users, err := GetUsers()
+
+	if err != nil {
+		t.Error("Error retrieving users")
+	}
+
+	if users[0].TeamID != 1 && users[1].TeamID != 2 {
+		t.Error("Users not found")
+	}
+
+	cleanUpDB()
+
+}
+
+func Test_GetUsers_Invalid(t *testing.T) {
+	users, err := GetUsers()
+
+	if err != nil {
+		t.Error("Error retrieving users")
+	}
+
+	if len(users) != 0 {
+		t.Error("I somehow retreived teams")
+	}
+
+	cleanUpDB()
+
+}
+
+func Test_GatherUserTeamData(t *testing.T) {
+	team := &Team{
+		ID:   1,
+		Name: "Jaymins",
+	}
+	DBConn.Create(team)
+
+	user := &User{
+		ID:       1,
+		TeamID:   team.ID,
+		Username: "jaymin",
+	}
+	DBConn.Create(user)
+
+	personalInfo := &UserPersonalInfo{
+		ID:        1,
+		Firstname: "Jaymin",
+		Lastname:  "Ortega",
+	}
+
+	DBConn.Create(personalInfo)
+
+	userTeamData := GatherUserTeamData(user)
+
+	if userTeamData.Username != user.Username && userTeamData.Teamname != team.Name &&
+		userTeamData.Firstname != personalInfo.Firstname {
+		t.Error("Gather didn't work")
+	}
+
+	cleanUpDB()
+
 }

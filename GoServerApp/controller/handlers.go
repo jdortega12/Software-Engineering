@@ -69,6 +69,7 @@ func SetupHandlers(router *gin.Engine) {
 					adminAuth.GET("/promotion-to-manager-requests", handleGetPromotionToManagerRequests)
 
 					adminAuth.POST("/start-match", handleStartMatch)
+					adminAuth.POST("/finish-match", handleFinishMatch)
 				}
 			}
 		}
@@ -483,40 +484,40 @@ func handleGetPlayoffs(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, team_names[0:8])
 }
 
-// Receives match struct in JSON and creates it in the DB, setting InProgress = true. Responds
+// Receives match wrapper struct in JSON and creates match in the DB, setting InProgress = true. Responds
 // HTTP Status Created on success. Responds HTTP Status Bad Request if JSON cannot be bound or
 // if one or both of the teams don't exist, and HTTP Status Internal Server Error if the match
 // cannot be created in the DB.
 func handleStartMatch(ctx *gin.Context) {
-	match := &model.Match{}
+	wrapper := &startMatchWrapper{}
 
-	err := ctx.BindJSON(match)
+	err := ctx.BindJSON(wrapper)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	teamIDs := []uint{match.HomeTeamID, match.AwayTeamID}
+	names := []string{wrapper.HomeTeamName, wrapper.AwayTeamName}
+	ids := make([]uint, 2)
 
-	// make sure teams exist
-	for _, id := range teamIDs {
-		_, err = model.GetTeamByID(id)
+	for i := range names {
+		team, err := model.GetTeamByName(names[i])
 		if err != nil {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
+
+		ids[i] = team.ID
 	}
 
-	// set match in progress and start time to current time
-	match.InProgress = true
-	match.StartTime = time.Now()
+	match := &model.Match{
+		HomeTeamID: ids[0],
+		AwayTeamID: ids[1],
+		Location:   wrapper.Location,
 
-	// make sure other values are defaulted
-	match.EndTime = time.Time{}
-	match.HomeTeamScore = 0
-	match.AwayTeamScore = 0
-	match.Likes = 0
-	match.Dislikes = 0
+		InProgress: true,
+		StartTime:  time.Now(),
+	}
 
 	err = model.CreateMatch(match)
 	if err != nil {
@@ -525,4 +526,23 @@ func handleStartMatch(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
+}
+
+// Receives match ID in JSON and marks it as finished in the database.
+func handleFinishMatch(ctx *gin.Context) {
+	match := &model.Match{}
+
+	err := ctx.BindJSON(match)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	err = model.FinishMatch(match.ID)
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
 }

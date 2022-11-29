@@ -81,16 +81,20 @@ func Test_DeleteTeam_NotInDB(t *testing.T) {
 
 func Test_GetTeams_Valid(t *testing.T) {
 	team1 := &Team{
-		ID:   1,
-		Name: "Desk",
+		ID:    1,
+		Name:  "Desk",
+		Wins:  2,
+		Loses: 0,
 	}
-	DBConn.Create(team1)
 
 	team2 := &Team{
-		ID:   2,
-		Name: "Chair",
+		ID:    2,
+		Name:  "Chair",
+		Wins:  1,
+		Loses: 0,
 	}
 	DBConn.Create(team2)
+	DBConn.Create(team1)
 
 	teams, err := GetTeams()
 
@@ -98,8 +102,8 @@ func Test_GetTeams_Valid(t *testing.T) {
 		t.Error("Error retrieving teams")
 	}
 
-	if teams[0].Name != "Desk" || teams[1].Name != "Chair" {
-		t.Error("I didn't retrieve teams correctly")
+	if teams[0].Wins < teams[1].Wins {
+		t.Error("Teams not sorted")
 	}
 
 	cleanUpDB()
@@ -148,6 +152,37 @@ func Test_GetTeamByID_Valid(t *testing.T) {
 // Makes sure GetTeamByID() returns an error when team doesn't exist.
 func Test_GetTeamByID_Invalid(t *testing.T) {
 	_, err := GetTeamByID(5)
+	if err == nil {
+		t.Error("should have produced an error when team doesn't exist")
+	}
+}
+
+func Test_GetTeamByName_Valid(t *testing.T) {
+	defer cleanUpDB()
+
+	team := &Team{
+		Name: "badgers",
+	}
+	DBConn.Create(team)
+
+	teamCpy, err := GetTeamByName(team.Name)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	team.CreatedAt = teamCpy.CreatedAt
+	team.UpdatedAt = teamCpy.UpdatedAt
+	team.DeletedAt = teamCpy.DeletedAt
+
+	if *team != *teamCpy {
+		t.Error("team pulled from DB should be same as when it was created")
+	}
+}
+
+func Test_GetTeamByName_DoesntExist(t *testing.T) {
+	_, err := GetTeamByName("test")
+
 	if err == nil {
 		t.Error("should have produced an error when team doesn't exist")
 	}
