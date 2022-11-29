@@ -69,6 +69,7 @@ func SetupHandlers(router *gin.Engine) {
 					adminAuth.GET("/promotion-to-manager-requests", handleGetPromotionToManagerRequests)
 
 					adminAuth.POST("/start-match", handleStartMatch)
+					adminAuth.POST("/finish-match", handleFinishMatch)
 				}
 			}
 		}
@@ -525,4 +526,23 @@ func handleStartMatch(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
+}
+
+// Receives match ID in JSON and marks it as finished in the database.
+func handleFinishMatch(ctx *gin.Context) {
+	match := &model.Match{}
+
+	err := ctx.BindJSON(match)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	err = model.FinishMatch(match.ID)
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
 }

@@ -1195,3 +1195,74 @@ func Test_handleStartMatch_BadTeam(t *testing.T) {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
 	}
 }
+
+func Test_handleFinishMatch_Valid(t *testing.T) {
+	defer cleanUpDB()
+
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.DBConn.Create(admin)
+
+	match := &model.Match{}
+	model.DBConn.Create(match)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	jsonData, _ := json.Marshal(&model.Match{
+		ID: match.ID,
+	})
+	body := bytes.NewBuffer(jsonData)
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/finish-match", body, router)
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+}
+
+func Test_handleFinishMatch_DoesntExist(t *testing.T) {
+	defer cleanUpDB()
+
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.DBConn.Create(admin)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	jsonData, _ := json.Marshal(&model.Match{
+		ID: 1,
+	})
+	body := bytes.NewBuffer(jsonData)
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/finish-match", body, router)
+	if w.Code != http.StatusNotFound {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusNotFound)
+	}
+}
+
+func Test_handleFinishMatch_BadJSON(t *testing.T) {
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.DBConn.Create(admin)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/finish-match", nil, router)
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
+	}
+}

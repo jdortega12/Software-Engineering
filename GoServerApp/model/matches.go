@@ -19,8 +19,8 @@ const (
 
 // Corresponds to matches table in DB.
 type Match struct {
-	ID       uint `json:"-"`
-	SeasonID uint `json:"-"`
+	ID       uint `json:"id"`
+	SeasonID uint `json:"season_id"`
 
 	MatchType matchType `gorm:"not null" json:"match_type"`
 
@@ -30,23 +30,23 @@ type Match struct {
 
 	// date AND time
 	StartTime time.Time `gorm:"not null" json:"start_time"`
-	EndTime   time.Time
+	EndTime   time.Time `json:"end_time"`
 
 	// whether match is currently in progress or archived
-	InProgress bool
+	InProgress bool `json:"in_progress"`
 
 	// quarter and how much time is left within the quarter
-	Quarter uint
-	QuarterTime time.Time
+	Quarter     uint      `json:"quarter"`
+	QuarterTime time.Time `json:"quarter_time"`
 
 	HomeTeamID uint `gorm:"not null" json:"home_id"`
 	AwayTeamID uint `gorm:"not null" json:"away_id"`
 
-	HomeTeamScore uint
-	AwayTeamScore uint
+	HomeTeamScore uint `json:"home_team_score"`
+	AwayTeamScore uint `json:"away_team_score"`
 
-	Likes    uint
-	Dislikes uint
+	Likes    uint `json:"likes"`
+	Dislikes uint `json:"dislikes"`
 
 	// player likes and dislikes? Not sure if those
 	// are meant to be for a match only or just on the
@@ -76,4 +76,21 @@ func GetMatchesThisSeason() ([]Match, error) {
 	matches := []Match{}
 	err := DBConn.Find(&matches).Error
 	return matches, err
+}
+
+// Marks a match as finished in the DB by updating InProgress and EndTime.
+func FinishMatch(id uint) error {
+	// make sure match exists
+	match := &Match{}
+	err := DBConn.Where("id = ?", id).First(match).Error
+	if err != nil {
+		return err
+	}
+
+	err = DBConn.Model(&Match{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"in_progress": false,
+		"end_time":    time.Now(),
+	}).Error
+
+	return err
 }
