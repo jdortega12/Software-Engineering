@@ -7,12 +7,12 @@ import (
 
 // see if we can insert a match into the DB error free
 func TestCreateMatch(t *testing.T) {
-	match := Match {
-		MatchType: REGULAR,
-		Location: "Twitter HQ",
-		StartTime: time.Now(),
-		HomeTeamID: 1, 
-		AwayTeamID: 2,
+	match := Match{
+		MatchType:     REGULAR,
+		Location:      "Twitter HQ",
+		StartTime:     time.Now(),
+		HomeTeamID:    1,
+		AwayTeamID:    2,
 		HomeTeamScore: 20,
 		AwayTeamScore: 10,
 	}
@@ -24,14 +24,14 @@ func TestCreateMatch(t *testing.T) {
 	}
 }
 
-// insert a match and see if we can retrieve it by the ID of the home team 
+// insert a match and see if we can retrieve it by the ID of the home team
 func TestGetMatchByHomeTeam(t *testing.T) {
-	match := Match {
-		MatchType: REGULAR,
-		Location: "Twitter HQ",
-		StartTime: time.Now(),
-		HomeTeamID: 1, 
-		AwayTeamID: 2,
+	match := Match{
+		MatchType:     REGULAR,
+		Location:      "Twitter HQ",
+		StartTime:     time.Now(),
+		HomeTeamID:    1,
+		AwayTeamID:    2,
 		HomeTeamScore: 20,
 		AwayTeamScore: 10,
 	}
@@ -51,15 +51,14 @@ func TestGetMatchByHomeTeam(t *testing.T) {
 	cleanUpDB()
 }
 
-
 // insert a match and see if we can retrieve it by the ID of the away team
 func TestGetMatchByAwayTeam(t *testing.T) {
-	match := Match {
-		MatchType: REGULAR,
-		Location: "Twitter HQ",
-		StartTime: time.Now(),
-		HomeTeamID: 1, 
-		AwayTeamID: 2,
+	match := Match{
+		MatchType:     REGULAR,
+		Location:      "Twitter HQ",
+		StartTime:     time.Now(),
+		HomeTeamID:    1,
+		AwayTeamID:    2,
 		HomeTeamScore: 20,
 		AwayTeamScore: 10,
 	}
@@ -76,22 +75,22 @@ func TestGetMatchByAwayTeam(t *testing.T) {
 }
 
 // test if we can retrieve all inserted matches from the DB
-func TestGetMatchesThisSeason(t *testing.T) { 
-	match := Match {
+func TestGetMatchesThisSeason(t *testing.T) {
+	match := Match{
 		MatchType: REGULAR,
 		Location: "Twitter HQ",
 		StartTime: time.Now(),
-		HomeTeamID: 1, 
+		HomeTeamID: 1,
 		AwayTeamID: 2,
 		HomeTeamScore: 20,
 		AwayTeamScore: 10,
 	}
 
-	match2 := Match {
+	match2 := Match{
 		MatchType: REGULAR,
 		Location: "Metlife Stadium",
 		StartTime: time.Now(),
-		HomeTeamID: 3, 
+		HomeTeamID: 3,
 		AwayTeamID: 4,
 		HomeTeamScore: 5,
 		AwayTeamScore: 28,
@@ -113,6 +112,8 @@ func TestGetMatchesThisSeason(t *testing.T) {
 
 // test get match by id
 func TestGetMatchById(t *testing.T) {
+	cleanUpDB()
+
 	match := Match {
 		MatchType: REGULAR,
 		Location: "Metlife Stadium",
@@ -129,6 +130,7 @@ func TestGetMatchById(t *testing.T) {
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	if returnMatch.Location != "Metlife Stadium" {
@@ -136,4 +138,45 @@ func TestGetMatchById(t *testing.T) {
 	}
 
 	cleanUpDB()
+}
+
+// Make sure FinishMatch updates a match correctly and doesn't modify anything it
+// wasn't supposed to.
+func Test_FinishMatch_Valid(t *testing.T) {
+	defer cleanUpDB()
+
+	match := &Match{
+		InProgress: true,
+		EndTime:    time.Time{},
+	}
+	DBConn.Create(match)
+
+	err := FinishMatch(match.ID)
+	if err != nil {
+		t.Error(err)
+	}
+
+	matchCpy := &Match{}
+
+	err = DBConn.Where("id = ?", match.ID).First(matchCpy).Error
+	if err != nil {
+		t.Error(err)
+	}
+
+	if matchCpy.EndTime == (time.Time{}) {
+		t.Error("end time was not set correctly")
+	}
+
+	if matchCpy.InProgress != false {
+		t.Error("in progress was not set to false")
+	}
+
+	match.InProgress = matchCpy.InProgress
+	match.EndTime = matchCpy.EndTime
+	match.CreatedAt = matchCpy.CreatedAt
+	match.UpdatedAt = matchCpy.UpdatedAt
+
+	if *match != *matchCpy {
+		t.Error("fields were updated that were not supposed to be")
+	}
 }
