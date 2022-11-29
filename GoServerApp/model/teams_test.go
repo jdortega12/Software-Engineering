@@ -81,16 +81,20 @@ func Test_DeleteTeam_NotInDB(t *testing.T) {
 
 func Test_GetTeams_Valid(t *testing.T) {
 	team1 := &Team{
-		ID:   1,
-		Name: "Desk",
+		ID:    1,
+		Name:  "Desk",
+		Wins:  2,
+		Loses: 0,
 	}
-	DBConn.Create(team1)
 
 	team2 := &Team{
-		ID:   2,
-		Name: "Chair",
+		ID:    2,
+		Name:  "Chair",
+		Wins:  1,
+		Loses: 0,
 	}
 	DBConn.Create(team2)
+	DBConn.Create(team1)
 
 	teams, err := GetTeams()
 
@@ -98,8 +102,8 @@ func Test_GetTeams_Valid(t *testing.T) {
 		t.Error("Error retrieving teams")
 	}
 
-	if teams[0].Name != "Desk" || teams[1].Name != "Chair" {
-		t.Error("I didn't retrieve teams correctly")
+	if teams[0].Wins < teams[1].Wins {
+		t.Error("Teams not sorted")
 	}
 
 	cleanUpDB()

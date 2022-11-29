@@ -6,6 +6,15 @@ export default StyleSheet.create({
   fontSize:50,
   color:"#e32636",
   },
+  leaderboardBackgroud: {
+    width: 50, 
+    backgroundColor: '#e32636',
+  },
+  leaderboardText: {
+    fontSize: 16, 
+    textAlign: 'center', 
+    color: 'white',
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',
