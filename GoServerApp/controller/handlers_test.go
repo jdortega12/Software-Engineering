@@ -1121,12 +1121,12 @@ func Test_handleStartMatch_Valid(t *testing.T) {
 		setSessionUser(ctx, admin.Username, admin.Password)
 	})
 
-	match := &model.Match{
-		HomeTeamID: teams[0].ID,
-		AwayTeamID: teams[1].ID,
+	wrapper := &startMatchWrapper{
+		HomeTeamName: teams[0].Name,
+		AwayTeamName: teams[1].Name,
 	}
 
-	jsonData, _ := json.Marshal(match)
+	jsonData, _ := json.Marshal(wrapper)
 	buffer := bytes.NewBuffer(jsonData)
 
 	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/start-match", buffer, router)
@@ -1182,12 +1182,12 @@ func Test_handleStartMatch_BadTeam(t *testing.T) {
 		setSessionUser(ctx, admin.Username, admin.Password)
 	})
 
-	match := &model.Match{
-		HomeTeamID: team.ID,
-		AwayTeamID: team.ID + 1, // doesn't exist
+	wrapper := &startMatchWrapper{
+		HomeTeamName: team.Name,
+		AwayTeamName: team.Name + "gabagool", // doesn't exist
 	}
 
-	jsonData, _ := json.Marshal(match)
+	jsonData, _ := json.Marshal(wrapper)
 	buffer := bytes.NewBuffer(jsonData)
 
 	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/start-match", buffer, router)

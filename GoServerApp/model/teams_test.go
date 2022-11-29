@@ -152,3 +152,34 @@ func Test_GetTeamByID_Invalid(t *testing.T) {
 		t.Error("should have produced an error when team doesn't exist")
 	}
 }
+
+func Test_GetTeamByName_Valid(t *testing.T) {
+	defer cleanUpDB()
+
+	team := &Team{
+		Name: "badgers",
+	}
+	DBConn.Create(team)
+
+	teamCpy, err := GetTeamByName(team.Name)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	team.CreatedAt = teamCpy.CreatedAt
+	team.UpdatedAt = teamCpy.UpdatedAt
+	team.DeletedAt = teamCpy.DeletedAt
+
+	if *team != *teamCpy {
+		t.Error("team pulled from DB should be same as when it was created")
+	}
+}
+
+func Test_GetTeamByName_DoesntExist(t *testing.T) {
+	_, err := GetTeamByName("test")
+
+	if err == nil {
+		t.Error("should have produced an error when team doesn't exist")
+	}
+}

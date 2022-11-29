@@ -10,3 +10,9 @@ type userDataWrapper struct {
 	PersonalInfo model.UserPersonalInfo `json:"personal_info"`
 	TeamName     string                 `json:"team_name"`
 }
+
+type startMatchWrapper struct {
+	HomeTeamName string `json:"home_team_name"`
+	AwayTeamName string `json:"away_team_name"`
+	Location     string `json:"location"`
+}

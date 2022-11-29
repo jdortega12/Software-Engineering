@@ -19,6 +19,8 @@ import ProfileScreenNotPersonal from "./view/screen/user_profile/UserProfileScre
 
 import AdminNotificationScreen from "./view/screen/admin_notifications/AdminNotificationsScreen"
 
+import StartMatchForm from "./view/component/StartMatchForm"
+
 //Import navigation files
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';

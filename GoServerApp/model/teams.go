@@ -48,3 +48,10 @@ func GetTeamByID(id uint) (*Team, error) {
 
 	return team, err
 }
+
+func GetTeamByName(name string) (*Team, error) {
+	team := &Team{}
+	err := DBConn.Where("name = ?", name).First(team).Error
+
+	return team, err
+}
