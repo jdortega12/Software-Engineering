@@ -77,3 +77,10 @@ func GetMatchesThisSeason() ([]Match, error) {
 	err := DBConn.Find(&matches).Error
 	return matches, err
 }
+
+// Get match by id
+func GetMatchById(id uint) (Match, error) {
+	match := Match{}
+	err := DBConn.Where("id = ?", id).First(&match).Error
+	return match, err
+}

@@ -110,3 +110,30 @@ func TestGetMatchesThisSeason(t *testing.T) {
 		t.Error("We didn't catch em all :(")
 	}
 }
+
+// test get match by id
+func TestGetMatchById(t *testing.T) {
+	match := Match {
+		MatchType: REGULAR,
+		Location: "Metlife Stadium",
+		StartTime: time.Now(),
+		HomeTeamID: 3, 
+		AwayTeamID: 4,
+		HomeTeamScore: 5,
+		AwayTeamScore: 28,
+	}
+
+	DBConn.Create(&match)
+	
+	returnMatch, err := GetMatchById(1)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if returnMatch.Location != "Metlife Stadium" {
+		t.Error("Did not return match correctly")
+	}
+
+	cleanUpDB()
+}
