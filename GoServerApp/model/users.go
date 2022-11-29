@@ -104,6 +104,16 @@ type AcceptData struct {
 	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
+type UserTeamData struct {
+	ID     uint `json:"-"`
+	TeamID uint `json:"-"`
+
+	Username  string `gorm:"unique;not null" json:"username"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Teamname  string `json:"teamname"`
+}
+
 // Updates the personal info of a user in the DB. Returns error if one ocurred.
 func UpdateUserPersonalInfo(userPersInfo *UserPersonalInfo) error {
 	err := DBConn.Where("id = ?", userPersInfo.ID).
@@ -158,11 +168,32 @@ func UpdateUserTeam(user *User, teamID uint) error {
 	return err
 }
 
+// Gathers user and team data based on user
+func GatherUserTeamData(user *User) UserTeamData {
+	personalInfo, _ := GetUserPersonalInfoByID(user.ID)
+	team, _ := GetTeamByID(user.TeamID)
+	userTeamData := UserTeamData{
+		ID:        user.ID,
+		TeamID:    user.TeamID,
+		Username:  user.Username,
+		Firstname: personalInfo.Firstname,
+		Lastname:  personalInfo.Lastname,
+		Teamname:  team.Name,
+	}
+	return userTeamData
+}
+
+// gets all users
+func GetUsers() ([]User, error) {
+	users := []User{}
+	err := DBConn.Find(&users).Error
+	return users, err
+}
+
 // Pulls User out of DB by username.
 func GetUserByUsername(username string) (*User, error) {
 	user := &User{}
 	err := DBConn.Where("username = ?", username).First(user).Error
-
 	return user, err
 }
 
@@ -170,7 +201,6 @@ func GetUserByUsername(username string) (*User, error) {
 func GetUserPersonalInfoByID(id uint) (*UserPersonalInfo, error) {
 	info := &UserPersonalInfo{}
 	err := DBConn.Where("id = ?", id).First(info).Error
-
 	return info, err
 }
 
@@ -182,7 +212,7 @@ func GetManagerByTeamID(teamid uint) (User, error) {
 	return user, err
 }
 
-// Pulls Players given a teamid 
+// Pulls Players given a teamid
 func GetPlayersByTeamID(teamid uint) ([]User, error) {
 	users := []User{}
 	err := DBConn.Select("Username, Position").Where("team_id = ? AND role = ?", teamid, PLAYER).Find(&users).Error

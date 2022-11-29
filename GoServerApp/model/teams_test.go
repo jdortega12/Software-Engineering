@@ -1,26 +1,8 @@
 package model
 
 import (
-	"fmt"
 	"testing"
 )
-
-func Test_SortTeams(t *testing.T) {
-	team1 := Team{
-		Name:  "Chair",
-		Wins:  1,
-		Loses: 0,
-	}
-	team2 := Team{
-		Name:  "Chair",
-		Wins:  0,
-		Loses: 1,
-	}
-
-	teams := []Team{team1, team2}
-
-	SortTeams(teams)
-}
 
 // Tests CreateTeam() creates the team in the DB correctly when
 // the struct passed is correct.
@@ -115,8 +97,6 @@ func Test_GetTeams_Valid(t *testing.T) {
 	DBConn.Create(team1)
 
 	teams, err := GetTeams()
-
-	fmt.Println(teams)
 
 	if err != nil {
 		t.Error("Error retrieving teams")

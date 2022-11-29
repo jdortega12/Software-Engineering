@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -55,7 +54,6 @@ func GetTeams() ([]Team, error) {
 	teams := []Team{}
 	err := DBConn.Find(&teams).Error
 	teams = SortTeams(teams)
-	fmt.Println(teams)
 	return teams, err
 }
 
