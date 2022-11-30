@@ -63,5 +63,21 @@ export default StyleSheet.create({
   },
   loginText:{
     color:"white"
-  }
+  },
+  player:{
+    marginTop: 24, 
+    padding: 30,
+    backgroundColor: "#e32636",
+  },
+  playerText:{
+    color: 'white', 
+    fontSize: 24,
+  },
+  rosterTitle:{
+    marginTop: 24, 
+    padding: 30,
+    backgroundColor: "#e32636",
+    color: 'white', 
+    fontSize: 24,
+  },
 });
