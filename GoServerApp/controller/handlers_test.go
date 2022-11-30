@@ -1350,3 +1350,64 @@ func Test_HandleGetUserTeamData(t *testing.T) {
 	cleanUpDB()
 
 }
+
+// test valid roster change post
+func Test_HandleChangeRoster(t *testing.T) {
+
+	team := &model.Team{
+		ID:   1,
+		Name: "Jaymins",
+	}
+	model.CreateTeam(team)
+
+	team2 := &model.Team{
+		ID:   2,
+		Name: "Ortegas",
+	}
+	model.CreateTeam(team2)
+
+	user := &model.User{
+		ID:       1,
+		TeamID:   1,
+		Username: "jaymin",
+		Password: "123",
+	}
+	model.CreateUser(user)
+
+	personalInfo := &model.UserPersonalInfo{
+		ID:        1,
+		Firstname: "Jaymin",
+		Lastname:  "Ortega",
+	}
+	model.UpdateUserPersonalInfo(personalInfo)
+
+	returnData := &model.UserTeamReturnData{
+		UserId:   1,
+		Teamname: "Ortegas",
+	}
+
+	jsonData, err := json.Marshal(returnData)
+	if err != nil {
+		t.Errorf("could not marshal json: %s\n", err)
+	}
+
+	//Create admin for session login
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.CreateUser(admin)
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+
+	// mock request
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/changeRoster", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}

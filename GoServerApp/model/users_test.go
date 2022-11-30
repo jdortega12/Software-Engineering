@@ -394,3 +394,22 @@ func Test_GatherUserTeamData(t *testing.T) {
 	cleanUpDB()
 
 }
+
+func Test_GetUserbyID(t *testing.T) {
+	user := &User{
+		ID:       1,
+		TeamID:   1,
+		Username: "jaymin",
+		Password: "123",
+	}
+	CreateUser(user)
+	foundUser, err := GetUserbyID(user.ID)
+
+	if err != nil {
+		t.Error("User not found")
+	}
+
+	if foundUser.Username != user.Username {
+		t.Error("Wrong user found")
+	}
+}

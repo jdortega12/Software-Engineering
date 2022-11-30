@@ -71,6 +71,7 @@ func SetupHandlers(router *gin.Engine) {
 					adminAuth.GET("/getUserTeamData", handleGetUserTeamData)
 					adminAuth.POST("/start-match", handleStartMatch)
 					adminAuth.POST("/finish-match", handleFinishMatch)
+					adminAuth.POST("/changeRoster", handleChangeRoster)
 				}
 			}
 		}
@@ -589,4 +590,37 @@ func handleGetUserTeamData(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusAccepted, userTeamData)
+}
+
+func handleChangeRoster(ctx *gin.Context) {
+	info := &model.UserTeamReturnData{}
+
+	err := ctx.BindJSON(&info)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	//Get team
+	team, err := model.GetTeamByName(info.Teamname)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	//Get user
+	user, err1 := model.GetUserbyID(info.UserId)
+	if err1 != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	//Update user's team
+	err2 := model.UpdateUserTeam(user, team.ID)
+	if err2 != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
 }

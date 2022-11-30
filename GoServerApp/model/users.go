@@ -104,12 +104,19 @@ type AcceptData struct {
 	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
+// struct for data to send to front end for player display
 type UserTeamData struct {
 	ID       uint   `json:"-"`
 	Teamname string `json:"teamname"`
 
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
+}
+
+// struct for return data from change roster
+type UserTeamReturnData struct {
+	UserId   uint   `json:"userid"`
+	Teamname string `json:"teamname"`
 }
 
 // Updates the personal info of a user in the DB. Returns error if one ocurred.
@@ -184,6 +191,13 @@ func GetUsers() ([]User, error) {
 	users := []User{}
 	err := DBConn.Find(&users).Error
 	return users, err
+}
+
+// Pulls User ouf of DB by ID
+func GetUserbyID(id uint) (*User, error) {
+	user := &User{}
+	err := DBConn.Where("id = ?", id).First(user).Error
+	return user, err
 }
 
 // Pulls User out of DB by username.
