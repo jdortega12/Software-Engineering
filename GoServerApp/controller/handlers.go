@@ -39,6 +39,7 @@ func SetupHandlers(router *gin.Engine) {
 			v1.GET("/getTeams", handleGetTeams)
 			v1.GET("/getTeamPlayers/:id", handleGetTeamPlayers)
 			v1.GET("/getPlayoffs", handleGetPlayoffs)
+			v1.GET("/getMatch/:id", handleGetMatch)
 
 			// endpoints requiring user authentication
 			userAuth := v1.Group("")
@@ -545,4 +546,24 @@ func handleFinishMatch(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusAccepted)
+}
+
+// called when the frontend tries to retrieve a match by id
+func handleGetMatch(ctx *gin.Context) {
+	id := ctx.Param("id")
+	idInt, err := strconv.Atoi(id)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	match, err := model.GetMatchById(uint(idInt))
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	ctx.JSON(http.StatusAccepted, match)
 }

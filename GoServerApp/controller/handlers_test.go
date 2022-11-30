@@ -1266,3 +1266,43 @@ func Test_handleFinishMatch_BadJSON(t *testing.T) {
 		t.Errorf("code was %d, should have been %d", w.Code, http.StatusBadRequest)
 	}
 }
+
+func TestHandleGetMatch(t *testing.T) {
+	cleanUpDB()
+	match := model.Match {
+		MatchType: model.REGULAR, 
+		Location: "Knott Hall",
+		StartTime: time.Now(),
+		InProgress: true,
+		Quarter: uint(1),
+		QuarterTime: time.Date(0, 0, 0, 0, 15, 0, 0, time.FixedZone("UTC-7", 0)),
+		HomeTeamID: 1,
+		AwayTeamID: 2,
+		HomeTeamScore: 0,
+		AwayTeamScore: 0,
+		Likes: 0,
+		Dislikes: 0,
+	}
+
+	model.DBConn.Create(&match)
+	router := setupTestRouter()
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getMatch/1", nil, router)
+
+	if w.Code == http.StatusBadRequest {
+		t.Error("Bad status")
+	}
+	
+	cleanUpDB()
+}
+
+func TestGetMatchInvalid(t *testing.T) {
+	cleanUpDB()
+	router := setupTestRouter()
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getMatch/1", nil, router)
+
+	if w.Code != http.StatusNotFound {
+		t.Error("Bad status")
+	}
+}
