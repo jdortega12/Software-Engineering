@@ -1269,19 +1269,19 @@ func Test_handleFinishMatch_BadJSON(t *testing.T) {
 
 func TestHandleGetMatch(t *testing.T) {
 	cleanUpDB()
-	match := model.Match {
-		MatchType: model.REGULAR, 
-		Location: "Knott Hall",
-		StartTime: time.Now(),
-		InProgress: true,
-		Quarter: uint(1),
-		QuarterTime: time.Date(0, 0, 0, 0, 15, 0, 0, time.FixedZone("UTC-7", 0)),
-		HomeTeamID: 1,
-		AwayTeamID: 2,
+	match := model.Match{
+		MatchType:     model.REGULAR,
+		Location:      "Knott Hall",
+		StartTime:     time.Now(),
+		InProgress:    true,
+		Quarter:       uint(1),
+		QuarterTime:   time.Date(0, 0, 0, 0, 15, 0, 0, time.FixedZone("UTC-7", 0)),
+		HomeTeamID:    1,
+		AwayTeamID:    2,
 		HomeTeamScore: 0,
 		AwayTeamScore: 0,
-		Likes: 0,
-		Dislikes: 0,
+		Likes:         0,
+		Dislikes:      0,
 	}
 
 	model.DBConn.Create(&match)
@@ -1292,7 +1292,7 @@ func TestHandleGetMatch(t *testing.T) {
 	if w.Code == http.StatusBadRequest {
 		t.Error("Bad status")
 	}
-	
+
 	cleanUpDB()
 }
 
@@ -1305,4 +1305,48 @@ func TestGetMatchInvalid(t *testing.T) {
 	if w.Code != http.StatusNotFound {
 		t.Error("Bad status")
 	}
+}
+
+func Test_HandleGetUserTeamData(t *testing.T) {
+
+	team := &model.Team{
+		ID:   1,
+		Name: "Jaymins",
+	}
+	model.CreateTeam(team)
+
+	user := &model.User{
+		ID:       1,
+		TeamID:   1,
+		Username: "jaymin",
+		Password: "123",
+	}
+	model.CreateUser(user)
+
+	personalInfo := &model.UserPersonalInfo{
+		ID:        1,
+		Firstname: "Jaymin",
+		Lastname:  "Ortega",
+	}
+	model.UpdateUserPersonalInfo(personalInfo)
+
+	//Create admin for session login
+	admin := &model.User{
+		Username: "jaluhrman",
+		Password: "123",
+		Role:     model.ADMIN,
+	}
+	model.CreateUser(admin)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, admin.Username, admin.Password)
+	})
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getUserTeamData", nil, router)
+
+	if w.Code != http.StatusAccepted {
+		t.Error("Unable to retrieve user team data")
+	}
+
+	cleanUpDB()
+
 }

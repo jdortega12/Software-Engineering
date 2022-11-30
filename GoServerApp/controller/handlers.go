@@ -68,7 +68,7 @@ func SetupHandlers(router *gin.Engine) {
 				adminAuth.Use(adminAuthMiddleware)
 				{
 					adminAuth.GET("/promotion-to-manager-requests", handleGetPromotionToManagerRequests)
-
+					adminAuth.GET("/getUserTeamData", handleGetUserTeamData)
 					adminAuth.POST("/start-match", handleStartMatch)
 					adminAuth.POST("/finish-match", handleFinishMatch)
 				}
@@ -566,4 +566,27 @@ func handleGetMatch(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusAccepted, match)
+}
+
+// Handles getting user/team data from db
+func handleGetUserTeamData(ctx *gin.Context) {
+	//get all the users
+	users, err := model.GetUsers()
+
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	var userTeamData []model.UserTeamData
+
+	//create array of userTeamData from users
+	for i := 0; i < len(users); i++ {
+		if users[i].Role == model.PLAYER || users[i].Role == model.MANAGER {
+			userTeamData = append(userTeamData, model.GatherUserTeamData(&users[i]))
+		}
+
+	}
+
+	ctx.JSON(http.StatusAccepted, userTeamData)
 }

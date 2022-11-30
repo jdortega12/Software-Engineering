@@ -368,15 +368,14 @@ func Test_GatherUserTeamData(t *testing.T) {
 		ID:   1,
 		Name: "Jaymins",
 	}
-	//DBConn.Create(team)
 	CreateTeam(team)
+
 	user := &User{
 		ID:       1,
 		TeamID:   1,
 		Username: "jaymin",
 		Password: "123",
 	}
-	//DBConn.Create(user)
 	CreateUser(user)
 
 	personalInfo := &UserPersonalInfo{
