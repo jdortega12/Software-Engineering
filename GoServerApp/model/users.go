@@ -105,13 +105,11 @@ type AcceptData struct {
 }
 
 type UserTeamData struct {
-	ID     uint `json:"-"`
-	TeamID uint `json:"-"`
+	ID       uint   `json:"-"`
+	Teamname string `json:"teamname"`
 
-	Username  string `gorm:"unique;not null" json:"username"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
-	Teamname  string `json:"teamname"`
 }
 
 // Updates the personal info of a user in the DB. Returns error if one ocurred.
@@ -174,11 +172,9 @@ func GatherUserTeamData(user *User) UserTeamData {
 	team, _ := GetTeamByID(user.TeamID)
 	userTeamData := UserTeamData{
 		ID:        user.ID,
-		TeamID:    user.TeamID,
-		Username:  user.Username,
+		Teamname:  team.Name,
 		Firstname: personalInfo.Firstname,
 		Lastname:  personalInfo.Lastname,
-		Teamname:  team.Name,
 	}
 	return userTeamData
 }

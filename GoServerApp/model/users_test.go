@@ -368,27 +368,27 @@ func Test_GatherUserTeamData(t *testing.T) {
 		ID:   1,
 		Name: "Jaymins",
 	}
-	DBConn.Create(team)
-
+	//DBConn.Create(team)
+	CreateTeam(team)
 	user := &User{
 		ID:       1,
-		TeamID:   team.ID,
+		TeamID:   1,
 		Username: "jaymin",
+		Password: "123",
 	}
-	DBConn.Create(user)
+	//DBConn.Create(user)
+	CreateUser(user)
 
 	personalInfo := &UserPersonalInfo{
 		ID:        1,
 		Firstname: "Jaymin",
 		Lastname:  "Ortega",
 	}
-
-	DBConn.Create(personalInfo)
+	UpdateUserPersonalInfo(personalInfo)
 
 	userTeamData := GatherUserTeamData(user)
 
-	if userTeamData.Username != user.Username && userTeamData.Teamname != team.Name &&
-		userTeamData.Firstname != personalInfo.Firstname {
+	if userTeamData.Teamname != team.Name && userTeamData.Firstname != personalInfo.Firstname {
 		t.Error("Gather didn't work")
 	}
 
