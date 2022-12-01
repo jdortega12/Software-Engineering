@@ -23,6 +23,7 @@ export default function ChangeRoster(){
     });
 
     const [newTeam, setNewTeam] = React.useState("");
+    const [userID, setUserID] = React.useState("");
     
     function getData(){
         handleGetUserTeamData().then((data) => {
@@ -45,9 +46,9 @@ export default function ChangeRoster(){
         <View>
         {playersStruct.players.map((item) => {
             return(
-                <View key={item.ID} style={FormStyle.player}>
+                <View key={item.id} style={FormStyle.player}>
                     <Text style={FormStyle.playerText}>Name: {item.firstname} {item.lastname}</Text>
-                    <Text style={FormStyle.playerText}>Team: {item.teamname}</Text>
+                    <Text style={FormStyle.playerText}>Team: {item.team_name}</Text>
                     <View style={{padding: 10}}>
                     <TextInput
                         style={FormStyle.changeRosterInput}
@@ -56,8 +57,8 @@ export default function ChangeRoster(){
                         onChangeText={setNewTeam}
                         autoCapitalize={false}/>          
                     </View>
-                    <View style={{padding: 10}}>
-                    <Button title="Change Roster" onPress={()=> handleChangeRoster(item.ID, newTeam)}/>
+                    <View userID={item.id} style={{padding: 10}}>
+                    <Button title="Change Roster" onPress={()=> handleChangeRoster(item.id, newTeam)}/>
                     </View>
                 </View>   
                 )
