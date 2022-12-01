@@ -11,7 +11,7 @@ export default StyleSheet.create({
     backgroundColor: '#e32636',
   },
   leaderboardText: {
-    fontSize: 16, 
+    fontSize: 18, 
     textAlign: 'center', 
     color: 'white',
   },
