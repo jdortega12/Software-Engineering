@@ -10,7 +10,7 @@ import (
 
 // Corresponds to teams table in DB.
 type Team struct {
-	ID           uint   `json:"-"`
+	ID           uint   `json:"id"`
 	Name         string `gorm:"unique;not null" json:"team_name"`
 	TeamLocation string `json:"team_location"`
 	// TeamManager uint (maybe??)
