@@ -1,7 +1,8 @@
 import React, {useState} from "react";
-import {Text, View, ScrollView} from "react-native";
+import {Text, View, ScrollView, Button, TextInput} from "react-native";
 import TopBar from "../component/TopBar";
 import FormStyle from "../Form.style";
+import handleChangeRoster from "../../event-handler/HandleChangeRoster"
 
 export default function ChangeRoster(){
 
@@ -14,11 +15,12 @@ export default function ChangeRoster(){
         {ID: 6, Teamname: "Jacks", Firstname: "Jack", Lastname: "McCormick"},
         {ID: 7, Teamname: "Jackies", Firstname: "Jackie", Lastname: "Pineda"},
     ]);
+    
+    const [newTeam, setNewTeam] = React.useState("");
 
         return (
         <>
-        <TopBar/>
-        <Text style={FormStyle.rosterTitle}>Admin Change Roster</Text>
+        <Text style={FormStyle.rosterTitle}>Admin Roster Change Page</Text>
         <ScrollView>
         <View>
         {players.map((item) => {
@@ -26,6 +28,17 @@ export default function ChangeRoster(){
                 <View key={item.ID} style={FormStyle.player}>
                     <Text style={FormStyle.playerText}>Name: {item.Firstname} {item.Lastname}</Text>
                     <Text style={FormStyle.playerText}>Team: {item.Teamname}</Text>
+                    <View style={{padding: 10}}>
+                    <TextInput
+                        style={FormStyle.changeRosterInput}
+                        placeholder="New Team Name..."
+                        placeholderTextColor="black"
+                        onChangeText={setNewTeam}
+                        autoCapitalize={false}/>          
+                    </View>
+                    <View style={{padding: 10}}>
+                    <Button title="Change Roster" onPress={()=> handleChangeRoster(item.ID, newTeam)}/>
+                    </View>
                 </View>   
                 )
             })}

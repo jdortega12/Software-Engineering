@@ -42,10 +42,20 @@ export default StyleSheet.create({
     justifyContent:"center",
     padding:20
   },
+  buttonView:{
+    width:"80%",
+    justifyContent:"center",
+  },
   inputText:{
     height:50,
     fontWeight: "bold",
     color:"white"
+  },
+  changeRosterInput:{
+    height:40,
+    //fontWeight: "bold",
+    color:"black",
+    backgroundColor:"white",
   },
   forgot:{
     color:"white",
@@ -73,9 +83,8 @@ export default StyleSheet.create({
     color: 'white', 
     fontSize: 24,
   },
-  rosterTitle:{
-    marginTop: 24, 
-    padding: 30,
+  rosterTitle:{ 
+    padding: 15,
     backgroundColor: "#e32636",
     color: 'white', 
     fontSize: 24,

@@ -1,7 +1,7 @@
 import React from 'react'
 
 // Sends HTTP request to server to create account 
-export default function handleCreateAccount(teamname, userID) {
+export default function handleChangeRoster(userID, teamname) {
     const info = {userID: userID, teamname: teamname}
     console.log(JSON.stringify(info))
     try{
