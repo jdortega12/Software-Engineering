@@ -56,8 +56,8 @@ const (
 
 // Corresponds to users table in DB.
 type User struct {
-	ID     uint `json:"-"`
-	TeamID uint `json:"-"`
+	ID     uint `json:"id"`
+	TeamID uint `json:"teamID"`
 
 	Username string `gorm:"unique;not null" json:"username"`
 	Email    string `json:"email"`
@@ -79,7 +79,7 @@ type User struct {
 // without any permission or extra complication.
 type UserPersonalInfo struct {
 	// must be same ID as user whom it belongs to
-	ID uint `json:"-"`
+	ID uint `json:"id"`
 
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
@@ -106,8 +106,8 @@ type AcceptData struct {
 
 // struct for data to send to front end for player display
 type UserTeamData struct {
-	ID       uint   `json:"-"`
-	Teamname string `json:"teamname"`
+	ID       uint   `json:"id"`
+	Teamname string `json:"team_name"`
 
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`

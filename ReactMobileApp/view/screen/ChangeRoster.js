@@ -3,9 +3,10 @@ import {Text, View, ScrollView, Button, TextInput} from "react-native";
 import TopBar from "../component/TopBar";
 import FormStyle from "../Form.style";
 import handleChangeRoster from "../../event-handler/HandleChangeRoster"
+import handleGetUserTeamData from "../../event-handler/HandleGetUserTeamData"
 
 export default function ChangeRoster(){
-
+    /*
     const [players, setPlayers] = useState([
         {ID: 1, Teamname: "Jaymins", Firstname: "Jaymin", Lastname: "Ortega"},
         {ID: 2, Teamname: "Evans", Firstname: "Evan", Lastname: "Sisitsky"},
@@ -14,20 +15,39 @@ export default function ChangeRoster(){
         {ID: 5, Teamname: "Bobbys", Firstname: "Bobby", Lastname: "Shmurda"},
         {ID: 6, Teamname: "Jacks", Firstname: "Jack", Lastname: "McCormick"},
         {ID: 7, Teamname: "Jackies", Firstname: "Jackie", Lastname: "Pineda"},
-    ]);
-    
-    const [newTeam, setNewTeam] = React.useState("");
+    ]);/*/
 
+    const [playersStruct, setPlayersStruct] = useState({
+        responseReceived: false,
+        players: [],
+    });
+
+    const [newTeam, setNewTeam] = React.useState("");
+    
+    function getData(){
+        handleGetUserTeamData().then((data) => {
+            console.log("DATA", data)
+            setPlayersStruct({
+                responseReceived: true,
+                players: data,
+            })
+        })
+    };
+
+    if(!playersStruct.responseReceived) {  
+        getData()
+        console.log("PLAYERS", playersStruct.players)
+    }
         return (
         <>
         <Text style={FormStyle.rosterTitle}>Admin Roster Change Page</Text>
         <ScrollView>
         <View>
-        {players.map((item) => {
+        {playersStruct.players.map((item) => {
             return(
                 <View key={item.ID} style={FormStyle.player}>
-                    <Text style={FormStyle.playerText}>Name: {item.Firstname} {item.Lastname}</Text>
-                    <Text style={FormStyle.playerText}>Team: {item.Teamname}</Text>
+                    <Text style={FormStyle.playerText}>Name: {item.firstname} {item.lastname}</Text>
+                    <Text style={FormStyle.playerText}>Team: {item.teamname}</Text>
                     <View style={{padding: 10}}>
                     <TextInput
                         style={FormStyle.changeRosterInput}
