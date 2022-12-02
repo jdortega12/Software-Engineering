@@ -83,6 +83,21 @@ export default StyleSheet.create({
     color: 'white', 
     fontSize: 24,
   },
+  link:{
+      width:"80%",
+      backgroundColor:"#e32636",
+      borderRadius:25,
+      height:50,
+      alignItems:"center",
+      justifyContent:"center",
+      marginTop:20,
+      marginBottom:10,
+  },
+  linkText:{
+    //textAlign: "center",
+    color: 'white', 
+    fontSize: 24,
+  },
   rosterTitle:{ 
     padding: 15,
     backgroundColor: "#e32636",
