@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"time"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,11 +32,11 @@ func SetupHandlers(router *gin.Engine) {
 		{
 			// endpoints requiring no authentication
 			v1.GET("/get-user/:username", handleGetUser)
-
 			v1.POST("/createAccount", handleCreateAccount)
 			v1.POST("/login", handleLogin)
 			v1.POST("/logout", handleLogout)
 			v1.GET("/getTeam/:id", handleGetTeam)
+			v1.GET("/getComments/:id", handleGetComments)
 			v1.GET("/getTeams", handleGetTeams)
 			v1.GET("/getTeamPlayers/:id", handleGetTeamPlayers)
 			v1.GET("/getPlayoffs", handleGetPlayoffs)
@@ -48,6 +49,10 @@ func SetupHandlers(router *gin.Engine) {
 				userAuth.POST("/createTeamRequest", handleCreateTeamNotification)
 				userAuth.POST("/updatePersonalInfo", handleUpdateUserPersonalInfo)
 				userAuth.POST("/createPhoto", handleCreatePhoto)
+				userAuth.POST("/createComment", handleCreateComment)
+				userAuth.POST("/postLikes/:id", handlePostLikes)
+				userAuth.POST("/postDislikes/:id", handlePostDislikes)
+				
 
 				playerAuth := userAuth.Group("")
 				playerAuth.Use(playerAuthMiddleware)
@@ -566,4 +571,81 @@ func handleGetMatch(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusAccepted, match)
+}
+
+func handleGetComments(ctx *gin.Context){
+	id := ctx.Param("id")
+	int_id, err := strconv.Atoi(id)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return 
+	}
+
+	comments, err := model.GetCommentsById(uint(int_id))
+
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return 
+	}
+
+	ctx.JSON(http.StatusAccepted, comments)
+}
+
+func handleCreateComment(ctx *gin.Context){
+	comment := model.Comment{}
+	err := ctx.BindJSON(&comment)
+	username, _, _ := getSessionUser(ctx)
+	fmt.Println(username)
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+	
+	comment.Username = username
+	err = model.CreateComment(&comment)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return 
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func handlePostLikes(ctx *gin.Context){
+	id := ctx.Param("id")
+	idInt, err := strconv.Atoi(id)
+
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+	_, err = model.GetMatchById(uint(idInt))
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+
+	model.AddLike(uint(idInt))
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func handlePostDislikes(ctx *gin.Context){
+	fmt.Println("got here")
+	id := ctx.Param("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+	_, err = model.GetMatchById(uint(idInt))
+	if err != nil {
+		ctx.AbortWithError(http.StatusNotFound, err)
+		return
+	}
+	model.AddDislike(uint(idInt))
+	ctx.Status(http.StatusAccepted)
 }

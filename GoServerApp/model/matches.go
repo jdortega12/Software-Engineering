@@ -48,6 +48,7 @@ type Match struct {
 	Likes    uint `json:"likes"`
 	Dislikes uint `json:"dislikes"`
 
+
 	// player likes and dislikes? Not sure if those
 	// are meant to be for a match only or just on the
 	// player's profile permanently or both
@@ -70,6 +71,7 @@ func GetMatchesByTeam(id uint) ([]Match, error) {
 	err := DBConn.Where("home_team_id = ? OR away_team_id = ?", id, id).Find(&matches).Error
 	return matches, err
 }
+
 
 // Retrieve all matches
 func GetMatchesThisSeason() ([]Match, error) {
@@ -99,5 +101,25 @@ func FinishMatch(id uint) error {
 		"end_time":    time.Now(),
 	}).Error
 
+	return err
+}
+
+func AddLike(id uint) error{
+	match := &Match{}
+	err := DBConn.Where("id = ?", id).First(match).Error
+	if err != nil {
+		return err
+	}
+	err = DBConn.Model(&Match{}).Where("id = ?", id).Update("likes", match.Likes + 1).Error
+	return err
+}
+
+func AddDislike(id uint) error{
+	match := &Match{}
+	err := DBConn.Where("id = ?", id).First(match).Error
+	if err != nil {
+		return err
+	}
+	err = DBConn.Model(&Match{}).Where("id = ?", id).Update("dislikes", match.Dislikes + 1).Error
 	return err
 }

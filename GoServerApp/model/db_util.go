@@ -29,6 +29,7 @@ func InitDB(path string) error {
 		&Match{},
 		&TeamNotification{},
 		&PromotionToManagerRequest{},
+		&Comment{},
 	)
 
 	return err

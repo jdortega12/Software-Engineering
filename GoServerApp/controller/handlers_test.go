@@ -1306,3 +1306,155 @@ func TestGetMatchInvalid(t *testing.T) {
 		t.Error("Bad status")
 	}
 }
+
+func TestFindComments(t *testing.T){
+	comment := model.Comment {
+		Message: "Hello",
+		MatchID: "12",
+		UserID: 1,
+	}
+	model.DBConn.Create(&comment)
+	comment2 := model.Comment {
+		Message: "World",
+		MatchID: "12",
+		UserID: 2,
+	}
+	model.DBConn.Create(&comment2)
+	router := setupTestRouter()
+
+	w := sendMockHTTPRequest(http.MethodGet, "/api/v1/getComments/12", nil, router)
+
+	if w.Code == http.StatusBadRequest {
+		t.Error("Bad status")
+	}
+	
+	cleanUpDB()
+}
+
+func TestCreateCommentValid(t *testing.T){
+	model.DBConn.Create(&model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		ID: 5,
+		Role: model.PLAYER,
+	})
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+		ctx.Next()
+	})
+
+	comment := model.Comment {
+		Message: "Hello",
+		MatchID: "12",
+		UserID: 1,
+	}
+
+	jsonData, _ := json.Marshal(comment)
+	
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createComment", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
+
+func TestCreateCommentInvalid(t *testing.T){
+	comment := model.Comment {
+		Message: "Hello",
+		MatchID: "12",
+		UserID: 1,
+	}
+
+	router := setupTestRouter()
+
+	jsonData, _ := json.Marshal(comment)
+	
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createComment", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != 401 {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
+
+func TestAddLikeValid(t *testing.T){
+	model.DBConn.Create(&model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		ID: 5,
+		Role: model.PLAYER,
+	})
+
+	match := model.Match {
+		MatchType: model.REGULAR, 
+		Location: "Knott Hall",
+		StartTime: time.Now(),
+		InProgress: true,
+		Quarter: uint(1),
+		QuarterTime: time.Date(0, 0, 0, 0, 15, 0, 0, time.FixedZone("UTC-7", 0)),
+		HomeTeamID: 1,
+		AwayTeamID: 2,
+		HomeTeamScore: 0,
+		AwayTeamScore: 0,
+		Likes: 0,
+		Dislikes: 0,
+	}
+
+	model.DBConn.Create(&match)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+		ctx.Next()
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/postLikes/1", nil, router)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
+
+func TestAddDislikeValid(t *testing.T){
+	model.DBConn.Create(&model.User{
+		Username: "kevin",
+		Password: "wasspord",
+		ID: 5,
+		Role: model.PLAYER,
+	})
+
+	match := model.Match {
+		MatchType: model.REGULAR, 
+		Location: "Knott Hall",
+		StartTime: time.Now(),
+		InProgress: true,
+		Quarter: uint(1),
+		QuarterTime: time.Date(0, 0, 0, 0, 15, 0, 0, time.FixedZone("UTC-7", 0)),
+		HomeTeamID: 1,
+		AwayTeamID: 2,
+		HomeTeamScore: 0,
+		AwayTeamScore: 0,
+		Likes: 0,
+		Dislikes: 0,
+	}
+
+	model.DBConn.Create(&match)
+
+	router := setupTestRouter(func(ctx *gin.Context) {
+		setSessionUser(ctx, "kevin", "wasspord")
+		ctx.Next()
+	})
+
+	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/postDislikes/1", nil, router)
+
+	if w.Code != http.StatusAccepted {
+		t.Errorf("code was %d, should have been %d", w.Code, http.StatusAccepted)
+	}
+
+	cleanUpDB()
+}
