@@ -1353,6 +1353,12 @@ func TestCreateCommentValid(t *testing.T){
 	jsonData, _ := json.Marshal(comment)
 	
 	w := sendMockHTTPRequest(http.MethodPost, "/api/v1/createComment", bytes.NewBuffer(jsonData), router)
+
+	if w.Code != 200 {
+		t.Error("wrong code")
+	}
+}
+
 func Test_HandleGetUserTeamData(t *testing.T) {
 
 	team := &model.Team{

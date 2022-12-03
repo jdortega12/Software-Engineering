@@ -66,3 +66,11 @@ afterAll(async () => {
 test("Full user Profile render smoke test", () => {
     const profile = render(<UserProfileScreen username="jaluhrman" isSelf={true}/>)
 })
+
+test("User profile screen personal renders", () => {
+    const profile = render(<UserProfileScreenPersonal username="bob"/>)
+})
+
+test("User profile screen notpersonal renders", () => {
+    const profile = render(<UserProfileScreenNotPersonal username="bob"/>)
+})

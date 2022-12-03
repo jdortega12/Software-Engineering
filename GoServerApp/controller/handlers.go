@@ -611,6 +611,7 @@ func handleCreateComment(ctx *gin.Context){
 		ctx.AbortWithError(http.StatusNotFound, err)
 		return 
 	}
+}
 // Handles getting user/team data from db
 func handleGetUserTeamData(ctx *gin.Context) {
 	//get all the users
