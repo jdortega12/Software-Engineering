@@ -12,3 +12,7 @@ CS 482 Software Engineering Project - Team 1
 [Package Diagram](https://docs.google.com/document/d/1401Eld774qwbeJslgnTc8383DtmE2tLpE1v1HjgU2yw/edit?usp=sharing) <br>
 [Coverage Report](Iteration_2_Coverage_Reports.md)
 
+### Iteration 3
+[Seuqence Diagram](https://drive.google.com/file/d/1DGOWr65ET4hJpXACkG4djphgJE_rbQW2/view?usp=sharing) <br>
+[Coverage Report](Iteration_3_coverage_reports.md)
+
