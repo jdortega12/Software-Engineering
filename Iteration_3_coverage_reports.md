@@ -1,14 +1,14 @@
 ### Golang Server
   # model 
     we had 84.5% coverage in model
-    ```
+    
     coverage: 84.5% of statements
-    ```
+    
     # controller
     we had 81.0% coverage in the controller
-    ```
+    
     coverage: 81.0% of statements
-    ```
+    
 
 ### React Native Frontend
   we had 53.14% coverage
