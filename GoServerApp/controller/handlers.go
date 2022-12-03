@@ -73,9 +73,10 @@ func SetupHandlers(router *gin.Engine) {
 				adminAuth.Use(adminAuthMiddleware)
 				{
 					adminAuth.GET("/promotion-to-manager-requests", handleGetPromotionToManagerRequests)
-
+					adminAuth.GET("/getUserTeamData", handleGetUserTeamData)
 					adminAuth.POST("/start-match", handleStartMatch)
 					adminAuth.POST("/finish-match", handleFinishMatch)
+					adminAuth.POST("/changeRoster", handleChangeRoster)
 				}
 			}
 		}
@@ -609,6 +610,58 @@ func handleCreateComment(ctx *gin.Context){
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, err)
 		return 
+	}
+// Handles getting user/team data from db
+func handleGetUserTeamData(ctx *gin.Context) {
+	//get all the users
+	users, err := model.GetUsers()
+
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	var userTeamData []model.UserTeamData
+
+	//create array of userTeamData from users
+	for i := 0; i < len(users); i++ {
+		if users[i].Role == model.PLAYER || users[i].Role == model.MANAGER {
+			userTeamData = append(userTeamData, model.GatherUserTeamData(&users[i]))
+		}
+
+	}
+
+	ctx.JSON(http.StatusAccepted, userTeamData)
+}
+
+func handleChangeRoster(ctx *gin.Context) {
+	info := &model.UserTeamReturnData{}
+
+	err := ctx.BindJSON(&info)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	//Get team
+	team, err := model.GetTeamByName(info.Teamname)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	//Get user
+	user, err1 := model.GetUserbyID(info.UserId)
+	if err1 != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	//Update user's team
+	err2 := model.UpdateUserTeam(user, team.ID)
+	if err2 != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
 	ctx.Status(http.StatusAccepted)

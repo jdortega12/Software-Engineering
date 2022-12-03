@@ -56,8 +56,8 @@ const (
 
 // Corresponds to users table in DB.
 type User struct {
-	ID     uint `json:"-"`
-	TeamID uint `json:"-"`
+	ID     uint `json:"id"`
+	TeamID uint `json:"teamID"`
 
 	Username string `gorm:"unique;not null" json:"username"`
 	Email    string `json:"email"`
@@ -79,7 +79,7 @@ type User struct {
 // without any permission or extra complication.
 type UserPersonalInfo struct {
 	// must be same ID as user whom it belongs to
-	ID uint `json:"-"`
+	ID uint `json:"id"`
 
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
@@ -104,14 +104,19 @@ type AcceptData struct {
 	DeletedAt gorm.DeletedAt `json:"-"`
 }
 
+// struct for data to send to front end for player display
 type UserTeamData struct {
-	ID     uint `json:"-"`
-	TeamID uint `json:"-"`
+	ID       uint   `json:"id"`
+	Teamname string `json:"team_name"`
 
-	Username  string `gorm:"unique;not null" json:"username"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
-	Teamname  string `json:"teamname"`
+}
+
+// struct for return data from change roster
+type UserTeamReturnData struct {
+	UserId   uint   `json:"userid"`
+	Teamname string `json:"teamname"`
 }
 
 // Updates the personal info of a user in the DB. Returns error if one ocurred.
@@ -174,11 +179,9 @@ func GatherUserTeamData(user *User) UserTeamData {
 	team, _ := GetTeamByID(user.TeamID)
 	userTeamData := UserTeamData{
 		ID:        user.ID,
-		TeamID:    user.TeamID,
-		Username:  user.Username,
+		Teamname:  team.Name,
 		Firstname: personalInfo.Firstname,
 		Lastname:  personalInfo.Lastname,
-		Teamname:  team.Name,
 	}
 	return userTeamData
 }
@@ -188,6 +191,13 @@ func GetUsers() ([]User, error) {
 	users := []User{}
 	err := DBConn.Find(&users).Error
 	return users, err
+}
+
+// Pulls User ouf of DB by ID
+func GetUserbyID(id uint) (*User, error) {
+	user := &User{}
+	err := DBConn.Where("id = ?", id).First(user).Error
+	return user, err
 }
 
 // Pulls User out of DB by username.

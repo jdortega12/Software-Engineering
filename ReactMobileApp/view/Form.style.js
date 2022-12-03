@@ -11,7 +11,7 @@ export default StyleSheet.create({
     backgroundColor: '#e32636',
   },
   leaderboardText: {
-    fontSize: 16, 
+    fontSize: 18, 
     textAlign: 'center', 
     color: 'white',
   },
@@ -42,10 +42,20 @@ export default StyleSheet.create({
     justifyContent:"center",
     padding:20
   },
+  buttonView:{
+    width:"80%",
+    justifyContent:"center",
+  },
   inputText:{
     height:50,
     fontWeight: "bold",
     color:"white"
+  },
+  changeRosterInput:{
+    height:40,
+    //fontWeight: "bold",
+    color:"black",
+    backgroundColor:"white",
   },
   forgot:{
     color:"white",
@@ -63,5 +73,35 @@ export default StyleSheet.create({
   },
   loginText:{
     color:"white"
-  }
+  },
+  player:{
+    marginTop: 24, 
+    padding: 30,
+    backgroundColor: "#e32636",
+  },
+  playerText:{
+    color: 'white', 
+    fontSize: 24,
+  },
+  link:{
+      width:"80%",
+      backgroundColor:"#e32636",
+      borderRadius:25,
+      height:50,
+      alignItems:"center",
+      justifyContent:"center",
+      marginTop:20,
+      marginBottom:10,
+  },
+  linkText:{
+    //textAlign: "center",
+    color: 'white', 
+    fontSize: 24,
+  },
+  rosterTitle:{ 
+    padding: 15,
+    backgroundColor: "#e32636",
+    color: 'white', 
+    fontSize: 24,
+  },
 });
