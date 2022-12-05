@@ -43,6 +43,10 @@ func SortTeams(teams []Team) []Team {
 				temp := teams[i]
 				teams[i] = teams[j]
 				teams[j] = temp
+				//change ranks
+				tempRank := teams[i].ID
+				teams[i].ID = teams[j].ID
+				teams[j].ID = tempRank
 			}
 		}
 	}
