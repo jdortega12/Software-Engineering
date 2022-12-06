@@ -14,6 +14,7 @@ import ChangeRoster from "./view/screen/ChangeRoster"
 import ProfileScreen from "./view/screen/user_profile/UserProfileScreen"
 import ProfileScreenPersonal from "./view/screen/user_profile/UserProfileScreenPersonal"
 import ProfileScreenNotPersonal from "./view/screen/user_profile/UserProfileScreenNotPersonal"
+import ViewMatch from "./view/screen/ViewMatch"
 
 
 //Forms/Notifications
@@ -45,6 +46,8 @@ export default function App(){
                 <Stack.Screen name="AcceptOrDeny" component={AcceptOrDeny} />
                 <Stack.Screen name="SeasonalLeaderboard" component={SeasonalLeaderboard} />
                 <Stack.Screen name="ChangeRoster" component={ChangeRoster} />
+                <Stack.Screen name="ViewMatch" component={ViewMatch} />
+                <Stack.Screen name="StartMatchForm" component={StartMatchForm} />
             </Stack.Navigator>
         }</NavigationContainer>     
     );

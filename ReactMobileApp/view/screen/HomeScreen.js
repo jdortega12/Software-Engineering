@@ -40,6 +40,14 @@ export default function HomeScreen({navigation}) {
                 <Text style={FormStyle.linkText}>Change Roster</Text>
             </TouchableOpacity>
             <TouchableOpacity style={FormStyle.link}
+                onPress={()=> navigation.navigate('StartMatchForm')}>
+                <Text style={FormStyle.linkText}>Start Match</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={FormStyle.link}
+                onPress={()=> navigation.navigate('ViewMatch')}>
+                <Text style={FormStyle.linkText}>View Match</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={FormStyle.link}
                 onPress={()=> navigation.navigate('AskManagerRequestForm')}>
                 <Text style={FormStyle.linkText}>Ask Manager</Text>
             </TouchableOpacity>
