@@ -4,8 +4,12 @@ import {Text, TouchableNativeFeedback, View, SafeAreaView, TouchableOpacity, Tex
 import TopBar from "../component/TopBar";
 import MatchStyle from "./Match.style";
 import FormStyle from "../Form.style";
+import handleFinishMatch from "../../event-handler/HandleFinishMatch"
 
 export default class ViewMatch extends React.Component {
+
+    
+
     state = {
         location: null, 
         quarter: null,
@@ -22,7 +26,7 @@ export default class ViewMatch extends React.Component {
     };
 
     getMatch = async() => {
-        const match = await fetch("http://10.0.2.2:8080/api/v1/getMatch/" + this.props.id, {
+        const match = await fetch("http://10.0.2.2:8080/api/v1/getMatch/2",  {
             method: "GET", 
             headers: {
                 Accept: "application/json",
@@ -36,7 +40,7 @@ export default class ViewMatch extends React.Component {
 
         const response = await match.json(); 
 
-        const comments = await this.getComments(this.props.id)
+        const comments = await this.getComments("2")
         console.log("likes:");
         console.log(this.state.likes);
         const comment_display = 4;
@@ -71,7 +75,7 @@ export default class ViewMatch extends React.Component {
             },
             body: JSON.stringify({
                 'message': message,
-                'match_id': this.props.id,
+                'match_id': '2',
             })
         });
     };
@@ -175,14 +179,14 @@ export default class ViewMatch extends React.Component {
                         <View style={MatchStyle.col2}>
                         <Text style={MatchStyle.quartertext}>Likes: {this.state.likes}</Text>
                             <TouchableOpacity style={MatchStyle.buttonLike}
-                                onPress={()=> this.postLikes(this.props.id)}>
+                                onPress={()=> this.postLikes('2')}>
                                 <Text style={MatchStyle.quartertext}>    Like    </Text>
                             </TouchableOpacity>
                         </View>
                         <View style={MatchStyle.col2}>
                         <Text style={MatchStyle.quartertext}>Dislikes: {this.state.dislikes}</Text>
                             <TouchableOpacity style={MatchStyle.buttonLike}
-                                onPress={()=> this.postDislikes(this.props.id)}>
+                                onPress={()=> this.postDislikes('2')}>
                                 <Text style={MatchStyle.quartertext}>Dislike</Text>
                             </TouchableOpacity>
                         </View>
@@ -211,6 +215,12 @@ export default class ViewMatch extends React.Component {
                     <Text style={MatchStyle.quartertext}>Post</Text>
                 </TouchableOpacity>
                 </View>
+            </View>
+            <View style={MatchStyle.col4}>
+                    <TouchableOpacity style={FormStyle.link}
+                             onPress={()=> handleFinishMatch(2)}>
+                    <Text>Finish Match</Text>
+                </TouchableOpacity>
             </View>
         </View>
             </>

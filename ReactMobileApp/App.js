@@ -15,7 +15,7 @@ import ProfileScreen from "./view/screen/user_profile/UserProfileScreen"
 import ProfileScreenPersonal from "./view/screen/user_profile/UserProfileScreenPersonal"
 import ProfileScreenNotPersonal from "./view/screen/user_profile/UserProfileScreenNotPersonal"
 import ViewMatch from "./view/screen/ViewMatch"
-
+import PlayoffPicture from "./view/screen/PlayoffPicture"
 
 //Forms/Notifications
 import AskManagerRequestForm from "./view/component/AskManagerRequestForm"
@@ -48,6 +48,8 @@ export default function App(){
                 <Stack.Screen name="ChangeRoster" component={ChangeRoster} />
                 <Stack.Screen name="ViewMatch" component={ViewMatch} />
                 <Stack.Screen name="StartMatchForm" component={StartMatchForm} />
+                <Stack.Screen name="PlayoffPicture" component={PlayoffPicture} />
+                <Stack.Screen name="ProfileScreenPersonal" component={ProfileScreenPersonal} />
             </Stack.Navigator>
         }</NavigationContainer>     
     );

@@ -8,7 +8,6 @@ import FormStyle from "../Form.style";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-
 export default function HomeScreen({navigation}) {
     return (
     <>
@@ -26,6 +25,10 @@ export default function HomeScreen({navigation}) {
             <TouchableOpacity style={FormStyle.link}
                 onPress={()=> navigation.navigate('CreateTeam')}>
                 <Text style={FormStyle.linkText}>Create Team</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={FormStyle.link}
+                onPress={()=> navigation.navigate('ProfileScreenPersonal')}>
+                <Text style={FormStyle.linkText}>Profile Screen</Text>
             </TouchableOpacity>
             <TouchableOpacity style={FormStyle.link}
                 onPress={()=> navigation.navigate('UpdateUserPersonalInfo')}>
@@ -46,6 +49,10 @@ export default function HomeScreen({navigation}) {
             <TouchableOpacity style={FormStyle.link}
                 onPress={()=> navigation.navigate('ViewMatch')}>
                 <Text style={FormStyle.linkText}>View Match</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={FormStyle.link}
+                onPress={()=> navigation.navigate('PlayoffPicture')}>
+                <Text style={FormStyle.linkText}>Playoff Bracket</Text>
             </TouchableOpacity>
             <TouchableOpacity style={FormStyle.link}
                 onPress={()=> navigation.navigate('AskManagerRequestForm')}>
