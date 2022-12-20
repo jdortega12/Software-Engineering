@@ -218,7 +218,7 @@ export default class ViewMatch extends React.Component {
             </View>
             <View style={MatchStyle.col4}>
                     <TouchableOpacity style={FormStyle.link}
-                             onPress={()=> handleFinishMatch(this.props.id)}>
+                             onPress={()=> handleFinishMatch(parseInt(this.props.id))}>
                     <Text>Finish Match</Text>
                 </TouchableOpacity>
             </View>
