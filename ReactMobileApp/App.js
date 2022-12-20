@@ -46,7 +46,9 @@ export default function App(){
                 <Stack.Screen name="AcceptOrDeny" component={AcceptOrDeny} />
                 <Stack.Screen name="SeasonalLeaderboard" component={SeasonalLeaderboard} />
                 <Stack.Screen name="ChangeRoster" component={ChangeRoster} />
-                <Stack.Screen name="ViewMatch" component={ViewMatch} />
+                <Stack.Screen name="ViewMatch" options={{title: "ViewMatch"}} >
+                    {(props) => <ViewMatch id="1" />}
+                </Stack.Screen>
                 <Stack.Screen name="StartMatchForm" component={StartMatchForm} />
                 <Stack.Screen name="PlayoffPicture" component={PlayoffPicture} />
                 <Stack.Screen name="ProfileScreenPersonal" component={ProfileScreenPersonal} />

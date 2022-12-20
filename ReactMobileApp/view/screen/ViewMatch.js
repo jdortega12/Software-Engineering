@@ -26,7 +26,7 @@ export default class ViewMatch extends React.Component {
     };
 
     getMatch = async() => {
-        const match = await fetch("http://10.0.2.2:8080/api/v1/getMatch/2",  {
+        const match = await fetch("http://10.0.2.2:8080/api/v1/getMatch/" + this.props.id,  {
             method: "GET", 
             headers: {
                 Accept: "application/json",
@@ -40,7 +40,7 @@ export default class ViewMatch extends React.Component {
 
         const response = await match.json(); 
 
-        const comments = await this.getComments("2")
+        const comments = await this.getComments(this.props.id)
         console.log("likes:");
         console.log(this.state.likes);
         const comment_display = 4;
@@ -75,7 +75,7 @@ export default class ViewMatch extends React.Component {
             },
             body: JSON.stringify({
                 'message': message,
-                'match_id': '2',
+                'match_id': this.props.id,
             })
         });
     };
@@ -179,14 +179,14 @@ export default class ViewMatch extends React.Component {
                         <View style={MatchStyle.col2}>
                         <Text style={MatchStyle.quartertext}>Likes: {this.state.likes}</Text>
                             <TouchableOpacity style={MatchStyle.buttonLike}
-                                onPress={()=> this.postLikes('2')}>
+                                onPress={()=> this.postLikes(this.props.id)}>
                                 <Text style={MatchStyle.quartertext}>    Like    </Text>
                             </TouchableOpacity>
                         </View>
                         <View style={MatchStyle.col2}>
                         <Text style={MatchStyle.quartertext}>Dislikes: {this.state.dislikes}</Text>
                             <TouchableOpacity style={MatchStyle.buttonLike}
-                                onPress={()=> this.postDislikes('2')}>
+                                onPress={()=> this.postDislikes(this.props.id)}>
                                 <Text style={MatchStyle.quartertext}>Dislike</Text>
                             </TouchableOpacity>
                         </View>
@@ -218,7 +218,7 @@ export default class ViewMatch extends React.Component {
             </View>
             <View style={MatchStyle.col4}>
                     <TouchableOpacity style={FormStyle.link}
-                             onPress={()=> handleFinishMatch(2)}>
+                             onPress={()=> handleFinishMatch(this.props.id)}>
                     <Text>Finish Match</Text>
                 </TouchableOpacity>
             </View>
