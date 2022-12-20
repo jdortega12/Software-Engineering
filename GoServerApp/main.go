@@ -18,6 +18,12 @@ const (
 // Initializes DB and router, runs server.
 func main() {
 	err := model.InitDB(DB_PATH)
+	model.DBConn.Exec("DELETE FROM users")
+	model.DBConn.Exec("DELETE FROM user_personal_infos")
+	model.DBConn.Exec("DELETE FROM teams")
+	model.DBConn.Exec("DELETE FROM team_notifications")
+	model.DBConn.Exec("DELETE FROM matches")
+	model.DBConn.Exec("DELETE FROM promotion_to_manager_requests")
 	if err != nil {
 		panic(err)
 	}
@@ -25,56 +31,56 @@ func main() {
 	team1 := model.Team{
 		ID:    1,
 		Name:  "Desk",
-		Wins:  8,
-		Loses: 0,
+		Wins:  0,
+		Loses: 1,
 	}
 	model.CreateTeam(&team1)
 
 	team2 := model.Team{
 		ID:    2,
 		Name:  "Chair",
-		Wins:  6,
-		Loses: 2,
+		Wins:  1,
+		Loses: 0,
 	}
 	model.CreateTeam(&team2)
 
 	team3 := model.Team{
 		ID:    3,
 		Name:  "Hair",
-		Wins:  5,
-		Loses: 3,
+		Wins:  0,
+		Loses: 0,
 	}
 	model.CreateTeam(&team3)
 
 	team4 := model.Team{
 		ID:    4,
 		Name:  "Stair",
-		Wins:  4,
-		Loses: 4,
+		Wins:  0,
+		Loses: 0,
 	}
 	model.CreateTeam(&team4)
 
 	team5 := model.Team{
 		ID:    5,
 		Name:  "Lair",
-		Wins:  2,
-		Loses: 6,
+		Wins:  0,
+		Loses: 0,
 	}
 	model.CreateTeam(&team5)
 
 	team6 := model.Team{
 		ID:    6,
 		Name:  "Flair",
-		Wins:  1,
-		Loses: 7,
+		Wins:  0,
+		Loses: 0,
 	}
 	model.CreateTeam(&team6)
 
 	team7 := model.Team{
 		ID:    7,
 		Name:  "Bear",
-		Wins:  1,
-		Loses: 7,
+		Wins:  0,
+		Loses: 0,
 	}
 	model.CreateTeam(&team7)
 
@@ -82,7 +88,7 @@ func main() {
 		ID:    8,
 		Name:  "Fair",
 		Wins:  0,
-		Loses: 8,
+		Loses: 0,
 	}
 	model.CreateTeam(&team8)
 
@@ -157,6 +163,23 @@ func main() {
 		Dislikes:      0,
 	}
 	model.DBConn.Create(&match)
+
+	match2 := model.Match{
+		ID:            2,
+		MatchType:     model.REGULAR,
+		Location:      "Knott Hall",
+		StartTime:     time.Now(),
+		InProgress:    false,
+		Quarter:       uint(4),
+		QuarterTime:   time.Date(0, 0, 0, 0, 15, 0, 0, time.FixedZone("UTC-7", 0)),
+		HomeTeamID:    1,
+		AwayTeamID:    2,
+		HomeTeamScore: 10,
+		AwayTeamScore: 0,
+		Likes:         0,
+		Dislikes:      0,
+	}
+	model.DBConn.Create(&match2)
 
 	// session store must be set up right after router is initialized
 	router := gin.Default()

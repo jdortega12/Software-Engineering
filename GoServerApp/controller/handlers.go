@@ -460,7 +460,7 @@ func handleGetPlayoffs(ctx *gin.Context) {
 			teams[match.HomeTeamID] += 1
 			teams[match.AwayTeamID] -= 1
 		}
-		if match.AwayTeamScore > match.HomeTeamScore {
+		if match.AwayTeamScore >= match.HomeTeamScore {
 			teams[match.AwayTeamID] += 1
 			teams[match.HomeTeamID] -= 1
 		}
@@ -488,7 +488,13 @@ func handleGetPlayoffs(ctx *gin.Context) {
 		team_names = append(team_names, team.Name)
 	}
 
-	ctx.JSON(http.StatusAccepted, team_names[0:8])
+	num_teams := 8
+
+	if len(team_names) < 8 {
+		num_teams = len(team_names)
+	}
+
+	ctx.JSON(http.StatusAccepted, team_names[0:num_teams])
 }
 
 // Receives match wrapper struct in JSON and creates match in the DB, setting InProgress = true. Responds

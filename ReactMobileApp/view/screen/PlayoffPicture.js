@@ -27,6 +27,7 @@ export default class PlayoffPicture extends React.Component {
         }
 
         const response = await teams.json()
+        console.log(response);
 
         matchups = []
 
@@ -37,6 +38,10 @@ export default class PlayoffPicture extends React.Component {
                 seed1: i+1, 
                 seed2: response.length - i
             });
+        }
+
+        while(matchups.length < 4) {
+            matchups.push([]);
         }
 
         this.setState({
